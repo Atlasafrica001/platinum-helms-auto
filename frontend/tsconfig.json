@@ -15,11 +15,13 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    // "references": [{ "path": "./tsconfig.node.json" }],
     // "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
+
   "include": ["src"]
 }

@@ -1,5 +1,23 @@
 import { ImageWithFallback } from "../components/ImageWithFallback";
-import { ArrowRight, Zap, Shield, Award, TrendingUp, Tag, Heart, Users, Star, Leaf, Sparkles, Clock, CheckCircle, Play, Quote, Car, Hammer } from "lucide-react";
+import {
+  ArrowRight,
+  Zap,
+  Shield,
+  Award,
+  TrendingUp,
+  Tag,
+  Heart,
+  Users,
+  Star,
+  Leaf,
+  Sparkles,
+  Clock,
+  CheckCircle,
+  Play,
+  Quote,
+  // Car,
+  Hammer,
+} from "lucide-react";
 import { Button } from "../components/button";
 import { Card } from "../components/card";
 import { Badge } from "../components/badge";
@@ -21,8 +39,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 0,
-      image: "https://images.unsplash.com/photo-1666067313311-de0a3760d884?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2NjA4MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      features: ["Adaptive Cruise Control", "Premium Sound System", "Leather Interior"],
+      image:
+        "https://images.unsplash.com/photo-1666067313311-de0a3760d884?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2NjA4MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      features: [
+        "Adaptive Cruise Control",
+        "Premium Sound System",
+        "Leather Interior",
+      ],
       tags: ["popular", "searched"],
     },
     {
@@ -36,7 +59,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 0,
-      image: "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["All-Wheel Drive", "Panoramic Sunroof", "Third Row Seating"],
       tags: ["popular", "hotDeal"],
     },
@@ -51,27 +75,36 @@ export function HomePage({ onNavigate }: HomePageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 0,
-      image: "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["Twin-Turbo V8", "Carbon Fiber Interior", "Sport Exhaust"],
       tags: ["searched"],
     },
   ];
 
   const getTagIcon = (tag: string) => {
-    switch(tag) {
-      case 'hotDeal': return <Tag size={12} />;
-      case 'popular': return <TrendingUp size={12} />;
-      case 'searched': return <Heart size={12} />;
-      default: return null;
+    switch (tag) {
+      case "hotDeal":
+        return <Tag size={12} />;
+      case "popular":
+        return <TrendingUp size={12} />;
+      case "searched":
+        return <Heart size={12} />;
+      default:
+        return null;
     }
   };
 
   const getTagLabel = (tag: string) => {
-    switch(tag) {
-      case 'hotDeal': return 'Hot Deal';
-      case 'popular': return 'Popular';
-      case 'searched': return 'Most Searched';
-      default: return tag;
+    switch (tag) {
+      case "hotDeal":
+        return "Hot Deal";
+      case "popular":
+        return "Popular";
+      case "searched":
+        return "Most Searched";
+      default:
+        return tag;
     }
   };
 
@@ -87,7 +120,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
         </div>
-        
+
         <div className="relative h-full flex items-center">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className="max-w-3xl">
@@ -101,12 +134,15 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 Find Your Dream Car Today
               </h1>
               <p className="text-white/90 text-2xl mb-4 leading-relaxed italic">
-                Your journey to automotive excellence starts here. Experience the perfect fusion of luxury, innovation, and performance.
+                Your journey to automotive excellence starts here. Experience
+                the perfect fusion of luxury, innovation, and performance.
               </p>
               <p className="text-white/80 mb-10 leading-relaxed text-[15px] italic">
-                Join thousands of satisfied drivers who've discovered their dream vehicle at Platinum Helms â€” where every drive is an occasion, and every vehicle tells a story.
+                Join thousands of satisfied drivers who've discovered their
+                dream vehicle at Platinum Helms â€” where every drive is an
+                occasion, and every vehicle tells a story.
               </p>
-              
+
               {/* Stats Row */}
               <div className="grid grid-cols-3 gap-6 mb-10">
                 <div className="text-white">
@@ -146,8 +182,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
 
         {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        </div>
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce"></div>
       </section>
 
       {/* Trust Indicators */}
@@ -157,12 +192,16 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <div className="flex flex-col items-center">
               <CheckCircle className="text-red-600 mb-3" size={32} />
               <div className="text-xl mb-1">Certified Quality</div>
-              <div className="text-white/60 text-sm">Every Vehicle Inspected</div>
+              <div className="text-white/60 text-sm">
+                Every Vehicle Inspected
+              </div>
             </div>
             <div className="flex flex-col items-center">
               <Shield className="text-red-600 mb-3" size={32} />
               <div className="text-xl mb-1">Warranty Included</div>
-              <div className="text-white/60 text-sm">Comprehensive Coverage</div>
+              <div className="text-white/60 text-sm">
+                Comprehensive Coverage
+              </div>
             </div>
             <div className="flex flex-col items-center">
               <Clock className="text-red-600 mb-3" size={32} />
@@ -185,9 +224,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <Badge className="bg-red-600 hover:bg-red-700 text-white border-none px-4 py-2 mb-4">
               The Platinum Helms Difference
             </Badge>
-            <h2 className="mb-4 font-bold text-[20px]">Why Choose Platinum Helms</h2>
+            <h2 className="mb-4 font-bold text-[20px]">
+              Why Choose Platinum Helms
+            </h2>
             <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-              We're not just selling cars â€” we're crafting experiences, building relationships, and making automotive dreams come true, one exceptional vehicle at a time.
+              We're not just selling cars â€” we're crafting experiences,
+              building relationships, and making automotive dreams come true,
+              one exceptional vehicle at a time.
             </p>
           </div>
 
@@ -198,7 +241,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
               </div>
               <h3 className="mb-3">Cutting-Edge Performance</h3>
               <p className="text-gray-600">
-                Experience the thrill of advanced engineering that delivers exceptional power, precision, and efficiency in every journey you take.
+                Experience the thrill of advanced engineering that delivers
+                exceptional power, precision, and efficiency in every journey
+                you take.
               </p>
             </Card>
 
@@ -208,7 +253,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
               </div>
               <h3 className="mb-3">Ultimate Safety</h3>
               <p className="text-gray-600">
-                State-of-the-art safety systems and smart technology work together to protect you and your loved ones on every adventure.
+                State-of-the-art safety systems and smart technology work
+                together to protect you and your loved ones on every adventure.
               </p>
             </Card>
 
@@ -218,7 +264,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
               </div>
               <h3 className="mb-3">Premium Quality</h3>
               <p className="text-gray-600">
-                Meticulous craftsmanship, luxury materials, and attention to detail define every aspect of our curated collection.
+                Meticulous craftsmanship, luxury materials, and attention to
+                detail define every aspect of our curated collection.
               </p>
             </Card>
           </div>
@@ -235,9 +282,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
               </Badge>
               <h2 className="mb-6 text-[20px] font-bold">The Future is Now</h2>
               <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-                Step into tomorrow with cutting-edge technology that transforms every drive into an intelligent, connected experience. From AI-powered assistance to seamless smartphone integration, we're redefining what's possible.
+                Step into tomorrow with cutting-edge technology that transforms
+                every drive into an intelligent, connected experience. From
+                AI-powered assistance to seamless smartphone integration, we're
+                redefining what's possible.
               </p>
-              
+
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -245,7 +295,10 @@ export function HomePage({ onNavigate }: HomePageProps) {
                   </div>
                   <div>
                     <h4 className="mb-1">AI-Powered Assistance</h4>
-                    <p className="text-gray-600">Intelligent systems that learn and adapt to your driving style</p>
+                    <p className="text-gray-600">
+                      Intelligent systems that learn and adapt to your driving
+                      style
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -254,7 +307,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
                   </div>
                   <div>
                     <h4 className="mb-1">Electric & Hybrid Options</h4>
-                    <p className="text-gray-600">Sustainable performance without compromising luxury</p>
+                    <p className="text-gray-600">
+                      Sustainable performance without compromising luxury
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -263,7 +318,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
                   </div>
                   <div>
                     <h4 className="mb-1">Advanced Safety Suite</h4>
-                    <p className="text-gray-600">360Â° protection with predictive collision avoidance</p>
+                    <p className="text-gray-600">
+                      360Â° protection with predictive collision avoidance
+                    </p>
                   </div>
                 </div>
               </div>
@@ -277,7 +334,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 <ArrowRight className="ml-2" size={18} />
               </Button>
             </div>
-            
+
             <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
               <ImageWithFallback
                 src="https://images.unsplash.com/photo-1758411897888-3ca658535fdf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjB0ZWNobm9sb2d5JTIwZGFzaGJvYXJkfGVufDF8fHx8MTc2MjQ0MzkwN3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
@@ -298,7 +355,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
             </Badge>
             <h2 className="mb-4 text-[20px] font-bold">Featured Collection</h2>
             <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-              Explore our most sought-after models, each carefully selected to deliver an extraordinary driving experience that exceeds expectations.
+              Explore our most sought-after models, each carefully selected to
+              deliver an extraordinary driving experience that exceeds
+              expectations.
             </p>
           </div>
 
@@ -315,7 +374,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                     alt={vehicle.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
-                  
+
                   {/* Year and Condition Badges */}
                   <div className="absolute top-4 left-4 flex flex-col gap-2">
                     <div className="bg-black/80 backdrop-blur-sm px-3 py-1 rounded-full">
@@ -365,7 +424,10 @@ export function HomePage({ onNavigate }: HomePageProps) {
                   {/* Features */}
                   <div className="mb-4 space-y-1">
                     {vehicle.features.slice(0, 3).map((feature, index) => (
-                      <div key={index} className="flex items-center text-xs text-gray-600">
+                      <div
+                        key={index}
+                        className="flex items-center text-xs text-gray-600"
+                      >
                         <CheckCircle size={12} className="mr-2 text-red-600" />
                         <span>{feature}</span>
                       </div>
@@ -415,11 +477,15 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 <Leaf size={14} className="mr-2" />
                 Sustainable Luxury
               </Badge>
-              <h2 className="mb-6 text-[20px] font-bold">Driving Towards a Greener Future</h2>
+              <h2 className="mb-6 text-[20px] font-bold">
+                Driving Towards a Greener Future
+              </h2>
               <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-                Luxury doesn't have to cost the Earth. Our growing collection of electric and hybrid vehicles proves you can enjoy premium performance while reducing your environmental impact.
+                Luxury doesn't have to cost the Earth. Our growing collection of
+                electric and hybrid vehicles proves you can enjoy premium
+                performance while reducing your environmental impact.
               </p>
-              
+
               <div className="grid grid-cols-2 gap-6 mb-8">
                 <div>
                   <div className="text-3xl mb-2 text-red-600">50+</div>
@@ -433,16 +499,31 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
               <div className="space-y-3 mb-8">
                 <div className="flex items-center gap-3">
-                  <CheckCircle className="text-red-600 flex-shrink-0" size={20} />
-                  <span className="text-gray-700">Fast charging infrastructure support</span>
+                  <CheckCircle
+                    className="text-red-600 flex-shrink-0"
+                    size={20}
+                  />
+                  <span className="text-gray-700">
+                    Fast charging infrastructure support
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <CheckCircle className="text-red-600 flex-shrink-0" size={20} />
-                  <span className="text-gray-700">Government incentives and tax credits</span>
+                  <CheckCircle
+                    className="text-red-600 flex-shrink-0"
+                    size={20}
+                  />
+                  <span className="text-gray-700">
+                    Government incentives and tax credits
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <CheckCircle className="text-red-600 flex-shrink-0" size={20} />
-                  <span className="text-gray-700">Lower running costs and maintenance</span>
+                  <CheckCircle
+                    className="text-red-600 flex-shrink-0"
+                    size={20}
+                  />
+                  <span className="text-gray-700">
+                    Lower running costs and maintenance
+                  </span>
                 </div>
               </div>
 
@@ -469,7 +550,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
             </Badge>
             <h2 className="mb-4 font-bold text-[20px]">What Our Clients Say</h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Don't just take our word for it â€” hear from the thousands of satisfied drivers who've found their perfect match.
+              Don't just take our word for it â€” hear from the thousands of
+              satisfied drivers who've found their perfect match.
             </p>
           </div>
 
@@ -477,12 +559,18 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <Card className="p-8 border-none shadow-lg shadow-red-600/20 hover:shadow-xl hover:shadow-red-600/30 transition-all bg-white">
               <div className="flex gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="text-red-600 fill-red-600" size={18} />
+                  <Star
+                    key={i}
+                    className="text-red-600 fill-red-600"
+                    size={18}
+                  />
                 ))}
               </div>
               <Quote className="text-red-600 mb-4" size={32} />
               <p className="text-gray-700 mb-6 italic">
-                "The entire experience was seamless. From browsing to financing to driving away in my dream car â€” Platinum Helms made it effortless. Absolutely exceptional service!"
+                "The entire experience was seamless. From browsing to financing
+                to driving away in my dream car â€” Platinum Helms made it
+                effortless. Absolutely exceptional service!"
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
@@ -490,7 +578,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 </div>
                 <div>
                   <div className="text-sm">Sarah Johnson</div>
-                  <div className="text-xs text-gray-500">Mercedes-Benz S-Class Owner</div>
+                  <div className="text-xs text-gray-500">
+                    Mercedes-Benz S-Class Owner
+                  </div>
                 </div>
               </div>
             </Card>
@@ -498,12 +588,18 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <Card className="p-8 border-none shadow-lg shadow-red-600/20 hover:shadow-xl hover:shadow-red-600/30 transition-all bg-white">
               <div className="flex gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="text-red-600 fill-red-600" size={18} />
+                  <Star
+                    key={i}
+                    className="text-red-600 fill-red-600"
+                    size={18}
+                  />
                 ))}
               </div>
               <Quote className="text-red-600 mb-4" size={32} />
               <p className="text-gray-700 mb-6 italic">
-                "I've purchased luxury vehicles before, but Platinum Helms sets a new standard. The attention to detail and customer care is unmatched. Highly recommend!"
+                "I've purchased luxury vehicles before, but Platinum Helms sets
+                a new standard. The attention to detail and customer care is
+                unmatched. Highly recommend!"
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
@@ -519,12 +615,18 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <Card className="p-8 border-none shadow-lg shadow-red-600/20 hover:shadow-xl hover:shadow-red-600/30 transition-all bg-white">
               <div className="flex gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="text-red-600 fill-red-600" size={18} />
+                  <Star
+                    key={i}
+                    className="text-red-600 fill-red-600"
+                    size={18}
+                  />
                 ))}
               </div>
               <Quote className="text-red-600 mb-4" size={32} />
               <p className="text-gray-700 mb-6 italic">
-                "As a first-time luxury car buyer, I was nervous. The team walked me through everything with patience and expertise. I couldn't be happier with my choice!"
+                "As a first-time luxury car buyer, I was nervous. The team
+                walked me through everything with patience and expertise. I
+                couldn't be happier with my choice!"
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
@@ -547,9 +649,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <Badge className="bg-red-600 hover:bg-red-700 text-white border-none px-4 py-2 mb-4">
               The Platinum Lifestyle
             </Badge>
-            <h2 className="mb-4 font-bold text-[20px]">More Than a Car, It's a Lifestyle</h2>
+            <h2 className="mb-4 font-bold text-[20px]">
+              More Than a Car, It's a Lifestyle
+            </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Join our community of discerning drivers living their best lives behind the wheel.
+              Join our community of discerning drivers living their best lives
+              behind the wheel.
             </p>
           </div>
 
@@ -589,12 +694,20 @@ export function HomePage({ onNavigate }: HomePageProps) {
           </div>
 
           <div className="text-center mt-8">
-            <p className="text-gray-600 mb-4">Follow us for daily inspiration</p>
+            <p className="text-gray-600 mb-4">
+              Follow us for daily inspiration
+            </p>
             <div className="flex gap-4 justify-center">
-              <Badge variant="outline" className="px-4 py-2 cursor-pointer hover:bg-gray-100">
+              <Badge
+                variant="outline"
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+              >
                 @platinumhelms
               </Badge>
-              <Badge variant="outline" className="px-4 py-2 cursor-pointer hover:bg-gray-100">
+              <Badge
+                variant="outline"
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+              >
                 #PlatinumLifestyle
               </Badge>
             </div>
@@ -619,9 +732,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
               <Badge className="bg-red-600 hover:bg-red-700 text-white border-none px-4 py-2 mb-4">
                 Craftsmanship
               </Badge>
-              <h2 className="mb-6 text-white text-[20px] font-bold">Where Artistry Meets Engineering</h2>
+              <h2 className="mb-6 text-white text-[20px] font-bold">
+                Where Artistry Meets Engineering
+              </h2>
               <p className="text-white/90 text-lg mb-8 leading-relaxed">
-                Every surface, every stitch, every detail meticulously designed and crafted to create an interior that transcends ordinary expectations. This is luxury redefined.
+                Every surface, every stitch, every detail meticulously designed
+                and crafted to create an interior that transcends ordinary
+                expectations. This is luxury redefined.
               </p>
               <Button
                 onClick={() => onNavigate("about")}
@@ -652,7 +769,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
             </Badge>
             <h2 className="mb-4 text-[32px]">Beyond Our Inventory</h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Looking for something special? Explore our custom importation service or bid on exclusive auction vehicles.
+              Looking for something special? Explore our custom importation
+              service or bid on exclusive auction vehicles.
             </p>
           </div>
 
@@ -671,9 +789,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
                     <Sparkles size={14} className="mr-2" />
                     BESPOKE SERVICE
                   </Badge>
-                  <h3 className="text-white mb-3 text-[28px]">Custom Importation Orders</h3>
+                  <h3 className="text-white mb-3 text-[28px]">
+                    Custom Importation Orders
+                  </h3>
                   <p className="text-white/90 mb-6 leading-relaxed">
-                    Can't find it in our inventory? We'll source your dream vehicle from anywhere in the world and handle everything from purchase to delivery.
+                    Can't find it in our inventory? We'll source your dream
+                    vehicle from anywhere in the world and handle everything
+                    from purchase to delivery.
                   </p>
                   <Button
                     onClick={() => onNavigate("importation")}
@@ -701,9 +823,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
                     <Hammer size={14} className="mr-2" />
                     LIVE AUCTIONS
                   </Badge>
-                  <h3 className="text-white mb-3 text-[28px]">Premium Vehicle Auctions</h3>
+                  <h3 className="text-white mb-3 text-[28px]">
+                    Premium Vehicle Auctions
+                  </h3>
                   <p className="text-white/90 mb-6 leading-relaxed">
-                    Bid on exclusive luxury vehicles with complete transparency on condition, history, and full importation services included.
+                    Bid on exclusive luxury vehicles with complete transparency
+                    on condition, history, and full importation services
+                    included.
                   </p>
                   <Button
                     onClick={() => onNavigate("importation")}
@@ -723,11 +849,15 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
               <div>
                 <div className="text-3xl mb-2">500+</div>
-                <p className="text-sm text-gray-600">Vehicles Imported Annually</p>
+                <p className="text-sm text-gray-600">
+                  Vehicles Imported Annually
+                </p>
               </div>
               <div>
                 <div className="text-3xl mb-2">40+</div>
-                <p className="text-sm text-gray-600">Countries We Source From</p>
+                <p className="text-sm text-gray-600">
+                  Countries We Source From
+                </p>
               </div>
               <div>
                 <div className="text-3xl mb-2">Live</div>
@@ -742,18 +872,26 @@ export function HomePage({ onNavigate }: HomePageProps) {
       <section className="py-24 bg-gradient-to-br from-black via-gray-900 to-black text-white relative overflow-hidden">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.1) 35px, rgba(255,255,255,.1) 70px)'
-          }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.1) 35px, rgba(255,255,255,.1) 70px)",
+            }}
+          />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <Badge className="bg-red-600 hover:bg-red-700 text-white border-none px-4 py-2 mb-6">
             Start Your Journey
           </Badge>
-          <h2 className="text-white mb-6 text-[20px] font-bold">Ready to Experience True Luxury?</h2>
+          <h2 className="text-white mb-6 text-[20px] font-bold">
+            Ready to Experience True Luxury?
+          </h2>
           <p className="text-white/80 mb-10 max-w-3xl mx-auto leading-relaxed italic text-[16px]">
-            Your dream vehicle is waiting. Schedule a personalized test drive, explore our exclusive inventory, or speak with our luxury automotive specialists today.
+            Your dream vehicle is waiting. Schedule a personalized test drive,
+            explore our exclusive inventory, or speak with our luxury automotive
+            specialists today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
@@ -784,7 +922,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
           {/* Trust badges */}
           <div className="mt-16 pt-16 border-t border-white/10">
-            <p className="text-white/60 text-sm mb-6">Trusted by thousands of luxury car enthusiasts</p>
+            <p className="text-white/60 text-sm mb-6">
+              Trusted by thousands of luxury car enthusiasts
+            </p>
             <div className="flex flex-wrap gap-8 justify-center items-center opacity-60">
               <div className="text-white/80">BBB A+ Rated</div>
               <div className="text-white/40">â€¢</div>

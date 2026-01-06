@@ -3,11 +3,37 @@ import { ImageWithFallback } from "../components/ImageWithFallback";
 import { Button } from "../components/button";
 import { Card } from "../components/card";
 import { Input } from "../components/input";
-import { Textarea } from "../components/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/select";
+// import { Textarea } from "../components/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/select";
 import { Slider } from "../components/slider";
 import { Badge } from "../components/badge";
-import { Globe, Package, Shield, Clock, CheckCircle2, Filter, Heart, ArrowRight, TrendingUp, Search, Zap, Tag, ArrowUpDown, CarFront, Star, Sparkles, Hammer, AlertTriangle, CheckCircle } from "lucide-react";
+import {
+  Globe,
+  Package,
+  Shield,
+  Clock,
+  CheckCircle2,
+  Filter,
+  Heart,
+  ArrowRight,
+  TrendingUp,
+  Search,
+  Zap,
+  Tag,
+  // ArrowUpDown,
+  CarFront,
+  Star,
+  Sparkles,
+  Hammer,
+  AlertTriangle,
+  CheckCircle,
+} from "lucide-react";
 import { VehicleDetailsDialog } from "../components/VehicleDetailsDialog";
 import { ImportationRequestForm } from "../components/ImportationRequestForm";
 import { AuctionCountdown } from "../components/AuctionCountdown";
@@ -37,12 +63,12 @@ interface ImportVehicle {
   dateAdded: string;
 }
 
-interface AuctionVehicle extends Omit<ImportVehicle, 'price'> {
+interface AuctionVehicle extends Omit<ImportVehicle, "price"> {
   currentBid: number;
   startingBid: number;
   bidCount: number;
   auctionEndTime: string;
-  vehicleStatus: 'clean' | 'accidented' | 'withIssues';
+  vehicleStatus: "clean" | "accidented" | "withIssues";
   issueDescription?: string;
   reservePrice: number;
   reserveMet: boolean;
@@ -61,8 +87,10 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
   const [priceRange, setPriceRange] = useState([0, 300000]);
   const [mileageRange, setMileageRange] = useState([0, 200000]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("recent");
-  const [selectedVehicle, setSelectedVehicle] = useState<ImportVehicle | null>(null);
+  const [sortBy] = useState("recent");
+  const [selectedVehicle, setSelectedVehicle] = useState<ImportVehicle | null>(
+    null
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isImportFormOpen, setIsImportFormOpen] = useState(false);
 
@@ -76,32 +104,38 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
     {
       step: "01",
       title: "Vehicle Selection",
-      description: "Choose your dream vehicle from international markets with our expert guidance.",
+      description:
+        "Choose your dream vehicle from international markets with our expert guidance.",
     },
     {
       step: "02",
       title: "Documentation",
-      description: "We handle all paperwork, customs documentation, and import regulations.",
+      description:
+        "We handle all paperwork, customs documentation, and import regulations.",
     },
     {
       step: "03",
       title: "Shipping & Logistics",
-      description: "Secure international shipping with full tracking and insurance coverage.",
+      description:
+        "Secure international shipping with full tracking and insurance coverage.",
     },
     {
       step: "04",
       title: "Customs Clearance",
-      description: "Expert customs clearance ensuring compliance with all local regulations.",
+      description:
+        "Expert customs clearance ensuring compliance with all local regulations.",
     },
     {
       step: "05",
       title: "Final Inspection",
-      description: "Comprehensive inspection and preparation before delivery to you.",
+      description:
+        "Comprehensive inspection and preparation before delivery to you.",
     },
     {
       step: "06",
       title: "Delivery",
-      description: "White-glove delivery service directly to your preferred location.",
+      description:
+        "White-glove delivery service directly to your preferred location.",
     },
   ];
 
@@ -109,12 +143,14 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
     {
       icon: Globe,
       title: "Global Access",
-      description: "Source vehicles from premium markets worldwide including Europe, Japan, and Dubai.",
+      description:
+        "Source vehicles from premium markets worldwide including Europe, Japan, and Dubai.",
     },
     {
       icon: Shield,
       title: "Full Protection",
-      description: "Comprehensive insurance coverage throughout the entire import process.",
+      description:
+        "Comprehensive insurance coverage throughout the entire import process.",
     },
     {
       icon: Clock,
@@ -124,7 +160,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
     {
       icon: Package,
       title: "Complete Service",
-      description: "End-to-end handling from purchase to delivery at your doorstep.",
+      description:
+        "End-to-end handling from purchase to delivery at your doorstep.",
     },
   ];
 
@@ -143,8 +180,13 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 0,
-      image: "https://images.unsplash.com/photo-1666067313311-de0a3760d884?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2NjA4MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      features: ["Executive Rear Seats", "Champagne Flutes", "Chauffeur Package"],
+      image:
+        "https://images.unsplash.com/photo-1666067313311-de0a3760d884?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2NjA4MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      features: [
+        "Executive Rear Seats",
+        "Champagne Flutes",
+        "Chauffeur Package",
+      ],
       tags: ["popular", "searched"],
       views: 1850,
       dateAdded: "2025-11-01",
@@ -163,7 +205,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 0,
-      image: "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["V8 Biturbo", "Off-Road Package", "AMG Performance"],
       tags: ["popular", "hotDeal"],
       views: 2100,
@@ -183,7 +226,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 0,
-      image: "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["640 HP", "Sport Chrono", "Carbon Ceramic Brakes"],
       tags: ["searched", "promo"],
       views: 1680,
@@ -203,7 +247,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Manual",
       fuelType: "Petrol",
       mileage: 45000,
-      image: "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["RB26DETT", "AWD", "JDM Legend"],
       tags: ["popular", "searched", "hotDeal"],
       views: 3200,
@@ -223,7 +268,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Diesel",
       mileage: 0,
-      image: "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["V6 Twin-Turbo", "Full-Time 4WD", "Off-Road Tech"],
       tags: ["popular", "promo"],
       views: 1920,
@@ -243,7 +289,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 0,
-      image: "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["Luxury Interior", "Mark Levinson", "Multi-Terrain"],
       tags: ["searched"],
       views: 1540,
@@ -263,7 +310,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 0,
-      image: "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["SV Bespoke", "Air Suspension", "Meridian Audio"],
       tags: ["popular", "hotDeal"],
       views: 1780,
@@ -283,7 +331,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 0,
-      image: "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["W12 Engine", "Handcrafted Interior", "Rotating Display"],
       tags: ["searched", "promo"],
       views: 1450,
@@ -303,7 +352,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 0,
-      image: "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["V12 830 HP", "Limited Edition", "Track Performance"],
       tags: ["popular", "searched"],
       views: 2850,
@@ -323,7 +373,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 0,
-      image: "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["V8 666 HP", "Carbon Fiber", "Rally Mode"],
       tags: ["popular", "hotDeal"],
       views: 2340,
@@ -343,7 +394,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 0,
-      image: "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["Desert Edition", "Gold Accents", "Premium Package"],
       tags: ["searched", "promo"],
       views: 1650,
@@ -363,7 +415,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 8000,
-      image: "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["V12 770 HP", "Aerodinamica", "Rare Spec"],
       tags: ["popular", "hotDeal"],
       views: 2950,
@@ -390,7 +443,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 15000,
-      image: "https://images.unsplash.com/photo-1666067313311-de0a3760d884?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2NjA4MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1666067313311-de0a3760d884?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2NjA4MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["AMG Performance", "Carbon Fiber Trim", "Dynamic Seats"],
       tags: ["popular"],
       views: 890,
@@ -416,13 +470,15 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 28000,
-      image: "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["Turbo Engine", "Sport Chrono", "Panoramic Roof"],
       tags: ["hotDeal"],
       views: 1245,
       dateAdded: "2025-12-14",
       vehicleStatus: "withIssues",
-      issueDescription: "Minor scratches on rear bumper, needs paint correction",
+      issueDescription:
+        "Minor scratches on rear bumper, needs paint correction",
       reservePrice: 60000,
       reserveMet: false,
     },
@@ -443,13 +499,15 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 35000,
-      image: "https://images.unsplash.com/photo-1666067313311-de0a3760d884?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2NjA4MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1666067313311-de0a3760d884?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2NjA4MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["625 HP", "M xDrive", "Carbon Roof"],
       tags: ["searched"],
       views: 756,
       dateAdded: "2025-12-13",
       vehicleStatus: "accidented",
-      issueDescription: "Front-end collision repair in 2023, fully restored with OEM parts",
+      issueDescription:
+        "Front-end collision repair in 2023, fully restored with OEM parts",
       reservePrice: 50000,
       reserveMet: false,
     },
@@ -470,7 +528,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 8500,
-      image: "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["V8 Engine", "Mark Levinson Audio", "Performance Package"],
       tags: ["popular", "searched"],
       views: 1120,
@@ -496,13 +555,19 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Diesel",
       mileage: 22000,
-      image: "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      features: ["Dynamic Handling", "Meridian Sound", "All-Terrain Progress Control"],
+      image:
+        "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      features: [
+        "Dynamic Handling",
+        "Meridian Sound",
+        "All-Terrain Progress Control",
+      ],
       tags: [],
       views: 645,
       dateAdded: "2025-12-12",
       vehicleStatus: "withIssues",
-      issueDescription: "Sunroof mechanism needs servicing, interior wear on driver seat",
+      issueDescription:
+        "Sunroof mechanism needs servicing, interior wear on driver seat",
       reservePrice: 58000,
       reserveMet: false,
     },
@@ -523,7 +588,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 5200,
-      image: "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image:
+        "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
       features: ["630 HP", "Drift Mode", "Carbon Ceramic Brakes"],
       tags: ["popular", "hotDeal"],
       views: 1876,
@@ -535,36 +601,66 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
   ];
 
   // Get unique brands for dropdown
-  const brands = Array.from(new Set(importVehicles.map(v => v.brand))).sort();
-  
+
   // Get models based on selected brand
-  const availableModels = selectedBrand === "all" 
-    ? Array.from(new Set(importVehicles.map(v => v.model))).sort()
-    : Array.from(new Set(importVehicles.filter(v => v.brand === selectedBrand).map(v => v.model))).sort();
+  const availableModels =
+    selectedBrand === "all"
+      ? Array.from(new Set(importVehicles.map((v) => v.model))).sort()
+      : Array.from(
+          new Set(
+            importVehicles
+              .filter((v) => v.brand === selectedBrand)
+              .map((v) => v.model)
+          )
+        ).sort();
 
   // Filtering logic
   let filteredVehicles = importVehicles.filter((vehicle) => {
-    const countryMatch = selectedCountry === "all" || vehicle.country === selectedCountry;
-    const brandMatch = selectedBrand === "all" || vehicle.brand === selectedBrand;
-    const modelMatch = selectedModel === "all" || vehicle.model === selectedModel;
-    const categoryMatch = selectedCategory === "all" || vehicle.category === selectedCategory;
-    const yearMatch = selectedYear === "all" || vehicle.year.toString() === selectedYear;
-    const conditionMatch = selectedCondition === "all" || vehicle.condition === selectedCondition;
-    const transmissionMatch = selectedTransmission === "all" || vehicle.transmission === selectedTransmission;
-    const fuelTypeMatch = selectedFuelType === "all" || vehicle.fuelType === selectedFuelType;
-    const bodyTypeMatch = selectedBodyType === "all" || vehicle.bodyType === selectedBodyType;
-    const priceMatch = vehicle.price >= priceRange[0] && vehicle.price <= priceRange[1];
-    const mileageMatch = vehicle.mileage >= mileageRange[0] && vehicle.mileage <= mileageRange[1];
-    
-    const searchMatch = searchQuery === "" || 
+    const countryMatch =
+      selectedCountry === "all" || vehicle.country === selectedCountry;
+    const brandMatch =
+      selectedBrand === "all" || vehicle.brand === selectedBrand;
+    const modelMatch =
+      selectedModel === "all" || vehicle.model === selectedModel;
+    const categoryMatch =
+      selectedCategory === "all" || vehicle.category === selectedCategory;
+    const yearMatch =
+      selectedYear === "all" || vehicle.year.toString() === selectedYear;
+    const conditionMatch =
+      selectedCondition === "all" || vehicle.condition === selectedCondition;
+    const transmissionMatch =
+      selectedTransmission === "all" ||
+      vehicle.transmission === selectedTransmission;
+    const fuelTypeMatch =
+      selectedFuelType === "all" || vehicle.fuelType === selectedFuelType;
+    const bodyTypeMatch =
+      selectedBodyType === "all" || vehicle.bodyType === selectedBodyType;
+    const priceMatch =
+      vehicle.price >= priceRange[0] && vehicle.price <= priceRange[1];
+    const mileageMatch =
+      vehicle.mileage >= mileageRange[0] && vehicle.mileage <= mileageRange[1];
+
+    const searchMatch =
+      searchQuery === "" ||
       vehicle.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       vehicle.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
       vehicle.model.toLowerCase().includes(searchQuery.toLowerCase()) ||
       vehicle.country.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return countryMatch && brandMatch && modelMatch && categoryMatch && yearMatch && 
-           conditionMatch && transmissionMatch && fuelTypeMatch && bodyTypeMatch && 
-           priceMatch && mileageMatch && searchMatch;
+    return (
+      countryMatch &&
+      brandMatch &&
+      modelMatch &&
+      categoryMatch &&
+      yearMatch &&
+      conditionMatch &&
+      transmissionMatch &&
+      fuelTypeMatch &&
+      bodyTypeMatch &&
+      priceMatch &&
+      mileageMatch &&
+      searchMatch
+    );
   });
 
   // Sorting logic
@@ -582,18 +678,25 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
         return b.views - a.views;
       case "recent":
       default:
-        return new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime();
+        return (
+          new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime()
+        );
     }
   });
 
   // Filter auction vehicles
   const filteredAuctionVehicles = auctionVehicles.filter((vehicle) => {
-    const statusMatch = auctionVehicleStatus === "all" || vehicle.vehicleStatus === auctionVehicleStatus;
-    const bidMatch = vehicle.currentBid >= auctionBidRange[0] && vehicle.currentBid <= auctionBidRange[1];
-    const searchMatch = auctionSearchQuery === "" || 
+    const statusMatch =
+      auctionVehicleStatus === "all" ||
+      vehicle.vehicleStatus === auctionVehicleStatus;
+    const bidMatch =
+      vehicle.currentBid >= auctionBidRange[0] &&
+      vehicle.currentBid <= auctionBidRange[1];
+    const searchMatch =
+      auctionSearchQuery === "" ||
       vehicle.name.toLowerCase().includes(auctionSearchQuery.toLowerCase()) ||
       vehicle.brand.toLowerCase().includes(auctionSearchQuery.toLowerCase());
-    
+
     return statusMatch && bidMatch && searchMatch;
   });
 
@@ -601,7 +704,10 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
   const sortedAuctionVehicles = [...filteredAuctionVehicles].sort((a, b) => {
     switch (auctionSortBy) {
       case "ending":
-        return new Date(a.auctionEndTime).getTime() - new Date(b.auctionEndTime).getTime();
+        return (
+          new Date(a.auctionEndTime).getTime() -
+          new Date(b.auctionEndTime).getTime()
+        );
       case "bidLow":
         return a.currentBid - b.currentBid;
       case "bidHigh":
@@ -666,17 +772,19 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
 
   const getCountryFlag = (country: string) => {
     const flags: { [key: string]: string } = {
-      "Germany": "ðŸ‡©ðŸ‡ª",
-      "Japan": "ðŸ‡¯ðŸ‡µ",
+      Germany: "ðŸ‡©ðŸ‡ª",
+      Japan: "ðŸ‡¯ðŸ‡µ",
       "United Kingdom": "ðŸ‡¬ðŸ‡§",
-      "Italy": "ðŸ‡®ðŸ‡¹",
-      "UAE": "ðŸ‡¦ðŸ‡ª",
-      "USA": "ðŸ‡ºðŸ‡¸",
+      Italy: "ðŸ‡®ðŸ‡¹",
+      UAE: "ðŸ‡¦ðŸ‡ª",
+      USA: "ðŸ‡ºðŸ‡¸",
     };
     return flags[country] || "ðŸŒ";
   };
 
-  const getVehicleStatusBadge = (status: 'clean' | 'accidented' | 'withIssues') => {
+  const getVehicleStatusBadge = (
+    status: "clean" | "accidented" | "withIssues"
+  ) => {
     switch (status) {
       case "clean":
         return (
@@ -718,7 +826,9 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
         <div className="relative h-full flex items-center">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className="max-w-2xl">
-              <h1 className="text-white mb-6 text-[64px] font-bold font-[Roboto] tracking-tight leading-tight">Global Vehicle Importation</h1>
+              <h1 className="text-white mb-6 text-[64px] font-bold font-[Roboto] tracking-tight leading-tight">
+                Global Vehicle Importation
+              </h1>
               <p className="text-white/90 mb-8 leading-relaxed text-[24px] text-left italic">
                 Access the world's finest vehicles. We handle every aspect of
                 international car importation with expertise and precision.
@@ -739,7 +849,9 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="mb-4 text-[20px] font-bold">Why Import With Platinum Helms</h2>
+            <h2 className="mb-4 text-[20px] font-bold">
+              Why Import With Platinum Helms
+            </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
               Experience seamless international vehicle acquisition with our
               comprehensive importation services.
@@ -750,7 +862,10 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
             {benefits.map((benefit, index) => {
               const Icon = benefit.icon;
               return (
-                <Card key={index} className="p-6 border-none shadow-sm hover:shadow-md transition-shadow text-center">
+                <Card
+                  key={index}
+                  className="p-6 border-none shadow-sm hover:shadow-md transition-shadow text-center"
+                >
                   <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Icon className="text-white" size={24} />
                   </div>
@@ -775,7 +890,10 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {importProcess.map((item, index) => (
-              <Card key={index} className="p-8 border-none shadow-sm hover:shadow-md transition-shadow">
+              <Card
+                key={index}
+                className="p-8 border-none shadow-sm hover:shadow-md transition-shadow"
+              >
                 <div className="flex items-start gap-4 mb-4">
                   <span className="text-4xl text-gray-300">{item.step}</span>
                   <CheckCircle2 className="text-red-600 mt-2" size={24} />
@@ -818,9 +936,10 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                   Can't Find What You're Looking For?
                 </h2>
                 <p className="text-gray-600 text-lg leading-relaxed mb-8">
-                  Our custom importation service allows you to specify exactly what you want. 
-                  From rare collector's items to specific configurations unavailable in local markets, 
-                  we'll source and import your perfect vehicle.
+                  Our custom importation service allows you to specify exactly
+                  what you want. From rare collector's items to specific
+                  configurations unavailable in local markets, we'll source and
+                  import your perfect vehicle.
                 </p>
               </div>
 
@@ -833,7 +952,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                   <div>
                     <h3 className="mb-2">Personalized Vehicle Sourcing</h3>
                     <p className="text-gray-600">
-                      Tell us your dream specifications and we'll find it anywhere in the world
+                      Tell us your dream specifications and we'll find it
+                      anywhere in the world
                     </p>
                   </div>
                 </div>
@@ -845,7 +965,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                   <div>
                     <h3 className="mb-2">Exclusive Access</h3>
                     <p className="text-gray-600">
-                      Access to private sales, dealer networks, and exclusive markets worldwide
+                      Access to private sales, dealer networks, and exclusive
+                      markets worldwide
                     </p>
                   </div>
                 </div>
@@ -857,7 +978,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                   <div>
                     <h3 className="mb-2">Pre-Import Inspection</h3>
                     <p className="text-gray-600">
-                      Comprehensive third-party inspection before purchase to ensure quality
+                      Comprehensive third-party inspection before purchase to
+                      ensure quality
                     </p>
                   </div>
                 </div>
@@ -887,7 +1009,9 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
               <div className="grid grid-cols-3 gap-6 mt-10 pt-10 border-t border-gray-200">
                 <div>
                   <div className="text-3xl mb-2">500+</div>
-                  <p className="text-sm text-gray-600">Custom Imports Completed</p>
+                  <p className="text-sm text-gray-600">
+                    Custom Imports Completed
+                  </p>
                 </div>
                 <div>
                   <div className="text-3xl mb-2">40+</div>
@@ -911,9 +1035,12 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
               <Hammer size={16} className="mr-2" />
               LIVE AUCTIONS
             </Badge>
-            <h2 className="text-white mb-4 text-[40px] tracking-tight leading-tight">Premium Vehicle Auctions</h2>
+            <h2 className="text-white mb-4 text-[40px] tracking-tight leading-tight">
+              Premium Vehicle Auctions
+            </h2>
             <p className="text-white/80 text-lg max-w-2xl mx-auto">
-              Bid on exclusive luxury vehicles with full transparency on condition and history.
+              Bid on exclusive luxury vehicles with full transparency on
+              condition and history.
             </p>
           </div>
 
@@ -921,12 +1048,17 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
           <div className="mb-12">
             <div className="flex items-center gap-2 mb-4">
               <Filter size={20} className="text-white" />
-              <span className="text-sm tracking-wider text-white">AUCTION FILTERS:</span>
+              <span className="text-sm tracking-wider text-white">
+                AUCTION FILTERS:
+              </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
               {/* Vehicle Status Filter */}
-              <Select value={auctionVehicleStatus} onValueChange={setAuctionVehicleStatus}>
+              <Select
+                value={auctionVehicleStatus}
+                onValueChange={setAuctionVehicleStatus}
+              >
                 <SelectTrigger className="w-full bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Vehicle Condition" />
                 </SelectTrigger>
@@ -965,7 +1097,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
             {/* Bid Range Slider */}
             <div className="mb-4">
               <label className="block text-sm text-white mb-3">
-                Current Bid Range: ${auctionBidRange[0].toLocaleString()} - ${auctionBidRange[1].toLocaleString()}
+                Current Bid Range: ${auctionBidRange[0].toLocaleString()} - $
+                {auctionBidRange[1].toLocaleString()}
               </label>
               <Slider
                 min={0}
@@ -979,7 +1112,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
 
             <div className="flex items-center justify-between">
               <div className="text-sm text-white/80">
-                {sortedAuctionVehicles.length} vehicle{sortedAuctionVehicles.length !== 1 ? 's' : ''} in auction
+                {sortedAuctionVehicles.length} vehicle
+                {sortedAuctionVehicles.length !== 1 ? "s" : ""} in auction
               </div>
               <Button
                 variant="outline"
@@ -995,7 +1129,9 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
           {/* Auction Vehicle Grid */}
           {sortedAuctionVehicles.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-white/70 text-lg mb-4">No auction vehicles match your criteria.</p>
+              <p className="text-white/70 text-lg mb-4">
+                No auction vehicles match your criteria.
+              </p>
               <Button
                 onClick={clearAuctionFilters}
                 variant="outline"
@@ -1023,12 +1159,16 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                         <span className="text-xs">Live Auction</span>
                       </Badge>
                     </div>
-                    
+
                     {/* Country Badge */}
                     <div className="absolute top-4 left-4">
                       <div className="bg-black/80 px-3 py-1 rounded-full flex items-center gap-2">
-                        <span className="text-lg">{getCountryFlag(vehicle.country)}</span>
-                        <span className="text-white text-sm">{vehicle.country}</span>
+                        <span className="text-lg">
+                          {getCountryFlag(vehicle.country)}
+                        </span>
+                        <span className="text-white text-sm">
+                          {vehicle.country}
+                        </span>
                       </div>
                     </div>
 
@@ -1042,7 +1182,9 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                     <div className="mb-4">
                       <p className="text-sm text-gray-500">{vehicle.brand}</p>
                       <h3 className="mb-1">{vehicle.name}</h3>
-                      <p className="text-sm text-gray-600">{vehicle.year} Â· {vehicle.mileage.toLocaleString()} km</p>
+                      <p className="text-sm text-gray-600">
+                        {vehicle.year} Â· {vehicle.mileage.toLocaleString()} km
+                      </p>
                     </div>
 
                     {/* Issue Description */}
@@ -1057,23 +1199,37 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
 
                     {/* Countdown Timer */}
                     <div className="mb-4 p-4 bg-gray-50 rounded">
-                      <p className="text-xs text-gray-500 mb-2">Auction Ends In:</p>
+                      <p className="text-xs text-gray-500 mb-2">
+                        Auction Ends In:
+                      </p>
                       <AuctionCountdown endTime={vehicle.auctionEndTime} />
                     </div>
 
                     {/* Bid Information */}
                     <div className="mb-4 space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Current Bid:</span>
-                        <span className="text-lg text-gray-900">${vehicle.currentBid.toLocaleString()}</span>
+                        <span className="text-sm text-gray-600">
+                          Current Bid:
+                        </span>
+                        <span className="text-lg text-gray-900">
+                          ${vehicle.currentBid.toLocaleString()}
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-500">Starting Bid:</span>
-                        <span className="text-xs text-gray-600">${vehicle.startingBid.toLocaleString()}</span>
+                        <span className="text-xs text-gray-500">
+                          Starting Bid:
+                        </span>
+                        <span className="text-xs text-gray-600">
+                          ${vehicle.startingBid.toLocaleString()}
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-500">Total Bids:</span>
-                        <span className="text-xs text-gray-900">{vehicle.bidCount} bids</span>
+                        <span className="text-xs text-gray-500">
+                          Total Bids:
+                        </span>
+                        <span className="text-xs text-gray-900">
+                          {vehicle.bidCount} bids
+                        </span>
                       </div>
                       {vehicle.reserveMet ? (
                         <div className="flex items-center gap-1 text-green-600 text-xs">
@@ -1089,7 +1245,10 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
 
                     <div className="space-y-2 mb-6">
                       {vehicle.features.slice(0, 2).map((feature, index) => (
-                        <div key={index} className="flex items-center text-sm text-gray-600">
+                        <div
+                          key={index}
+                          className="flex items-center text-sm text-gray-600"
+                        >
                           <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2" />
                           {feature}
                         </div>
@@ -1097,14 +1256,14 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button 
+                      <Button
                         className="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium"
-                        onClick={() => alert('Bidding system coming soon!')}
+                        onClick={() => alert("Bidding system coming soon!")}
                       >
                         Place Bid
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="flex-1 text-black border-gray-300 hover:bg-gray-100 font-medium"
                       >
                         Details
@@ -1122,19 +1281,22 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
               <div>
                 <h3 className="text-white mb-2">How Auctions Work</h3>
                 <p className="text-white/70 text-sm">
-                  Place bids on premium vehicles with full transparency. All vehicles come with detailed history reports.
+                  Place bids on premium vehicles with full transparency. All
+                  vehicles come with detailed history reports.
                 </p>
               </div>
               <div>
                 <h3 className="text-white mb-2">Buyer Protection</h3>
                 <p className="text-white/70 text-sm">
-                  Every auction includes a comprehensive inspection report and money-back guarantee if description doesn't match.
+                  Every auction includes a comprehensive inspection report and
+                  money-back guarantee if description doesn't match.
                 </p>
               </div>
               <div>
                 <h3 className="text-white mb-2">Import Included</h3>
                 <p className="text-white/70 text-sm">
-                  Winning bids include full importation services, customs clearance, and delivery to your location.
+                  Winning bids include full importation services, customs
+                  clearance, and delivery to your location.
                 </p>
               </div>
             </div>
@@ -1146,9 +1308,12 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="mb-4 text-[20px] font-bold">Available Import Vehicles</h2>
+            <h2 className="mb-4 text-[20px] font-bold">
+              Available Import Vehicles
+            </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Browse our curated selection of premium vehicles ready for import from around the world.
+              Browse our curated selection of premium vehicles ready for import
+              from around the world.
             </p>
           </div>
 
@@ -1156,12 +1321,17 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
           <div className="mb-12">
             <div className="flex items-center gap-2 mb-4">
               <Filter size={20} className="text-gray-600" />
-              <span className="text-sm tracking-wider text-gray-900">FILTER BY:</span>
+              <span className="text-sm tracking-wider text-gray-900">
+                FILTER BY:
+              </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
               {/* Country Filter */}
-              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+              <Select
+                value={selectedCountry}
+                onValueChange={setSelectedCountry}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Country of Origin" />
                 </SelectTrigger>
@@ -1169,7 +1339,9 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                   <SelectItem value="all">All Countries</SelectItem>
                   <SelectItem value="Germany">ðŸ‡©ðŸ‡ª Germany</SelectItem>
                   <SelectItem value="Japan">ðŸ‡¯ðŸ‡µ Japan</SelectItem>
-                  <SelectItem value="United Kingdom">ðŸ‡¬ðŸ‡§ United Kingdom</SelectItem>
+                  <SelectItem value="United Kingdom">
+                    ðŸ‡¬ðŸ‡§ United Kingdom
+                  </SelectItem>
                   <SelectItem value="Italy">ðŸ‡®ðŸ‡¹ Italy</SelectItem>
                   <SelectItem value="UAE">ðŸ‡¦ðŸ‡ª UAE</SelectItem>
                   <SelectItem value="USA">ðŸ‡ºðŸ‡¸ USA</SelectItem>
@@ -1198,7 +1370,10 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
               </Select>
 
               {/* Category Filter */}
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
@@ -1227,7 +1402,10 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Condition Filter */}
-              <Select value={selectedCondition} onValueChange={setSelectedCondition}>
+              <Select
+                value={selectedCondition}
+                onValueChange={setSelectedCondition}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Condition" />
                 </SelectTrigger>
@@ -1247,13 +1425,18 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                 <SelectContent>
                   <SelectItem value="all">All Models</SelectItem>
                   {availableModels.map((model) => (
-                    <SelectItem key={model} value={model}>{model}</SelectItem>
+                    <SelectItem key={model} value={model}>
+                      {model}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
               {/* Transmission Filter */}
-              <Select value={selectedTransmission} onValueChange={setSelectedTransmission}>
+              <Select
+                value={selectedTransmission}
+                onValueChange={setSelectedTransmission}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Transmission" />
                 </SelectTrigger>
@@ -1265,7 +1448,10 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
               </Select>
 
               {/* Fuel Type Filter */}
-              <Select value={selectedFuelType} onValueChange={setSelectedFuelType}>
+              <Select
+                value={selectedFuelType}
+                onValueChange={setSelectedFuelType}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Fuel Type" />
                 </SelectTrigger>
@@ -1282,7 +1468,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
             {/* Price Range Slider */}
             <div className="mt-4">
               <label className="block text-sm text-gray-700 mb-3">
-                Price Range: ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()}
+                Price Range: ${priceRange[0].toLocaleString()} - $
+                {priceRange[1].toLocaleString()}
               </label>
               <Slider
                 min={0}
@@ -1306,7 +1493,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
 
             <div className="mt-4 flex items-center justify-between">
               <div className="text-sm text-gray-600">
-                {sortedVehicles.length} vehicle{sortedVehicles.length !== 1 ? 's' : ''} available for import
+                {sortedVehicles.length} vehicle
+                {sortedVehicles.length !== 1 ? "s" : ""} available for import
               </div>
               <Button
                 variant="outline"
@@ -1322,7 +1510,9 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
           {/* Vehicle Grid */}
           {sortedVehicles.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-gray-500 text-lg mb-4">No vehicles match your search criteria.</p>
+              <p className="text-gray-500 text-lg mb-4">
+                No vehicles match your search criteria.
+              </p>
               <Button
                 onClick={clearAllFilters}
                 variant="outline"
@@ -1347,15 +1537,21 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                     <button className="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors">
                       <Heart size={20} className="text-black" />
                     </button>
-                    
+
                     {/* Country and Year Badges */}
                     <div className="absolute top-4 left-4 flex flex-col gap-2">
                       <div className="bg-black/80 px-3 py-1 rounded-full flex items-center gap-2">
-                        <span className="text-lg">{getCountryFlag(vehicle.country)}</span>
-                        <span className="text-white text-sm">{vehicle.country}</span>
+                        <span className="text-lg">
+                          {getCountryFlag(vehicle.country)}
+                        </span>
+                        <span className="text-white text-sm">
+                          {vehicle.country}
+                        </span>
                       </div>
                       <div className="bg-black/80 px-3 py-1 rounded-full">
-                        <span className="text-white text-sm">{vehicle.year}</span>
+                        <span className="text-white text-sm">
+                          {vehicle.year}
+                        </span>
                       </div>
                       {vehicle.condition === "new" && (
                         <div className="bg-red-600 px-3 py-1 rounded-full">
@@ -1391,7 +1587,10 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
 
                     <div className="space-y-2 mb-6">
                       {vehicle.features.map((feature, index) => (
-                        <div key={index} className="flex items-center text-sm text-gray-600">
+                        <div
+                          key={index}
+                          className="flex items-center text-sm text-gray-600"
+                        >
                           <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2" />
                           {feature}
                         </div>
@@ -1399,7 +1598,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button 
+                      <Button
                         className="flex-1 bg-black hover:bg-gray-800 text-white font-medium"
                         onClick={() => {
                           setSelectedVehicle(vehicle);
@@ -1409,7 +1608,10 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                         View Details
                         <ArrowRight className="ml-2" size={18} />
                       </Button>
-                      <Button variant="outline" className="flex-1 text-black border-gray-300 hover:bg-gray-100 font-medium">
+                      <Button
+                        variant="outline"
+                        className="flex-1 text-black border-gray-300 hover:bg-gray-100 font-medium"
+                      >
                         Request Import
                       </Button>
                     </div>
@@ -1425,9 +1627,12 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="mb-4 text-[20px] font-bold">Popular Import Markets</h2>
+            <h2 className="mb-4 text-[20px] font-bold">
+              Popular Import Markets
+            </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              We specialize in importing from the world's premier automotive markets.
+              We specialize in importing from the world's premier automotive
+              markets.
             </p>
           </div>
 
@@ -1470,8 +1675,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
               </div>
               <div className="p-6">
                 <p className="text-gray-600 mb-4">
-                  JDM legends and cutting-edge technology from Japan's automotive
-                  excellence.
+                  JDM legends and cutting-edge technology from Japan's
+                  automotive excellence.
                 </p>
                 <ul className="space-y-2 text-sm text-gray-600">
                   <li className="flex items-center">
@@ -1499,8 +1704,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
               </div>
               <div className="p-6">
                 <p className="text-gray-600 mb-4">
-                  Rare configurations and exclusive models from the luxury markets
-                  of Dubai and beyond.
+                  Rare configurations and exclusive models from the luxury
+                  markets of Dubai and beyond.
                 </p>
                 <ul className="space-y-2 text-sm text-gray-600">
                   <li className="flex items-center">
@@ -1525,7 +1730,9 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       {/* Contact Form */}
       <section className="py-24 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="mb-4 text-[20px] font-bold">Request an Import Quote</h2>
+          <h2 className="mb-4 text-[20px] font-bold">
+            Request an Import Quote
+          </h2>
           <p className="text-gray-600 text-lg mb-8">
             Tell us about the vehicle you'd like to import, and we'll provide a
             detailed quote with delivery timelines and costs.
@@ -1546,10 +1753,12 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       {/* CTA Section */}
       <section className="py-16 bg-black text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-white mb-6 text-[20px] font-bold font-normal">Questions About Importing?</h2>
+          <h2 className="text-white mb-6 text-[20px] font-bold">
+            Questions About Importing?
+          </h2>
           <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
-            Our import specialists are available to discuss your specific needs and
-            answer any questions.
+            Our import specialists are available to discuss your specific needs
+            and answer any questions.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
