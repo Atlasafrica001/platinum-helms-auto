@@ -1,0 +1,241 @@
+// Platinum Helms Autos - Database Schema
+// PostgreSQL + Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ADMIN USERS MODEL
+// ============================================================================
+model AdminUser {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String   // Bcrypt hashed
+  firstName String?
+  lastName  String?
+  role      String   @default("admin") // Future: "super_admin", "manager", "viewer"
+  isActive  Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastLogin DateTime?
+
+  @@map("admin_users")
+}
+
+// ============================================================================
+// CAR MODEL
+// ============================================================================
+model Car {
+  id          Int      @id @default(autoincrement())
+  
+  // Basic Information
+  name        String   // e.g., "S-Class Premium"
+  brand       String   // e.g., "Mercedes-Benz"
+  model       String   // e.g., "S-Class"
+  year        Int
+  vin         String?  @unique // Vehicle Identification Number
+  
+  // Categorization
+  category    String   // "luxury", "sedan", "suv", "sports", etc.
+  bodyType    String   // "Sedan", "SUV", "Coupe", "Hatchback", "Truck", "Van"
+  condition   String   // "New", "Foreign Used", "Nigerian Used"
+  
+  // Pricing & Financial
+  price       Decimal  @db.Decimal(15, 2) // Nigerian Naira, e.g., 25000000.00
+  
+  // Technical Specifications
+  transmission String  // "Automatic", "Manual"
+  fuelType     String  // "Petrol", "Diesel", "Hybrid", "Electric"
+  mileage      Int     @default(0) // in kilometers
+  
+  // Features & Description
+  features     String[] // Array of feature strings
+  description  String?  @db.Text
+  
+  // Media
+  images       CarImage[]
+  
+  // Tags & Classification
+  tags         String[] // "popular", "hotDeal", "promo", "searched"
+  
+  // Status & Visibility
+  status       String   @default("available") // "available", "reserved", "sold", "hidden"
+  visibility   Boolean  @default(true) // true = visible to public, false = hidden
+  
+  // Analytics
+  views        Int      @default(0)
+  
+  // Importation Details (for import vehicles)
+  country      String?  // Country of origin for import vehicles
+  
+  // Timestamps
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  financingLeads FinancingLead[]
+
+  // Indexes for performance
+  @@index([brand, model])
+  @@index([price])
+  @@index([year])
+  @@index([status])
+  @@index([category])
+  @@index([views])
+  @@index([createdAt])
+  
+  @@map("cars")
+}
+
+// ============================================================================
+// CAR IMAGES MODEL (One-to-Many with Car)
+// ============================================================================
+model CarImage {
+  id          Int      @id @default(autoincrement())
+  carId       Int
+  url         String   // Cloudinary URL
+  publicId    String   // Cloudinary public ID for deletion
+  isPrimary   Boolean  @default(false) // First image = primary
+  order       Int      @default(0) // Display order
+  
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  car         Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+  
+  @@index([carId])
+  @@map("car_images")
+}
+
+// ============================================================================
+// FINANCING LEAD MODEL
+// ============================================================================
+model FinancingLead {
+  id          Int      @id @default(autoincrement())
+  
+  // Personal Information
+  firstName   String
+  lastName    String
+  email       String
+  phone       String
+  dateOfBirth String?
+  ssn         String?  // ⚠️ Should be encrypted in production
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
+  
+  // Employment Information
+  employmentStatus  String   // "full-time", "part-time", "self-employed", etc.
+  employer          String?
+  jobTitle          String?
+  employmentLength  String?  // "less1", "1-2", "2-5", "5plus"
+  workPhone         String?
+  
+  // Financial Information
+  annualIncome      String?  // Stored as string to handle ranges
+  monthlyIncome     String?  // From official doc
+  additionalIncome  String?
+  monthlyHousing    String?
+  monthlyDebt       String?
+  
+  // Loan Details
+  selectedCarId           Int?
+  preferredRepaymentDuration String? // "6 months", "12 months", etc.
+  initialDepositBudget    Decimal?   @db.Decimal(15, 2)
+  additionalNotes         String?    @db.Text
+  
+  // Authorization
+  authorizeCredit Boolean  @default(false)
+  agreeToTerms    Boolean  @default(false)
+  
+  // Metadata (from official doc requirements)
+  formType        String   @default("Financing")
+  source          String?  // "Car Page", "Financing Page"
+  status          String   @default("pending") // "pending", "contacted", "approved", "rejected", "closed"
+  
+  // Timestamps
+  submissionDate  DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  selectedCar     Car?     @relation(fields: [selectedCarId], references: [id], onDelete: SetNull)
+  
+  @@index([email])
+  @@index([status])
+  @@index([submissionDate])
+  @@index([selectedCarId])
+  
+  @@map("financing_leads")
+}
+
+// ============================================================================
+// IMPORTATION LEAD MODEL
+// ============================================================================
+model ImportationLead {
+  id          Int      @id @default(autoincrement())
+  
+  // Personal Information
+  fullName    String
+  email       String
+  phone       String
+  
+  // Vehicle & Importation Details
+  desiredCar        String   // e.g., "Toyota Highlander 2019"
+  preferredCountry  String   // "USA", "Canada", "UAE", "Germany", "UK", "Japan"
+  budgetRange       String   // "5M-7M", "7M-10M", "10M-15M", etc.
+  deliveryTimeline  String   // "4-6", "6-8", "8-12", "flexible"
+  importationType   String   // "self-import", "assisted-import"
+  additionalDetails String?  @db.Text
+  
+  // Metadata (from official doc requirements)
+  formType        String   @default("Importation")
+  source          String?  // "Importation Page", "Car Page"
+  status          String   @default("pending") // "pending", "contacted", "closed"
+  
+  // Timestamps
+  submissionDate  DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([email])
+  @@index([status])
+  @@index([submissionDate])
+  
+  @@map("importation_leads")
+}
+
+// ============================================================================
+// CONTACT MESSAGE MODEL (for general contact form)
+// ============================================================================
+model ContactMessage {
+  id          Int      @id @default(autoincrement())
+  
+  name        String
+  email       String
+  phone       String?
+  subject     String
+  message     String   @db.Text
+  
+  status      String   @default("new") // "new", "responded", "closed"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  
+  @@map("contact_messages")
+}
+
+// ============================================================================
+// ANALYTICS/STATS (Future Enhancement - Optional)
+// ============================================================================
+// Can be added later for tracking page views, popular searches, etc.
