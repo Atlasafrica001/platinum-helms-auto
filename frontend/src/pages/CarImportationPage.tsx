@@ -772,12 +772,12 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
 
   const getCountryFlag = (country: string) => {
     const flags: { [key: string]: string } = {
-      Germany: "ðŸ‡©ðŸ‡ª",
-      Japan: "ðŸ‡¯ðŸ‡µ",
-      "United Kingdom": "ðŸ‡¬ðŸ‡§",
-      Italy: "ðŸ‡®ðŸ‡¹",
-      UAE: "ðŸ‡¦ðŸ‡ª",
-      USA: "ðŸ‡ºðŸ‡¸",
+      Germany: "🇩🇪",
+      Japan: "🇯🇵",
+      "United Kingdom": "🇬🇧",
+      Italy: "🇮🇹",
+      UAE: "🇦🇪",
+      USA: "🇺🇸",
     };
     return flags[country] || "ðŸŒ";
   };

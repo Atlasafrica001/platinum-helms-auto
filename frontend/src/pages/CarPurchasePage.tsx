@@ -778,9 +778,9 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
                     {/* Vehicle Specs */}
                     <div className="flex flex-wrap gap-3 mb-4 text-xs text-gray-600">
                       <span>{vehicle.transmission}</span>
-                      <span>â€¢</span>
+                      <span>&#8226;</span>
                       <span>{vehicle.fuelType}</span>
-                      <span>â€¢</span>
+                      <span>&#8226;</span>
                       <span>{vehicle.mileage.toLocaleString()} km</span>
                     </div>
 

@@ -108,7 +108,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <p className="text-sm text-gray-400">
-            Â© 2025 Platinum Helms. All rights reserved.
+            © 2025 Platinum Helms. All rights reserved.
           </p>
           <div className="flex space-x-6 text-sm text-gray-400">
             <a href="#" className="hover:text-white transition-colors">
