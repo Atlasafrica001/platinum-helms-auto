@@ -1380,14 +1380,12 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Countries</SelectItem>
-                  <SelectItem value="Germany">ðŸ‡©ðŸ‡ª Germany</SelectItem>
-                  <SelectItem value="Japan">ðŸ‡¯ðŸ‡µ Japan</SelectItem>
-                  <SelectItem value="United Kingdom">
-                    ðŸ‡¬ðŸ‡§ United Kingdom
-                  </SelectItem>
-                  <SelectItem value="Italy">ðŸ‡®ðŸ‡¹ Italy</SelectItem>
-                  <SelectItem value="UAE">ðŸ‡¦ðŸ‡ª UAE</SelectItem>
-                  <SelectItem value="USA">ðŸ‡ºðŸ‡¸ USA</SelectItem>
+                  <SelectItem value="Germany">DE Germany</SelectItem>
+                  <SelectItem value="Japan">JP Japan</SelectItem>
+                  <SelectItem value="United Kingdom">GB United Kingdom</SelectItem>
+                  <SelectItem value="Italy">IT Italy</SelectItem>
+                  <SelectItem value="UAE">AE UAE</SelectItem>
+                  <SelectItem value="USA">US USA</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -1516,7 +1514,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
               </label>
               <Slider
                 min={0}
-                max={600000}
+                max={9000000000}
                 step={10000}
                 value={priceRange}
                 onValueChange={setPriceRange}

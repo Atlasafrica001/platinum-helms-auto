@@ -58,11 +58,15 @@ const DialogContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         data-slot="dialog-content"
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          zIndex: 9999,
+        }}
         className={cn(
-          "relative z-50 w-full max-w-lg",
-          "bg-background shadow-lg",
-          "rounded-lg border",
-          "focus:outline-none",
+          "w-full max-w-lg bg-background shadow-lg rounded-lg border p-6",
           className
         )}
         {...props}
