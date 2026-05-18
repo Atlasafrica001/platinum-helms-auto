@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatCurrency } from "@/lib/adminUtils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/dialog";
 import { Button } from "../components/button";
 import { Badge } from "../components/badge";
@@ -30,6 +31,7 @@ interface Vehicle {
   condition: string;
   price: number;
   image: string;
+  images?: Array<{ url: string }>;
   features: string[];
   tags?: string[];
   country?: string;
@@ -54,12 +56,10 @@ export function VehicleDetailsDialog({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   // Multiple images for slideshow - main image + additional views
-  const vehicleImages = [
-    vehicle.image,
-    vehicle.image, // In a real app, these would be different angles
-    vehicle.image, // e.g., interior, side view, rear view, etc.
-    vehicle.image,
-  ];
+  const vehicleImages =
+    vehicle.images && vehicle.images.length > 0
+      ? vehicle.images.map((image) => image.url)
+      : [vehicle.image];
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % vehicleImages.length);
@@ -104,7 +104,7 @@ export function VehicleDetailsDialog({
         <DialogHeader className="sr-only">
           <DialogTitle>{vehicle.brand} {vehicle.name}</DialogTitle>
           <DialogDescription>
-            Detailed information about {vehicle.year} {vehicle.brand} {vehicle.name} - ${vehicle.price.toLocaleString()}
+            Detailed information about {vehicle.year} {vehicle.brand} {vehicle.name} - {formatCurrency(vehicle.price)}
           </DialogDescription>
         </DialogHeader>
 
@@ -201,7 +201,7 @@ export function VehicleDetailsDialog({
             <p className="text-sm text-white/80 mb-1">{vehicle.brand}</p>
             <h2 className="text-white mb-2">{vehicle.name}</h2>
             <p className="text-white">
-              ${vehicle.price.toLocaleString()}
+              {formatCurrency(vehicle.price)}
             </p>
           </div>
         </div>
@@ -269,14 +269,14 @@ export function VehicleDetailsDialog({
               <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <p className="text-xs text-gray-500 mb-1">Estimated Monthly</p>
                 <p className="text-red-600">
-                  ${Math.round((vehicle.price * 0.02)).toLocaleString()}/mo
+                  {formatCurrency(Math.round(vehicle.price * 0.02))}/mo
                 </p>
                 <p className="text-xs text-gray-500 mt-1">60 months @ 4.9% APR</p>
               </div>
               <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <p className="text-xs text-gray-500 mb-1">Down Payment</p>
                 <p className="text-red-600">
-                  ${Math.round((vehicle.price * 0.2)).toLocaleString()}
+                  {formatCurrency(Math.round(vehicle.price * 0.2))}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">20% recommended</p>
               </div>

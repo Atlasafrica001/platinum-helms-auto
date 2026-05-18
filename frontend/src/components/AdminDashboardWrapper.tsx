@@ -3,13 +3,13 @@
  * Adds auth integration, logout, and user display to existing dashboard
  */
 
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { ReactNode, useEffect } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import { AdminDashboard } from './AdminDashboard';
 import { Button } from './button';
 import { Avatar, AvatarFallback } from './avatar';
-import { LogOut, User } from 'lucide-react';
+import { Car, FileText, LayoutDashboard, LogOut, MessageSquare, Settings, User } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,8 +18,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from './alert-dialog';
 
-const AdminDashboardWrapper = () => {
+interface AdminDashboardWrapperProps {
+  children?: ReactNode;
+}
+
+const adminNavigation = [
+  { label: 'Dashboard', path: '/admin', icon: LayoutDashboard },
+  { label: 'Vehicle Inventory', path: '/admin/vehicles', icon: Car },
+  { label: 'Finance Applications', path: '/admin/finance-applications', icon: FileText },
+  { label: 'Contact Leads', path: '/admin/contact-leads', icon: MessageSquare },
+  { label: 'Admin Settings', path: '/admin/settings', icon: Settings },
+];
+
+const AdminDashboardWrapper = ({ children }: AdminDashboardWrapperProps) => {
   const { user, logout, refreshUser } = useAdminAuth();
   const navigate = useNavigate();
 
@@ -34,7 +57,7 @@ const AdminDashboardWrapper = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/admin/login');
+      navigate('/home');
     } catch (error) {
       console.error('Logout failed:', error);
     }
@@ -52,12 +75,36 @@ const AdminDashboardWrapper = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Admin Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex flex-col gap-4 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold text-gray-900">
               Platinum Helms Admin
             </h1>
           </div>
+
+          <nav className="flex flex-wrap items-center gap-2">
+            {adminNavigation.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  end={item.path === '/admin'}
+                  className={({ isActive }) =>
+                    `inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-red-600 text-white'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }`
+                  }
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </NavLink>
+              );
+            })}
+          </nav>
 
           {/* User Menu */}
           <div className="flex items-center gap-4">
@@ -93,15 +140,39 @@ const AdminDashboardWrapper = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/admin/profile')}>
+                <DropdownMenuItem onClick={() => navigate('/admin/settings')}>
                   <User className="mr-2 h-4 w-4" />
                   Profile Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </DropdownMenuItem>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Log out of admin dashboard?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        You will be signed out of the admin dashboard and returned to the homepage.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleLogout}
+                        className="bg-red-600 text-white hover:bg-red-700"
+                      >
+                        Logout
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -110,7 +181,7 @@ const AdminDashboardWrapper = () => {
 
       {/* Dashboard Content */}
       <main>
-        <AdminDashboard />
+        {children || <AdminDashboard />}
       </main>
     </div>
   );

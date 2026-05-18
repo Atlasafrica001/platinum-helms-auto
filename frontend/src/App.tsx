@@ -11,6 +11,10 @@ import { AboutUsPage } from "./pages/AboutUsPage";
 import { ContactPage } from "./pages/ContactPage";
 import { ComingSoonPage } from "./pages/ComingSoonPage";
 import AdminLogin from "./pages/admin/AdminLogin";
+import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+import ContactLeadsPage from "./pages/admin/ContactLeadsPage";
+import FinanceApplicationsPage from "./pages/admin/FinanceApplicationsPage";
+import VehicleInventoryPage from "./pages/admin/VehicleInventoryPage";
 import AdminDashboardWrapper from "./components/AdminDashboardWrapper";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import { LeadCaptureDialog } from "./components/LeadCaptureDialog";
@@ -226,6 +230,46 @@ export default function App() {
               element={
                 <ProtectedAdminRoute>
                   <AdminDashboardWrapper />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/vehicles"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminDashboardWrapper>
+                    <VehicleInventoryPage />
+                  </AdminDashboardWrapper>
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/finance-applications"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminDashboardWrapper>
+                    <FinanceApplicationsPage />
+                  </AdminDashboardWrapper>
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/contact-leads"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminDashboardWrapper>
+                    <ContactLeadsPage />
+                  </AdminDashboardWrapper>
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/settings"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminDashboardWrapper>
+                    <AdminSettingsPage />
+                  </AdminDashboardWrapper>
                 </ProtectedAdminRoute>
               }
             />

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import api from "@/lib/api";
 import { ImageWithFallback } from "../components/ImageWithFallback";
 import { Button } from "../components/button";
 import { Card } from "../components/card";
@@ -15,17 +16,21 @@ export function ContactPage() {
     message: "",
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
   
   const phoneNumber = "15551234567";
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent("Hello! I have a question about Platinum Helms.")}`;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real application, this would send data to a backend
-    console.log("Form submitted:", formData);
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
+
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      await api.leads.submitContact(formData);
+      setIsSubmitted(true);
       setFormData({
         name: "",
         email: "",
@@ -33,7 +38,11 @@ export function ContactPage() {
         subject: "",
         message: "",
       });
-    }, 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to send message");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -167,6 +176,11 @@ export function ContactPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {error && (
+                    <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      {error}
+                    </div>
+                  )}
                   <div>
                     <label htmlFor="name" className="block text-sm mb-2">
                       Full Name *
@@ -244,9 +258,10 @@ export function ContactPage() {
                   <Button
                     type="submit"
                     className="w-full bg-red-600 hover:bg-red-700 text-white"
+                    disabled={isSubmitting}
                   >
                     <Send className="w-4 h-4 mr-2" />
-                    Send Message
+                    {isSubmitting ? "Sending..." : "Send Message"}
                   </Button>
                   
                   <div className="relative">

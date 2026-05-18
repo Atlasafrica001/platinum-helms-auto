@@ -166,7 +166,8 @@ const uploadCarImages = catchAsync(async (req, res) => {
 
   // Upload each file to Cloudinary
   for (const file of req.files) {
-    const result = await uploadImage(file.buffer.toString('base64'), 'platinum-helms/cars');
+    const dataUri = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+    const result = await uploadImage(dataUri, 'platinum-helms/cars');
     uploadedImages.push({
       url: result.url,
       publicId: result.publicId,

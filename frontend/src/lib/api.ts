@@ -4,6 +4,8 @@
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
+console.log(import.meta.env.VITE_API_BASE_URL);
+console.log(API_BASE_URL);
 
 // Token storage keys
 const TOKEN_KEY = 'admin_token';
@@ -274,6 +276,15 @@ export const api = {
       });
 
       return response.json();
+    },
+
+    /**
+     * Delete car image
+     */
+    deleteImage: async (carId: number, imageId: number) => {
+      return fetchApi(`/admin/cars/${carId}/images/${imageId}`, {
+        method: 'DELETE',
+      });
     },
   },
 

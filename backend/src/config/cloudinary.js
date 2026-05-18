@@ -17,6 +17,16 @@ cloudinary.config({
  */
 const uploadImage = async (filePath, folder = 'platinum-helms') => {
   try {
+    if (
+      !process.env.CLOUDINARY_CLOUD_NAME ||
+      !process.env.CLOUDINARY_API_KEY ||
+      !process.env.CLOUDINARY_API_SECRET
+    ) {
+      throw new Error(
+        'Cloudinary environment variables are missing. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.'
+      );
+    }
+
     const result = await cloudinary.uploader.upload(filePath, {
       folder: folder,
       resource_type: 'auto',

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import api from "@/lib/api";
 import { Button } from "../components/button";
 import { Input } from "../components/input";
 import { Label } from "../components/label";
@@ -28,23 +29,26 @@ export function ImportationRequestForm({ isOpen, onClose }: ImportationRequestFo
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Save to localStorage (since no backend)
-    const submissions = JSON.parse(localStorage.getItem("importationRequests") || "[]");
-    const newSubmission = {
-      ...formData,
-      formType: "Importation",
-      submissionDate: new Date().toISOString(),
-      status: "Pending",
-      source: "Importation Page",
-    };
-    submissions.push(newSubmission);
-    localStorage.setItem("importationRequests", JSON.stringify(submissions));
 
-    setIsSubmitted(true);
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      await api.leads.submitImportation({
+        ...formData,
+      source: "Importation Page",
+      });
+      setIsSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to submit request");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -88,6 +92,11 @@ export function ImportationRequestForm({ isOpen, onClose }: ImportationRequestFo
             </DialogHeader>
 
             <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+              {error && (
+                <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
               {/* Personal Information */}
               <div className="space-y-4">
                 <h3 className="text-black">Personal Information</h3>
@@ -245,8 +254,8 @@ export function ImportationRequestForm({ isOpen, onClose }: ImportationRequestFo
                 </p>
               </div>
 
-              <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-medium">
-                Submit Request
+              <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-medium" disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Submit Request"}
               </Button>
             </form>
           </>

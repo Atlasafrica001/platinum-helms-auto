@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
+import { formatCurrency, normalizeCar } from "@/lib/adminUtils";
 import { ImageWithFallback } from "../components/ImageWithFallback";
 import { Button } from "../components/button";
 import { Card } from "../components/card";
@@ -67,8 +69,9 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
 
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoadingVehicles, setIsLoadingVehicles] = useState(true);
 
-  const vehicles: Vehicle[] = [
+  const fallbackVehicles: Vehicle[] = [
     {
       id: 1,
       name: "S-Class Premium",
@@ -274,6 +277,17 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
       dateAdded: "2025-10-27",
     },
   ];
+
+  const [databaseVehicles, setDatabaseVehicles] = useState<Vehicle[]>([]);
+  const vehicles = databaseVehicles.length > 0 ? databaseVehicles : fallbackVehicles;
+
+  useEffect(() => {
+    api.cars
+      .getAll({ limit: 100 })
+      .then((response) => setDatabaseVehicles((response.data || []).map(normalizeCar)))
+      .catch(() => setDatabaseVehicles([]))
+      .finally(() => setIsLoadingVehicles(false));
+  }, []);
 
   // Get unique brands for dropdown
   const brands = Array.from(new Set(vehicles.map((v) => v.brand))).sort();
@@ -628,8 +642,8 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
             {/* Price Range Slider */}
             <div className="mb-4">
               <label className="block text-sm text-gray-700 mb-3">
-                Price Range: ${priceRange[0].toLocaleString()} - $
-                {priceRange[1].toLocaleString()}
+                Price Range: {formatCurrency(priceRange[0])} -{" "}
+                {formatCurrency(priceRange[1])}
               </label>
               <Slider
                 min={0}
@@ -672,7 +686,7 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
           {/* Results Header with Sorting */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div className="text-sm text-gray-600">
-              {sortedVehicles.length} vehicle
+              {isLoadingVehicles ? "Loading" : sortedVehicles.length} vehicle
               {sortedVehicles.length !== 1 ? "s" : ""} found
             </div>
 
@@ -772,7 +786,7 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
                     </p>
                     <h3 className="text-black mb-2">{vehicle.name}</h3>
                     <p className="text-gray-900 mb-2">
-                      ${vehicle.price.toLocaleString()}
+                      {formatCurrency(vehicle.price)}
                     </p>
 
                     {/* Vehicle Specs */}

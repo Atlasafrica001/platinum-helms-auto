@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "@/lib/api";
 import { Card } from "../components/card";
 import { Button } from "../components/button";
 import { Input } from "../components/input";
@@ -13,12 +15,10 @@ import {
   TableRow,
 } from "../components/table";
 import {
-  // LayoutDashboard,
   Car,
   FileText,
   MessageSquare,
   TrendingUp,
-  // Users,
   DollarSign,
   Package,
   Search,
@@ -30,204 +30,356 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 
-// Mock data for the dashboard
-const mockStats = {
-  totalVehicles: 48,
-  totalApplications: 156,
-  totalContacts: 89,
-  monthlyRevenue: 2450000,
-  pendingApplications: 23,
-  approvedApplications: 98,
-  activeListings: 42,
+type DashboardOverview = {
+  totalCars: number;
+  activeCars: number;
+  soldCars: number;
+  totalLeads: number;
+  totalFinancingLeads: number;
+  pendingFinancingLeads: number;
+  approvedFinancingLeads: number;
+  totalImportationLeads: number;
+  pendingImportationLeads: number;
+  totalContactMessages: number;
+  newContactMessages: number;
 };
 
-const mockVehicles = [
-  {
-    id: 1,
-    make: "Mercedes-Benz",
-    model: "S-Class",
-    year: 2024,
-    price: 125000,
-    status: "Available",
-    vin: "WDD2221771A123456",
-  },
-  {
-    id: 2,
-    make: "BMW",
-    model: "7 Series",
-    year: 2024,
-    price: 110000,
-    status: "Reserved",
-    vin: "WBA7E2C53JG123456",
-  },
-  {
-    id: 3,
-    make: "Audi",
-    model: "A8",
-    year: 2023,
-    price: 95000,
-    status: "Available",
-    vin: "WAUZZZ8V9KA123456",
-  },
-  {
-    id: 4,
-    make: "Porsche",
-    model: "Panamera",
-    year: 2024,
-    price: 135000,
-    status: "Sold",
-    vin: "WP0AA2A71KL123456",
-  },
-  {
-    id: 5,
-    make: "Range Rover",
-    model: "Autobiography",
-    year: 2024,
-    price: 150000,
-    status: "Available",
-    vin: "SALGS2VF5KA123456",
-  },
-];
+type Vehicle = {
+  id: number;
+  name?: string;
+  brand?: string;
+  make?: string;
+  model?: string;
+  year?: number;
+  vin?: string | null;
+  price?: number;
+  status?: string;
+};
 
-const mockApplications = [
-  {
-    id: 1,
-    name: "John Smith",
-    email: "john.smith@email.com",
-    vehicleInterest: "Mercedes-Benz S-Class",
-    amount: 125000,
-    status: "Under Review",
-    date: "2025-10-28",
-  },
-  {
-    id: 2,
-    name: "Sarah Johnson",
-    email: "sarah.j@email.com",
-    vehicleInterest: "BMW 7 Series",
-    amount: 110000,
-    status: "Approved",
-    date: "2025-10-25",
-  },
-  {
-    id: 3,
-    name: "Michael Brown",
-    email: "m.brown@email.com",
-    vehicleInterest: "Audi A8",
-    amount: 95000,
-    status: "Pending Documents",
-    date: "2025-10-30",
-  },
-  {
-    id: 4,
-    name: "Emily Davis",
-    email: "emily.d@email.com",
-    vehicleInterest: "Porsche Panamera",
-    amount: 135000,
-    status: "Rejected",
-    date: "2025-10-22",
-  },
-  {
-    id: 5,
-    name: "David Wilson",
-    email: "d.wilson@email.com",
-    vehicleInterest: "Range Rover",
-    amount: 150000,
-    status: "Approved",
-    date: "2025-10-29",
-  },
-];
+type FinancingLead = {
+  id: number;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  status?: string;
+  submissionDate?: string;
+  initialDepositBudget?: number | string | null;
+  selectedCar?: {
+    name?: string;
+    brand?: string;
+    model?: string;
+  } | null;
+};
 
-const mockContacts = [
-  {
-    id: 1,
-    name: "Robert Taylor",
-    email: "r.taylor@email.com",
-    phone: "+1 (555) 123-4567",
-    subject: "Vehicle Import Inquiry",
-    message: "Interested in importing a vehicle from Europe...",
-    date: "2025-11-01",
-    status: "New",
-  },
-  {
-    id: 2,
-    name: "Lisa Anderson",
-    email: "l.anderson@email.com",
-    phone: "+1 (555) 234-5678",
-    subject: "Financing Options",
-    message: "Would like to know more about financing options...",
-    date: "2025-10-31",
-    status: "Responded",
-  },
-  {
-    id: 3,
-    name: "James Martinez",
-    email: "j.martinez@email.com",
-    phone: "+1 (555) 345-6789",
-    subject: "Test Drive Request",
-    message: "Requesting a test drive for the S-Class...",
-    date: "2025-10-30",
-    status: "Scheduled",
-  },
-  {
-    id: 4,
-    name: "Patricia Garcia",
-    email: "p.garcia@email.com",
-    phone: "+1 (555) 456-7890",
-    subject: "General Inquiry",
-    message: "Question about your vehicle selection...",
-    date: "2025-10-29",
-    status: "Responded",
-  },
-];
+type ContactMessage = {
+  id: number;
+  name?: string;
+  email?: string;
+  phone?: string | null;
+  subject?: string;
+  message?: string;
+  status?: string;
+  createdAt?: string;
+};
+
+const emptyOverview: DashboardOverview = {
+  totalCars: 0,
+  activeCars: 0,
+  soldCars: 0,
+  totalLeads: 0,
+  totalFinancingLeads: 0,
+  pendingFinancingLeads: 0,
+  approvedFinancingLeads: 0,
+  totalImportationLeads: 0,
+  pendingImportationLeads: 0,
+  totalContactMessages: 0,
+  newContactMessages: 0,
+};
+
+const formatCurrency = (value?: number | string | null) => {
+  const amount = Number(value || 0);
+
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+const formatDate = (value?: string) => {
+  if (!value) return "N/A";
+
+  return new Intl.DateTimeFormat("en-NG", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(new Date(value));
+};
+
+const labelStatus = (status?: string) => {
+  if (!status) return "Unknown";
+
+  return status
+    .split(/[_\s-]+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+};
+
+const downloadCsv = (fileName: string, rows: Record<string, unknown>[]) => {
+  if (rows.length === 0) return;
+
+  const headers = Object.keys(rows[0]);
+  const escapeCell = (value: unknown) =>
+    `"${String(value ?? "").replace(/"/g, '""')}"`;
+  const csv = [
+    headers.join(","),
+    ...rows.map((row) => headers.map((header) => escapeCell(row[header])).join(",")),
+  ].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
+};
 
 export function AdminDashboard() {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("vehicles");
   const [searchTerm, setSearchTerm] = useState("");
+  const [overview, setOverview] = useState<DashboardOverview>(emptyOverview);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [applications, setApplications] = useState<FinancingLead[]>([]);
+  const [contacts, setContacts] = useState<ContactMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [actionId, setActionId] = useState<string | null>(null);
+  const [error, setError] = useState("");
 
-  const getStatusBadge = (status: string) => {
+  const loadDashboard = async (query = searchTerm, showRefreshing = false) => {
+    if (showRefreshing) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
+    setError("");
+
+    try {
+      const filters = query.trim() ? { search: query.trim(), limit: 20 } : { limit: 20 };
+      const [statsResponse, carsResponse, leadsResponse] = await Promise.all([
+        api.stats.getDashboard(),
+        api.cars.getAllAdmin(filters),
+        api.leads.getAll(filters),
+      ]);
+
+      setOverview(statsResponse.data?.overview || emptyOverview);
+      setVehicles(carsResponse.data || []);
+      setApplications(leadsResponse.data?.financing?.leads || []);
+      setContacts(leadsResponse.data?.contact?.messages || []);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Unable to load dashboard data";
+      setError(message);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDashboard("");
+  }, []);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      loadDashboard(searchTerm, true);
+    }, 350);
+
+    return () => window.clearTimeout(timeout);
+  }, [searchTerm]);
+
+  const totalInventoryValue = useMemo(
+    () => vehicles.reduce((total, vehicle) => total + Number(vehicle.price || 0), 0),
+    [vehicles],
+  );
+
+  const getStatusBadge = (status?: string) => {
+    const normalized = (status || "").toLowerCase();
     const statusColors: Record<string, string> = {
-      Available: "bg-green-100 text-green-800",
-      Reserved: "bg-yellow-100 text-yellow-800",
-      Sold: "bg-gray-100 text-gray-800",
-      Approved: "bg-green-100 text-green-800",
-      "Under Review": "bg-blue-100 text-blue-800",
-      "Pending Documents": "bg-yellow-100 text-yellow-800",
-      Rejected: "bg-red-100 text-red-800",
-      New: "bg-blue-100 text-blue-800",
-      Responded: "bg-green-100 text-green-800",
-      Scheduled: "bg-purple-100 text-purple-800",
+      available: "bg-green-100 text-green-800",
+      reserved: "bg-yellow-100 text-yellow-800",
+      sold: "bg-gray-100 text-gray-800",
+      hidden: "bg-gray-100 text-gray-800",
+      approved: "bg-green-100 text-green-800",
+      contacted: "bg-blue-100 text-blue-800",
+      pending: "bg-yellow-100 text-yellow-800",
+      rejected: "bg-red-100 text-red-800",
+      closed: "bg-gray-100 text-gray-800",
+      new: "bg-blue-100 text-blue-800",
+      responded: "bg-green-100 text-green-800",
     };
 
     return (
-      <Badge className={`${statusColors[status] || "bg-gray-100 text-gray-800"}`}>
-        {status}
+      <Badge className={statusColors[normalized] || "bg-gray-100 text-gray-800"}>
+        {labelStatus(status)}
       </Badge>
     );
   };
 
+  const deleteVehicle = async (id: number) => {
+    if (!window.confirm("Delete this vehicle from inventory?")) return;
+
+    setActionId(`vehicle-${id}`);
+    try {
+      await api.cars.delete(id);
+      await loadDashboard(searchTerm, true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Unable to delete vehicle");
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const updateApplicationStatus = async (id: number, status: string) => {
+    setActionId(`application-${id}-${status}`);
+    try {
+      await api.leads.updateStatus("financing", id, status);
+      await loadDashboard(searchTerm, true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Unable to update application");
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const markContactResponded = async (id: number) => {
+    setActionId(`contact-${id}-responded`);
+    try {
+      await api.leads.updateStatus("contact", id, "responded");
+      await loadDashboard(searchTerm, true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Unable to update contact");
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const deleteContact = async (id: number) => {
+    if (!window.confirm("Delete this contact message?")) return;
+
+    setActionId(`contact-${id}`);
+    try {
+      await api.leads.delete("contact", id);
+      await loadDashboard(searchTerm, true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Unable to delete contact");
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const exportCurrentTab = () => {
+    if (activeTab === "vehicles") {
+      downloadCsv(
+        "vehicles.csv",
+        vehicles.map((vehicle) => ({
+          id: vehicle.id,
+          vehicle: vehicle.name || `${vehicle.brand || vehicle.make || ""} ${vehicle.model || ""}`.trim(),
+          year: vehicle.year,
+          vin: vehicle.vin,
+          price: vehicle.price,
+          status: vehicle.status,
+        })),
+      );
+      return;
+    }
+
+    if (activeTab === "applications") {
+      downloadCsv(
+        "finance-applications.csv",
+        applications.map((application) => ({
+          id: application.id,
+          name: `${application.firstName || ""} ${application.lastName || ""}`.trim(),
+          email: application.email,
+          vehicle: application.selectedCar?.name || "N/A",
+          depositBudget: application.initialDepositBudget,
+          status: application.status,
+          date: application.submissionDate,
+        })),
+      );
+      return;
+    }
+
+    downloadCsv(
+      "contacts.csv",
+      contacts.map((contact) => ({
+        id: contact.id,
+        name: contact.name,
+        email: contact.email,
+        phone: contact.phone,
+        subject: contact.subject,
+        status: contact.status,
+        date: contact.createdAt,
+      })),
+    );
+  };
+
+  const renderEmptyRow = (message: string, colSpan: number) => (
+    <TableRow>
+      <TableCell colSpan={colSpan} className="py-10 text-center text-gray-500">
+        {message}
+      </TableCell>
+    </TableRow>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div>
               <h1 className="mb-2">Admin Dashboard</h1>
               <p className="text-gray-600">
                 Manage your automotive business operations
               </p>
             </div>
-            <Button className="bg-red-600 hover:bg-red-700 text-white">
-              <Download className="w-4 h-4 mr-2" />
-              Export Report
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => loadDashboard(searchTerm, true)}
+                disabled={isRefreshing}
+              >
+                {isRefreshing ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                )}
+                Refresh
+              </Button>
+              <Button
+                className="bg-red-600 hover:bg-red-700 text-white"
+                onClick={exportCurrentTab}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Report
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Stats Grid */}
+        {error && (
+          <div className="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="p-6 border-none shadow-sm">
             <div className="flex items-center justify-between mb-4">
@@ -236,10 +388,10 @@ export function AdminDashboard() {
               </div>
               <TrendingUp className="w-5 h-5 text-green-500" />
             </div>
-            <h3 className="mb-1">{mockStats.totalVehicles}</h3>
+            <h3 className="mb-1">{isLoading ? "..." : overview.totalCars}</h3>
             <p className="text-sm text-gray-600">Total Vehicles</p>
             <p className="text-xs text-green-600 mt-2">
-              {mockStats.activeListings} active listings
+              {overview.activeCars} active listings
             </p>
           </Card>
 
@@ -250,10 +402,12 @@ export function AdminDashboard() {
               </div>
               <TrendingUp className="w-5 h-5 text-green-500" />
             </div>
-            <h3 className="mb-1">{mockStats.totalApplications}</h3>
+            <h3 className="mb-1">
+              {isLoading ? "..." : overview.totalFinancingLeads}
+            </h3>
             <p className="text-sm text-gray-600">Finance Applications</p>
             <p className="text-xs text-yellow-600 mt-2">
-              {mockStats.pendingApplications} pending review
+              {overview.pendingFinancingLeads} pending review
             </p>
           </Card>
 
@@ -264,9 +418,13 @@ export function AdminDashboard() {
               </div>
               <TrendingUp className="w-5 h-5 text-green-500" />
             </div>
-            <h3 className="mb-1">{mockStats.totalContacts}</h3>
+            <h3 className="mb-1">
+              {isLoading ? "..." : overview.totalContactMessages}
+            </h3>
             <p className="text-sm text-gray-600">Contact Messages</p>
-            <p className="text-xs text-blue-600 mt-2">15 new this week</p>
+            <p className="text-xs text-blue-600 mt-2">
+              {overview.newContactMessages} new messages
+            </p>
           </Card>
 
           <Card className="p-6 border-none shadow-sm">
@@ -276,16 +434,15 @@ export function AdminDashboard() {
               </div>
               <TrendingUp className="w-5 h-5 text-green-500" />
             </div>
-            <h3 className="mb-1">
-              ${(mockStats.monthlyRevenue / 1000000).toFixed(2)}M
-            </h3>
-            <p className="text-sm text-gray-600">Monthly Revenue</p>
-            <p className="text-xs text-green-600 mt-2">+12% from last month</p>
+            <h3 className="mb-1">{formatCurrency(totalInventoryValue)}</h3>
+            <p className="text-sm text-gray-600">Loaded Inventory Value</p>
+            <p className="text-xs text-green-600 mt-2">
+              {overview.soldCars} sold vehicles
+            </p>
           </Card>
         </div>
 
-        {/* Data Tables */}
-        <Tabs defaultValue="vehicles" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white border">
             <TabsTrigger value="vehicles" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <Car className="w-4 h-4 mr-2" />
@@ -301,15 +458,17 @@ export function AdminDashboard() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Vehicles Tab */}
           <TabsContent value="vehicles">
             <Card className="border-none shadow-sm">
               <div className="p-6 border-b">
                 <div className="flex items-center justify-between mb-4">
                   <h2>Vehicle Inventory</h2>
-                  <Button className="bg-red-600 hover:bg-red-700 text-white">
+                  <Button
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    onClick={() => navigate("/admin/vehicles")}
+                  >
                     <Package className="w-4 h-4 mr-2" />
-                    Add Vehicle
+                    See All Vehicles
                   </Button>
                 </div>
                 <div className="flex gap-4">
@@ -322,7 +481,7 @@ export function AdminDashboard() {
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
-                  <Button variant="outline">
+                  <Button variant="outline" disabled>
                     <Filter className="w-4 h-4 mr-2" />
                     Filter
                   </Button>
@@ -341,44 +500,57 @@ export function AdminDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mockVehicles.map((vehicle) => (
-                      <TableRow key={vehicle.id}>
-                        <TableCell>
-                          <div>
-                            <div>{vehicle.make}</div>
-                            <div className="text-sm text-gray-600">
-                              {vehicle.model}
+                    {isLoading && renderEmptyRow("Loading vehicles...", 6)}
+                    {!isLoading &&
+                      vehicles.length === 0 &&
+                      renderEmptyRow("No vehicles found.", 6)}
+                    {!isLoading &&
+                      vehicles.map((vehicle) => (
+                        <TableRow key={vehicle.id}>
+                          <TableCell>
+                            <div>
+                              <div>{vehicle.name || vehicle.brand || vehicle.make || "Unnamed vehicle"}</div>
+                              <div className="text-sm text-gray-600">
+                                {vehicle.model || "N/A"}
+                              </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{vehicle.year}</TableCell>
-                        <TableCell className="text-sm text-gray-600">
-                          {vehicle.vin}
-                        </TableCell>
-                        <TableCell>${vehicle.price.toLocaleString()}</TableCell>
-                        <TableCell>{getStatusBadge(vehicle.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="sm">
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="w-4 h-4 text-red-600" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                          <TableCell>{vehicle.year || "N/A"}</TableCell>
+                          <TableCell className="text-sm text-gray-600">
+                            {vehicle.vin || "N/A"}
+                          </TableCell>
+                          <TableCell>{formatCurrency(vehicle.price)}</TableCell>
+                          <TableCell>{getStatusBadge(vehicle.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button variant="ghost" size="sm" disabled>
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" disabled>
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteVehicle(vehicle.id)}
+                                disabled={actionId === `vehicle-${vehicle.id}`}
+                              >
+                                {actionId === `vehicle-${vehicle.id}` ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-4 h-4 text-red-600" />
+                                )}
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </div>
             </Card>
           </TabsContent>
 
-          {/* Applications Tab */}
           <TabsContent value="applications">
             <Card className="border-none shadow-sm">
               <div className="p-6 border-b">
@@ -387,11 +559,11 @@ export function AdminDashboard() {
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm">
                       <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                      {mockStats.approvedApplications} Approved
+                      {overview.approvedFinancingLeads} Approved
                     </Button>
                     <Button variant="outline" size="sm">
                       <Clock className="w-4 h-4 mr-2 text-yellow-600" />
-                      {mockStats.pendingApplications} Pending
+                      {overview.pendingFinancingLeads} Pending
                     </Button>
                   </div>
                 </div>
@@ -405,7 +577,7 @@ export function AdminDashboard() {
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
-                  <Button variant="outline">
+                  <Button variant="outline" disabled>
                     <Filter className="w-4 h-4 mr-2" />
                     Filter
                   </Button>
@@ -417,63 +589,91 @@ export function AdminDashboard() {
                     <TableRow>
                       <TableHead>Applicant</TableHead>
                       <TableHead>Vehicle Interest</TableHead>
-                      <TableHead>Amount</TableHead>
+                      <TableHead>Deposit Budget</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mockApplications.map((app) => (
-                      <TableRow key={app.id}>
-                        <TableCell>
-                          <div>
-                            <div>{app.name}</div>
-                            <div className="text-sm text-gray-600">
-                              {app.email}
+                    {isLoading && renderEmptyRow("Loading applications...", 6)}
+                    {!isLoading &&
+                      applications.length === 0 &&
+                      renderEmptyRow("No applications found.", 6)}
+                    {!isLoading &&
+                      applications.map((application) => (
+                        <TableRow key={application.id}>
+                          <TableCell>
+                            <div>
+                              <div>
+                                {`${application.firstName || ""} ${application.lastName || ""}`.trim() ||
+                                  "Unnamed applicant"}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                {application.email || "N/A"}
+                              </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{app.vehicleInterest}</TableCell>
-                        <TableCell>${app.amount.toLocaleString()}</TableCell>
-                        <TableCell>{app.date}</TableCell>
-                        <TableCell>{getStatusBadge(app.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="sm">
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-green-600"
-                            >
-                              <CheckCircle className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-600"
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                          <TableCell>
+                            {application.selectedCar?.name ||
+                              `${application.selectedCar?.brand || ""} ${application.selectedCar?.model || ""}`.trim() ||
+                              "N/A"}
+                          </TableCell>
+                          <TableCell>
+                            {formatCurrency(application.initialDepositBudget)}
+                          </TableCell>
+                          <TableCell>{formatDate(application.submissionDate)}</TableCell>
+                          <TableCell>{getStatusBadge(application.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button variant="ghost" size="sm" disabled>
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-green-600"
+                                onClick={() => updateApplicationStatus(application.id, "approved")}
+                                disabled={actionId === `application-${application.id}-approved`}
+                              >
+                                {actionId === `application-${application.id}-approved` ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <CheckCircle className="w-4 h-4" />
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600"
+                                onClick={() => updateApplicationStatus(application.id, "rejected")}
+                                disabled={actionId === `application-${application.id}-rejected`}
+                              >
+                                {actionId === `application-${application.id}-rejected` ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <XCircle className="w-4 h-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </div>
             </Card>
           </TabsContent>
 
-          {/* Contacts Tab */}
           <TabsContent value="contacts">
             <Card className="border-none shadow-sm">
               <div className="p-6 border-b">
                 <div className="flex items-center justify-between mb-4">
                   <h2>Contact Messages</h2>
-                  <Button className="bg-red-600 hover:bg-red-700 text-white">
+                  <Button
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    onClick={exportCurrentTab}
+                  >
                     <Download className="w-4 h-4 mr-2" />
                     Export
                   </Button>
@@ -488,7 +688,7 @@ export function AdminDashboard() {
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
-                  <Button variant="outline">
+                  <Button variant="outline" disabled>
                     <Filter className="w-4 h-4 mr-2" />
                     Filter
                   </Button>
@@ -507,40 +707,63 @@ export function AdminDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mockContacts.map((contact) => (
-                      <TableRow key={contact.id}>
-                        <TableCell>
-                          <div>
-                            <div>{contact.name}</div>
-                            <div className="text-sm text-gray-600">
-                              {contact.email}
+                    {isLoading && renderEmptyRow("Loading contacts...", 6)}
+                    {!isLoading &&
+                      contacts.length === 0 &&
+                      renderEmptyRow("No contacts found.", 6)}
+                    {!isLoading &&
+                      contacts.map((contact) => (
+                        <TableRow key={contact.id}>
+                          <TableCell>
+                            <div>
+                              <div>{contact.name || "Unnamed contact"}</div>
+                              <div className="text-sm text-gray-600">
+                                {contact.email || "N/A"}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                {contact.phone || "N/A"}
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-600">
-                              {contact.phone}
+                          </TableCell>
+                          <TableCell>{contact.subject || "N/A"}</TableCell>
+                          <TableCell className="max-w-xs truncate">
+                            {contact.message || "N/A"}
+                          </TableCell>
+                          <TableCell>{formatDate(contact.createdAt)}</TableCell>
+                          <TableCell>{getStatusBadge(contact.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button variant="ghost" size="sm" disabled>
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => markContactResponded(contact.id)}
+                                disabled={actionId === `contact-${contact.id}-responded`}
+                              >
+                                {actionId === `contact-${contact.id}-responded` ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Edit className="w-4 h-4" />
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteContact(contact.id)}
+                                disabled={actionId === `contact-${contact.id}`}
+                              >
+                                {actionId === `contact-${contact.id}` ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-4 h-4 text-red-600" />
+                                )}
+                              </Button>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{contact.subject}</TableCell>
-                        <TableCell className="max-w-xs truncate">
-                          {contact.message}
-                        </TableCell>
-                        <TableCell>{contact.date}</TableCell>
-                        <TableCell>{getStatusBadge(contact.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="sm">
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="w-4 h-4 text-red-600" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </div>

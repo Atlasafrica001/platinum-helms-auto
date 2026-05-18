@@ -1,4 +1,6 @@
 import { useState } from "react";
+import api from "@/lib/api";
+import { formatCurrency } from "@/lib/adminUtils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/dialog";
 import { Button } from "../components/button";
 import { Input } from "../components/input";
@@ -74,6 +76,8 @@ export function FinancialApplicationForm({
   const [applicationStatus, setApplicationStatus] = useState<ApplicationStatus>("draft");
   const [approvedAmount, setApprovedAmount] = useState<number>(0);
   const [estimatedRate, setEstimatedRate] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
   
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
@@ -105,29 +109,38 @@ export function FinancialApplicationForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Simulate submission process
-    setApplicationStatus("submitted");
-    
-    // Simulate verification
-    setTimeout(() => {
-      setApplicationStatus("verifying");
-    }, 1500);
-    
-    // Simulate credit check
-    setTimeout(() => {
-      setApplicationStatus("eligibility");
-    }, 3500);
-    
-    // Simulate approval
-    setTimeout(() => {
-      setApplicationStatus("approved");
-      // Calculate approved amount based on income
-      const income = parseFloat(formData.annualIncome) || 0;
-      const approved = Math.min(income * 0.4, vehiclePrice * 1.2);
-      setApprovedAmount(approved);
-      setEstimatedRate(4.9 + Math.random() * 3); // Random rate between 4.9% and 7.9%
-    }, 5500);
+
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      await api.leads.submitFinancing({
+        ...formData,
+        source: "Financial Application Form",
+      });
+
+      setApplicationStatus("submitted");
+
+      setTimeout(() => {
+        setApplicationStatus("verifying");
+      }, 1000);
+
+      setTimeout(() => {
+        setApplicationStatus("eligibility");
+      }, 2200);
+
+      setTimeout(() => {
+        setApplicationStatus("approved");
+        const income = parseFloat(formData.annualIncome) || 0;
+        const approved = Math.min(income * 0.4, vehiclePrice * 1.2);
+        setApprovedAmount(approved);
+        setEstimatedRate(4.9);
+      }, 3400);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to submit application");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getStatusIndex = () => {
@@ -232,7 +245,7 @@ export function FinancialApplicationForm({
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-xs text-green-700 mb-1">Approved Amount</p>
-                      <p className="text-green-900">${approvedAmount.toLocaleString()}</p>
+                      <p className="text-green-900">{formatCurrency(approvedAmount)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-green-700 mb-1">Estimated Rate</p>
@@ -264,6 +277,11 @@ export function FinancialApplicationForm({
         {/* Application Form */}
         {applicationStatus === "draft" && (
           <form onSubmit={handleSubmit} className="p-8">
+            {error && (
+              <div className="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
             {/* Personal Information */}
             <div className="mb-8">
               <h3 className="mb-4 flex items-center gap-2">
@@ -388,9 +406,9 @@ export function FinancialApplicationForm({
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="employed">Employed Full-Time</SelectItem>
-                      <SelectItem value="parttime">Employed Part-Time</SelectItem>
-                      <SelectItem value="selfemployed">Self-Employed</SelectItem>
+                      <SelectItem value="full-time">Employed Full-Time</SelectItem>
+                      <SelectItem value="part-time">Employed Part-Time</SelectItem>
+                      <SelectItem value="self-employed">Self-Employed</SelectItem>
                       <SelectItem value="retired">Retired</SelectItem>
                       <SelectItem value="student">Student</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
@@ -458,7 +476,7 @@ export function FinancialApplicationForm({
                   <Input
                     id="annualIncome"
                     type="number"
-                    placeholder="$"
+                    placeholder="Naira amount"
                     value={formData.annualIncome}
                     onChange={(e) => updateField("annualIncome", e.target.value)}
                     required
@@ -469,7 +487,7 @@ export function FinancialApplicationForm({
                   <Input
                     id="additionalIncome"
                     type="number"
-                    placeholder="$"
+                    placeholder="Naira amount"
                     value={formData.additionalIncome}
                     onChange={(e) => updateField("additionalIncome", e.target.value)}
                   />
@@ -479,7 +497,7 @@ export function FinancialApplicationForm({
                   <Input
                     id="monthlyHousing"
                     type="number"
-                    placeholder="$ (rent or mortgage)"
+                    placeholder="Naira amount (rent or mortgage)"
                     value={formData.monthlyHousing}
                     onChange={(e) => updateField("monthlyHousing", e.target.value)}
                     required
@@ -490,7 +508,7 @@ export function FinancialApplicationForm({
                   <Input
                     id="monthlyDebt"
                     type="number"
-                    placeholder="$ (credit cards, loans, etc.)"
+                    placeholder="Naira amount (credit cards, loans, etc.)"
                     value={formData.monthlyDebt}
                     onChange={(e) => updateField("monthlyDebt", e.target.value)}
                   />
@@ -563,9 +581,9 @@ export function FinancialApplicationForm({
               type="submit"
               className="w-full bg-red-600 hover:bg-red-700 text-white"
               size="lg"
-              disabled={!isFormValid()}
+              disabled={!isFormValid() || isSubmitting}
             >
-              Submit Application
+              {isSubmitting ? "Submitting..." : "Submit Application"}
             </Button>
 
             <p className="text-xs text-gray-500 text-center mt-4">

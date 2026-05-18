@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Calculator, CreditCard, FileText, CheckCircle2, TrendingDown } from "lucide-react";
 import { FinancialApplicationForm } from "../components/FinancialApplicationForm";
 import { FinancingEligibilityForm } from "../components/FinancingEligibilityForm";
+import { formatCurrency } from "@/lib/adminUtils";
 
 interface CarFinancingPageProps {
   onNavigate: (page: string) => void;
@@ -142,7 +143,7 @@ export function CarFinancingPage({ onNavigate }: CarFinancingPageProps) {
                 <div>
                   <div className="flex justify-between mb-3">
                     <label className="text-sm">Vehicle Price</label>
-                    <span className="text-sm">${vehiclePrice.toLocaleString()}</span>
+                    <span className="text-sm">{formatCurrency(vehiclePrice)}</span>
                   </div>
                   <Slider
                     value={[vehiclePrice]}
@@ -153,15 +154,15 @@ export function CarFinancingPage({ onNavigate }: CarFinancingPageProps) {
                     className="mb-2"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>$30,000</span>
-                    <span>$200,000</span>
+                    <span>{formatCurrency(30000)}</span>
+                    <span>{formatCurrency(200000)}</span>
                   </div>
                 </div>
 
                 <div>
                   <div className="flex justify-between mb-3">
                     <label className="text-sm">Down Payment ({((downPayment / vehiclePrice) * 100).toFixed(0)}%)</label>
-                    <span className="text-sm">${downPayment.toLocaleString()}</span>
+                    <span className="text-sm">{formatCurrency(downPayment)}</span>
                   </div>
                   <Slider
                     value={[downPayment]}
@@ -172,8 +173,8 @@ export function CarFinancingPage({ onNavigate }: CarFinancingPageProps) {
                     className="mb-2"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>$0</span>
-                    <span>${(vehiclePrice * 0.5).toLocaleString()}</span>
+                    <span>{formatCurrency(0)}</span>
+                    <span>{formatCurrency(vehiclePrice * 0.5)}</span>
                   </div>
                 </div>
 
@@ -217,7 +218,7 @@ export function CarFinancingPage({ onNavigate }: CarFinancingPageProps) {
               <Card className="p-8 bg-black text-white border-none">
                 <h3 className="text-white mb-8">Estimated Monthly Payment</h3>
                 <div className="text-5xl mb-8">
-                  ${monthlyPayment.toFixed(0)}
+                  {formatCurrency(monthlyPayment)}
                   <span className="text-2xl text-white/60">/mo</span>
                 </div>
                 <div className="space-y-3">
@@ -244,15 +245,15 @@ export function CarFinancingPage({ onNavigate }: CarFinancingPageProps) {
                 <div className="space-y-4">
                   <div className="flex justify-between py-3 border-b">
                     <span className="text-gray-600">Vehicle Price</span>
-                    <span>${vehiclePrice.toLocaleString()}</span>
+                    <span>{formatCurrency(vehiclePrice)}</span>
                   </div>
                   <div className="flex justify-between py-3 border-b">
                     <span className="text-gray-600">Down Payment</span>
-                    <span>${downPayment.toLocaleString()}</span>
+                    <span>{formatCurrency(downPayment)}</span>
                   </div>
                   <div className="flex justify-between py-3 border-b">
                     <span className="text-gray-600">Amount Financed</span>
-                    <span>${(vehiclePrice - downPayment).toLocaleString()}</span>
+                    <span>{formatCurrency(vehiclePrice - downPayment)}</span>
                   </div>
                   <div className="flex justify-between py-3 border-b">
                     <span className="text-gray-600">Loan Term</span>
@@ -264,11 +265,11 @@ export function CarFinancingPage({ onNavigate }: CarFinancingPageProps) {
                   </div>
                   <div className="flex justify-between py-3 border-b">
                     <span className="text-gray-600">Total Interest</span>
-                    <span>${totalInterest.toFixed(0)}</span>
+                    <span>{formatCurrency(totalInterest)}</span>
                   </div>
                   <div className="flex justify-between py-3">
                     <span>Total Amount</span>
-                    <span>${totalAmount.toFixed(0)}</span>
+                    <span>{formatCurrency(totalAmount)}</span>
                   </div>
                 </div>
               </Card>

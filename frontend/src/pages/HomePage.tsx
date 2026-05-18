@@ -1,4 +1,7 @@
+import { useEffect, useState } from "react";
 import { ImageWithFallback } from "../components/ImageWithFallback";
+import api from "@/lib/api";
+import { CarRecord, formatCurrency, normalizeCar } from "@/lib/adminUtils";
 import {
   ArrowRight,
   Zap,
@@ -27,7 +30,7 @@ interface HomePageProps {
 }
 
 export function HomePage({ onNavigate }: HomePageProps) {
-  const featuredVehicles = [
+  const fallbackFeaturedVehicles: any[] = [
     {
       id: 1,
       name: "LUX S-Class",
@@ -81,6 +84,19 @@ export function HomePage({ onNavigate }: HomePageProps) {
       tags: ["searched"],
     },
   ];
+
+  const [databaseFeaturedVehicles, setDatabaseFeaturedVehicles] = useState<CarRecord[]>([]);
+  const featuredVehicles = databaseFeaturedVehicles.length > 0 ? databaseFeaturedVehicles : fallbackFeaturedVehicles;
+
+  useEffect(() => {
+    api.cars
+      .getAll({ limit: 6, sortBy: "popular" })
+      .then((response) => {
+        const cars = (response.data || []).map(normalizeCar);
+        setDatabaseFeaturedVehicles(cars.filter((car: CarRecord) => car.tags.includes("popular")).slice(0, 3));
+      })
+      .catch(() => setDatabaseFeaturedVehicles([]));
+  }, []);
 
   const getTagIcon = (tag: string) => {
     switch (tag) {
@@ -409,7 +425,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                   </p>
                   <h3 className="text-black mb-2">{vehicle.name}</h3>
                   <p className="text-black mb-2 text-2xl">
-                    ${vehicle.price.toLocaleString()}
+                    {formatCurrency(vehicle.price)}
                   </p>
 
                   {/* Vehicle Specs */}

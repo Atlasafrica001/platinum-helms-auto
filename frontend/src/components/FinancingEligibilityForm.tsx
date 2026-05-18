@@ -1,4 +1,5 @@
 import { useState } from "react";
+import api from "@/lib/api";
 import { Button } from "../components/button";
 import { Input } from "../components/input";
 import { Label } from "../components/label";
@@ -29,23 +30,40 @@ export function FinancingEligibilityForm({ isOpen, onClose, selectedCar }: Finan
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Save to localStorage (since no backend)
-    const submissions = JSON.parse(localStorage.getItem("financingRequests") || "[]");
-    const newSubmission = {
-      ...formData,
-      formType: "Financing",
-      submissionDate: new Date().toISOString(),
-      status: "Pending",
-      source: "Financing Page",
-    };
-    submissions.push(newSubmission);
-    localStorage.setItem("financingRequests", JSON.stringify(submissions));
 
-    setIsSubmitted(true);
+    const [firstName, ...lastNameParts] = formData.fullName.trim().split(" ");
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      await api.leads.submitFinancing({
+        firstName: firstName || formData.fullName,
+        lastName: lastNameParts.join(" ") || "N/A",
+        email: formData.email,
+        phone: formData.phone,
+        employmentStatus: formData.employmentStatus,
+        monthlyIncome: formData.monthlyIncome,
+        preferredRepaymentDuration: `${formData.repaymentDuration} months`,
+        initialDepositBudget: formData.initialDeposit || null,
+        additionalNotes: [
+          formData.selectedCar ? `Selected car: ${formData.selectedCar}` : "",
+          formData.additionalNotes,
+        ].filter(Boolean).join("\n"),
+        authorizeCredit: true,
+        agreeToTerms: true,
+        source: "Financing Page",
+      });
+      setIsSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to submit financing request");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -89,6 +107,11 @@ export function FinancingEligibilityForm({ isOpen, onClose, selectedCar }: Finan
             </DialogHeader>
 
             <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+              {error && (
+                <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
               {/* Personal Information */}
               <div className="space-y-4">
                 <h3 className="text-black">Personal Information</h3>
@@ -154,7 +177,7 @@ export function FinancingEligibilityForm({ isOpen, onClose, selectedCar }: Finan
                       <SelectValue placeholder="Select your employment status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="employed">Employed</SelectItem>
+                      <SelectItem value="full-time">Employed</SelectItem>
                       <SelectItem value="self-employed">Self-Employed</SelectItem>
                       <SelectItem value="business-owner">Business Owner</SelectItem>
                       <SelectItem value="student">Student</SelectItem>
@@ -228,8 +251,8 @@ export function FinancingEligibilityForm({ isOpen, onClose, selectedCar }: Finan
                 />
               </div>
 
-              <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-medium">
-                Check My Eligibility
+              <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-medium" disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Check My Eligibility"}
               </Button>
             </form>
           </>

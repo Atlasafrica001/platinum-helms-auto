@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
+import { formatCurrency, normalizeCar } from "@/lib/adminUtils";
 import { ImageWithFallback } from "../components/ImageWithFallback";
 import { Button } from "../components/button";
 import { Card } from "../components/card";
@@ -99,6 +101,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
   const [auctionSearchQuery, setAuctionSearchQuery] = useState("");
   const [auctionBidRange, setAuctionBidRange] = useState([0, 500000]);
   const [auctionSortBy, setAuctionSortBy] = useState("ending");
+  const [databaseImportVehicles, setDatabaseImportVehicles] = useState<ImportVehicle[]>([]);
+  const [databaseAuctionVehicles, setDatabaseAuctionVehicles] = useState<AuctionVehicle[]>([]);
 
   const importProcess = [
     {
@@ -600,22 +604,54 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
     },
   ];
 
+  useEffect(() => {
+    api.cars
+      .getAll({ limit: 100 })
+      .then((response) => {
+        const cars = (response.data || []).map(normalizeCar);
+        setDatabaseImportVehicles(cars);
+        setDatabaseAuctionVehicles(
+          cars
+            .filter((car: any) => car.tags.includes("auction"))
+            .map((car: any) => ({
+              ...car,
+              currentBid: car.price,
+              startingBid: Math.round(car.price * 0.8),
+              reservePrice: Math.round(car.price * 0.95),
+              bidCount: 0,
+              reserveMet: false,
+              auctionEndTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+              vehicleStatus: "clean",
+            })),
+        );
+      })
+      .catch(() => {
+        setDatabaseImportVehicles([]);
+        setDatabaseAuctionVehicles([]);
+      });
+  }, []);
+
+  const displayedImportVehicles =
+    databaseImportVehicles.length > 0 ? databaseImportVehicles : importVehicles;
+  const displayedAuctionVehicles =
+    databaseAuctionVehicles.length > 0 ? databaseAuctionVehicles : auctionVehicles;
+
   // Get unique brands for dropdown
 
   // Get models based on selected brand
   const availableModels =
     selectedBrand === "all"
-      ? Array.from(new Set(importVehicles.map((v) => v.model))).sort()
+      ? Array.from(new Set(displayedImportVehicles.map((v) => v.model))).sort()
       : Array.from(
           new Set(
-            importVehicles
+            displayedImportVehicles
               .filter((v) => v.brand === selectedBrand)
               .map((v) => v.model)
           )
         ).sort();
 
   // Filtering logic
-  let filteredVehicles = importVehicles.filter((vehicle) => {
+  let filteredVehicles = displayedImportVehicles.filter((vehicle) => {
     const countryMatch =
       selectedCountry === "all" || vehicle.country === selectedCountry;
     const brandMatch =
@@ -685,7 +721,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
   });
 
   // Filter auction vehicles
-  const filteredAuctionVehicles = auctionVehicles.filter((vehicle) => {
+  const filteredAuctionVehicles = displayedAuctionVehicles.filter((vehicle) => {
     const statusMatch =
       auctionVehicleStatus === "all" ||
       vehicle.vehicleStatus === auctionVehicleStatus;
@@ -1097,8 +1133,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
             {/* Bid Range Slider */}
             <div className="mb-4">
               <label className="block text-sm text-white mb-3">
-                Current Bid Range: ${auctionBidRange[0].toLocaleString()} - $
-                {auctionBidRange[1].toLocaleString()}
+                Current Bid Range: {formatCurrency(auctionBidRange[0])} -{" "}
+                {formatCurrency(auctionBidRange[1])}
               </label>
               <Slider
                 min={0}
@@ -1212,7 +1248,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                           Current Bid:
                         </span>
                         <span className="text-lg text-gray-900">
-                          ${vehicle.currentBid.toLocaleString()}
+                          {formatCurrency(vehicle.currentBid)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
@@ -1220,7 +1256,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                           Starting Bid:
                         </span>
                         <span className="text-xs text-gray-600">
-                          ${vehicle.startingBid.toLocaleString()}
+                          {formatCurrency(vehicle.startingBid)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
@@ -1238,7 +1274,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                         </div>
                       ) : (
                         <div className="text-xs text-amber-600">
-                          Reserve: ${vehicle.reservePrice.toLocaleString()}
+                          Reserve: {formatCurrency(vehicle.reservePrice)}
                         </div>
                       )}
                     </div>
@@ -1265,6 +1301,10 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                       <Button
                         variant="outline"
                         className="flex-1 text-black border-gray-300 hover:bg-gray-100 font-medium"
+                        onClick={() => {
+                          setSelectedVehicle(vehicle);
+                          setIsDialogOpen(true);
+                        }}
                       >
                         Details
                       </Button>
@@ -1468,8 +1508,8 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
             {/* Price Range Slider */}
             <div className="mt-4">
               <label className="block text-sm text-gray-700 mb-3">
-                Price Range: ${priceRange[0].toLocaleString()} - $
-                {priceRange[1].toLocaleString()}
+                Price Range: {formatCurrency(priceRange[0])} -{" "}
+                {formatCurrency(priceRange[1])}
               </label>
               <Slider
                 min={0}
@@ -1582,7 +1622,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                       <h3>{vehicle.name}</h3>
                     </div>
                     <p className="text-gray-900 mb-4">
-                      ${vehicle.price.toLocaleString()}
+                      {formatCurrency(vehicle.price)}
                     </p>
 
                     <div className="space-y-2 mb-6">
@@ -1611,6 +1651,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                       <Button
                         variant="outline"
                         className="flex-1 text-black border-gray-300 hover:bg-gray-100 font-medium"
+                        onClick={() => setIsImportFormOpen(true)}
                       >
                         Request Import
                       </Button>
