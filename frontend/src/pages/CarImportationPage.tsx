@@ -1380,12 +1380,12 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Countries</SelectItem>
-                  <SelectItem value="Germany">DE Germany</SelectItem>
-                  <SelectItem value="Japan">JP Japan</SelectItem>
-                  <SelectItem value="United Kingdom">GB United Kingdom</SelectItem>
-                  <SelectItem value="Italy">IT Italy</SelectItem>
-                  <SelectItem value="UAE">AE UAE</SelectItem>
-                  <SelectItem value="USA">US USA</SelectItem>
+                  <SelectItem value="Germany"><span className="font-bold text-xs">DE</span> Germany</SelectItem>
+                  <SelectItem value="Japan"><span className="font-bold text-xs">JP</span> Japan</SelectItem>
+                  <SelectItem value="United Kingdom"><span className="font-bold text-xs">GB</span> United Kingdom</SelectItem>
+                  <SelectItem value="Italy"><span className="font-bold text-xs">IT</span> Italy</SelectItem>
+                  <SelectItem value="UAE"><span className="font-bold text-xs">AE</span> UAE</SelectItem>
+                  <SelectItem value="USA"><span className="font-bold text-xs">US</span> USA</SelectItem>
                 </SelectContent>
               </Select>
 
