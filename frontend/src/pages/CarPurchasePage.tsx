@@ -27,8 +27,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { VehicleDetailsDialog } from "../components/VehicleDetailsDialog";
-import phblack from "../assets/phblack.jpg";
-import phred from "../assets/phred.jpg";
+import phblack from "../assets/phblack.png";
+import phred from "../assets/phred.png";
 // import phwhite from "../assets/phwhite.jpg";
 
 interface CarPurchasePageProps {
