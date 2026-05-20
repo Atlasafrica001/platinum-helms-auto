@@ -4,7 +4,7 @@ import { Card } from "../components/card";
 import { Users, Award, Globe, Heart, Target, Zap } from "lucide-react";
 import phblack from "../assets/phblack.jpg";
 import phred from "../assets/phred.jpg";
-import phwhite from "../assets/phwhite.jpg";
+import phwhite from "../assets/phwhite.png";
 
 interface AboutUsPageProps {
   onNavigate: (page: string) => void;

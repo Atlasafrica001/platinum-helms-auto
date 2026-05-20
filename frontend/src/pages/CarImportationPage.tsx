@@ -41,7 +41,7 @@ import { ImportationRequestForm } from "../components/ImportationRequestForm";
 import { AuctionCountdown } from "../components/AuctionCountdown";
 import phblack from "../assets/phblack.jpg";
 // import phred from "../assets/phred.jpg";
-// import phwhite from "../assets/phwhite.jpg";
+// import phwhite from "../assets/phwhite.png";
 
 interface CarImportationPageProps {
   onNavigate: (page: string) => void;

@@ -26,7 +26,7 @@ import { Card } from "../components/card";
 import { Badge } from "../components/badge";
 import phblack from "../assets/phblack.jpg";
 import phred from "../assets/phred.jpg";
-import phwhite from "../assets/phwhite.jpg";
+import phwhite from "../assets/phwhite.png";
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
@@ -94,7 +94,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
       category: "Sports Car",
       year: 2025,
       condition: "New",
-      price: 125000,
+      price: 1250000,
       transmission: "Automatic",
       fuelType: "Petrol",
       mileage: 0,

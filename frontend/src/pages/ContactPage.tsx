@@ -8,7 +8,7 @@ import { Textarea } from "../components/textarea";
 import { Phone, Mail, MapPin, Clock, Send, MessageCircle } from "lucide-react";
 // import phblack from "../assets/phblack.jpg";
 // import phred from "../assets/phred.jpg";
-import phwhite from "../assets/phwhite.jpg";
+import phwhite from "../assets/phwhite.png";
 
 export function ContactPage() {
   const [formData, setFormData] = useState({
