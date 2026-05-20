@@ -24,22 +24,22 @@ export function Footer() {
             <h3 className="mb-4 tracking-wider">Quick Links</h3>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="/contact" className="hover:text-white transition-colors">
                   Find a Dealer
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="/contact" className="hover:text-white transition-colors">
                   Test Drive
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="/contact" className="hover:text-white transition-colors">
                   Owner Support
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="/contact" className="hover:text-white transition-colors">
                   Contact Us
                 </a>
               </li>
@@ -51,22 +51,22 @@ export function Footer() {
             <h3 className="mb-4 tracking-wider">Services</h3>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="/contact" className="hover:text-white transition-colors">
                   Vehicle Maintenance
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="/contact" className="hover:text-white transition-colors">
                   Insurance
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="/contact" className="hover:text-white transition-colors">
                   Extended Warranty
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="/contact" className="hover:text-white transition-colors">
                   Accessories
                 </a>
               </li>
