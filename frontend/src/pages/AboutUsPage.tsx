@@ -2,6 +2,9 @@ import { ImageWithFallback } from "../components/ImageWithFallback";
 import { Button } from "../components/button";
 import { Card } from "../components/card";
 import { Users, Award, Globe, Heart, Target, Zap } from "lucide-react";
+import phblack from "../assets/phblack.jpg";
+import phred from "../assets/phred.jpg";
+import phwhite from "../assets/phwhite.jpg";
 
 interface AboutUsPageProps {
   onNavigate: (page: string) => void;
@@ -52,17 +55,17 @@ export function AboutUsPage({ onNavigate }: AboutUsPageProps) {
     {
       name: "Michael Chen",
       role: "Chief Executive Officer",
-      image: "https://images.unsplash.com/photo-1666067313311-de0a3760d884?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2NjA4MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image: phblack,
     },
     {
       name: "Sarah Williams",
       role: "Director of Operations",
-      image: "https://images.unsplash.com/photo-1700884520248-92092bd21e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBTVVZ8ZW58MXx8fHwxNzYxNjU2MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image: phred,
     },
     {
       name: "David Rodriguez",
       role: "Head of Customer Relations",
-      image: "https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXJ8ZW58MXx8fHwxNzYxNjM3NDg1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+      image: phwhite,
     },
   ];
 
@@ -72,7 +75,7 @@ export function AboutUsPage({ onNavigate }: AboutUsPageProps) {
       <section className="relative h-[600px]">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1644749700856-a82a92828a1b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBjYXIlMjBzaG93cm9vbXxlbnwxfHx8fDE3NjE2ODQ3NjV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+            src={phblack}
             alt="About Platinum Helms"
             className="w-full h-full object-cover"
           />
@@ -139,7 +142,7 @@ export function AboutUsPage({ onNavigate }: AboutUsPageProps) {
 
             <div className="relative h-[500px] rounded-lg overflow-hidden shadow-xl">
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1567789884554-0b844b597180?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBtYW51ZmFjdHVyaW5nfGVufDF8fHx8MTc2MTY5ODYxOXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                src={phwhite}
                 alt="Our facility"
                 className="w-full h-full object-cover"
               />
@@ -247,7 +250,7 @@ export function AboutUsPage({ onNavigate }: AboutUsPageProps) {
               <div className="mb-6">
                 <div className="flex text-yellow-500 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <span key={i}>â˜…</span>
+                    <span key={i}>★</span>
                   ))}
                 </div>
                 <p className="text-gray-600 italic">
@@ -265,7 +268,7 @@ export function AboutUsPage({ onNavigate }: AboutUsPageProps) {
               <div className="mb-6">
                 <div className="flex text-yellow-500 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <span key={i}>â˜…</span>
+                    <span key={i}>★</span>
                   ))}
                 </div>
                 <p className="text-gray-600 italic">
@@ -283,7 +286,7 @@ export function AboutUsPage({ onNavigate }: AboutUsPageProps) {
               <div className="mb-6">
                 <div className="flex text-yellow-500 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <span key={i}>â˜…</span>
+                    <span key={i}>★</span>
                   ))}
                 </div>
                 <p className="text-gray-600 italic">

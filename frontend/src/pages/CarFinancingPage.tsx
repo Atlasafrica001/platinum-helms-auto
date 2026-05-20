@@ -15,8 +15,8 @@ interface CarFinancingPageProps {
 }
 
 export function CarFinancingPage({ onNavigate }: CarFinancingPageProps) {
-  const [vehiclePrice, setVehiclePrice] = useState(80000);
-  const [downPayment, setDownPayment] = useState(16000);
+  const [vehiclePrice, setVehiclePrice] = useState(250000000);
+  const [downPayment, setDownPayment] = useState(1000000);
   const [loanTerm, setLoanTerm] = useState(60);
   const [interestRate] = useState(4.5);
   const [isApplicationOpen, setIsApplicationOpen] = useState(false);
@@ -97,6 +97,10 @@ export function CarFinancingPage({ onNavigate }: CarFinancingPageProps) {
     },
   ];
 
+  function handleLearnMoreClick() {
+    onNavigate("contact");
+  }
+
   return (
     <div className="min-h-screen bg-white pt-20">
       {/* Hero Section */}
@@ -148,14 +152,14 @@ export function CarFinancingPage({ onNavigate }: CarFinancingPageProps) {
                   <Slider
                     value={[vehiclePrice]}
                     onValueChange={(value) => setVehiclePrice(value[0])}
-                    min={50000000}
-                    max={7000000000}
+                    min={5000000}
+                    max={250000000}
                     step={5000}
                     className="mb-2"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>{formatCurrency(50000000)}</span>
-                    <span>{formatCurrency(7000000000)}</span>
+                    <span>{formatCurrency(5000000)}</span>
+                    <span>{formatCurrency(250000000)}</span>
                   </div>
                 </div>
 
@@ -167,13 +171,13 @@ export function CarFinancingPage({ onNavigate }: CarFinancingPageProps) {
                   <Slider
                     value={[downPayment]}
                     onValueChange={(value) => setDownPayment(value[0])}
-                    min={0}
+                    min={1000000}
                     max={vehiclePrice * 0.5}
                     step={1000}
                     className="mb-2"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>{formatCurrency(0)}</span>
+                    <span>{formatCurrency(1000000)}</span>
                     <span>{formatCurrency(vehiclePrice * 0.5)}</span>
                   </div>
                 </div>
@@ -311,7 +315,7 @@ export function CarFinancingPage({ onNavigate }: CarFinancingPageProps) {
                       </li>
                     ))}
                   </ul>
-                  <Button variant="outline" className="w-full text-black border-gray-300 hover:bg-gray-100 font-medium">
+                  <Button variant="outline" className="w-full text-black border-gray-300 hover:bg-gray-100 font-medium" onClick={handleLearnMoreClick}>
                     Learn More
                   </Button>
                 </Card>

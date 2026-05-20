@@ -39,6 +39,9 @@ import {
 import { VehicleDetailsDialog } from "../components/VehicleDetailsDialog";
 import { ImportationRequestForm } from "../components/ImportationRequestForm";
 import { AuctionCountdown } from "../components/AuctionCountdown";
+import phblack from "../assets/phblack.jpg";
+// import phred from "../assets/phred.jpg";
+// import phwhite from "../assets/phwhite.jpg";
 
 interface CarImportationPageProps {
   onNavigate: (page: string) => void;
@@ -86,7 +89,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
   const [selectedTransmission, setSelectedTransmission] = useState("all");
   const [selectedFuelType, setSelectedFuelType] = useState("all");
   const [selectedBodyType, setSelectedBodyType] = useState("all");
-  const [priceRange, setPriceRange] = useState([0, 300000]);
+  const [priceRange, setPriceRange] = useState([0, 250000000]);
   const [mileageRange, setMileageRange] = useState([0, 200000]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy] = useState("recent");
@@ -99,7 +102,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
   // Auction filters
   const [auctionVehicleStatus, setAuctionVehicleStatus] = useState("all");
   const [auctionSearchQuery, setAuctionSearchQuery] = useState("");
-  const [auctionBidRange, setAuctionBidRange] = useState([0, 500000]);
+  const [auctionBidRange, setAuctionBidRange] = useState([0, 250000000]);
   const [auctionSortBy, setAuctionSortBy] = useState("ending");
   const [databaseImportVehicles, setDatabaseImportVehicles] = useState<ImportVehicle[]>([]);
   const [databaseAuctionVehicles, setDatabaseAuctionVehicles] = useState<AuctionVehicle[]>([]);
@@ -765,7 +768,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
     setSelectedTransmission("all");
     setSelectedFuelType("all");
     setSelectedBodyType("all");
-    setPriceRange([0, 300000]);
+    setPriceRange([0, 250000000]);
     setMileageRange([0, 200000]);
     setSearchQuery("");
   };
@@ -773,7 +776,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
   const clearAuctionFilters = () => {
     setAuctionVehicleStatus("all");
     setAuctionSearchQuery("");
-    setAuctionBidRange([0, 500000]);
+    setAuctionBidRange([0, 250000000]);
   };
 
   const getTagIcon = (tag: string) => {
@@ -852,7 +855,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       <section className="relative h-[500px]">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1567789884554-0b844b597180?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBtYW51ZmFjdHVyaW5nfGVufDF8fHx8MTc2MTY5ODYxOXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+            src={phblack}
             alt="Car importation"
             className="w-full h-full object-cover"
           />
@@ -949,7 +952,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
             {/* Left Side - Image */}
             <div className="relative h-[500px] lg:h-[600px] rounded-lg overflow-hidden shadow-2xl">
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1759831766683-b0d6a0c41dc8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjdXN0b20lMjBjYXIlMjBkZXNpZ258ZW58MXx8fHwxNzY2MTgwOTU1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                src={phblack}
                 alt="Custom vehicle importation"
                 className="w-full h-full object-cover"
               />
@@ -1138,7 +1141,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
               </label>
               <Slider
                 min={0}
-                max={7000000000}
+                max={250000000}
                 step={5000}
                 value={auctionBidRange}
                 onValueChange={setAuctionBidRange}

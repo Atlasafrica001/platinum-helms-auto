@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react";
 import { ImageWithFallback } from "../components/ImageWithFallback";
 import api from "@/lib/api";
 import { CarRecord, formatCurrency, normalizeCar } from "@/lib/adminUtils";
@@ -24,13 +24,33 @@ import {
 import { Button } from "../components/button";
 import { Card } from "../components/card";
 import { Badge } from "../components/badge";
+import phblack from "../assets/phblack.jpg";
+import phred from "../assets/phred.jpg";
+import phwhite from "../assets/phwhite.jpg";
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
 }
 
+type FeaturedVehicle = Pick<
+  CarRecord,
+  | "id"
+  | "name"
+  | "brand"
+  | "category"
+  | "year"
+  | "condition"
+  | "price"
+  | "image"
+  | "features"
+  | "tags"
+  | "transmission"
+  | "fuelType"
+  | "mileage"
+>;
+
 export function HomePage({ onNavigate }: HomePageProps) {
-  const fallbackFeaturedVehicles: any[] = [
+  const fallbackFeaturedVehicles: FeaturedVehicle[] = [
     {
       id: 1,
       name: "LUX S-Class",
@@ -85,8 +105,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
     },
   ];
 
-  const [databaseFeaturedVehicles, setDatabaseFeaturedVehicles] = useState<CarRecord[]>([]);
-  const featuredVehicles = databaseFeaturedVehicles.length > 0 ? databaseFeaturedVehicles : fallbackFeaturedVehicles;
+  const [databaseFeaturedVehicles, setDatabaseFeaturedVehicles] = useState<FeaturedVehicle[]>([]);
+  const featuredVehicles: FeaturedVehicle[] =
+    databaseFeaturedVehicles.length > 0 ? databaseFeaturedVehicles : fallbackFeaturedVehicles;
 
   useEffect(() => {
     api.cars
@@ -130,7 +151,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
       <section className="relative h-screen">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1707407772603-274cc5cf18f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBzZWRhbiUyMGRyaXZpbmd8ZW58MXx8fHwxNzYxNjk4NjE5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+            src={phblack}
             alt="Luxury vehicle"
             className="w-full h-full object-cover"
           />
@@ -353,7 +374,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
             <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1758411897888-3ca658535fdf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjB0ZWNobm9sb2d5JTIwZGFzaGJvYXJkfGVufDF8fHx8MTc2MjQ0MzkwN3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                src={phwhite}
                 alt="Advanced technology dashboard"
                 className="w-full h-full object-cover"
               />
@@ -439,7 +460,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
                   {/* Features */}
                   <div className="mb-4 space-y-1">
-                    {vehicle.features.slice(0, 3).map((feature, index) => (
+                    {vehicle.features.slice(0, 3).map((feature: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined, index: Key | null | undefined) => (
                       <div
                         key={index}
                         className="flex items-center text-xs text-gray-600"
@@ -482,7 +503,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl order-2 lg:order-1">
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1593941707874-ef25b8b4a92b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbGVjdHJpYyUyMHZlaGljbGUlMjBjaGFyZ2luZ3xlbnwxfHx8fDE3NjI0MTcwMTF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                src={phred}
                 alt="Electric vehicle charging"
                 className="w-full h-full object-cover"
               />
@@ -677,7 +698,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="relative h-64 rounded-lg overflow-hidden group cursor-pointer">
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1638885930125-85350348d266?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBsdXh1cnklMjBsaWZlc3R5bGV8ZW58MXx8fHwxNzYyNTE2MjI0fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                src={phblack}
                 alt="Lifestyle"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
@@ -685,7 +706,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             </div>
             <div className="relative h-64 rounded-lg overflow-hidden group cursor-pointer">
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1567722949028-bd65dec5148f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBzdW5zZXR8ZW58MXx8fHwxNzYyNTE2MjI2fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                src={phwhite}
                 alt="Lifestyle"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
@@ -693,7 +714,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             </div>
             <div className="relative h-64 rounded-lg overflow-hidden group cursor-pointer">
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1705747401901-28363172fe7e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBzaG93cm9vbXxlbnwxfHx8fDE3NjI1MTYyMjV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                src={phred}
                 alt="Showroom"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
@@ -701,7 +722,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             </div>
             <div className="relative h-64 rounded-lg overflow-hidden group cursor-pointer">
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1666981690385-476d59af2183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYXBweSUyMGN1c3RvbWVyJTIwY2FyfGVufDF8fHx8MTc2MjQ4NzY0Nnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                src={phblack}
                 alt="Happy customer"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
@@ -735,7 +756,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
       <section className="relative h-[600px]">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1599912027667-755b68b4dd3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBpbnRlcmlvcnxlbnwxfHx8fDE3NjE2OTg2MTh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+            src={phwhite}
             alt="Luxury interior"
             className="w-full h-full object-cover"
           />
@@ -795,7 +816,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <Card className="overflow-hidden border-none shadow-lg hover:shadow-2xl transition-all group">
               <div className="relative h-80">
                 <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1759831766683-b0d6a0c41dc8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjdXN0b20lMjBjYXIlMjBkZXNpZ258ZW58MXx8fHwxNzY2MTgwOTU1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                  src={phblack}
                   alt="Custom car importation"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
@@ -829,7 +850,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <Card className="overflow-hidden border-none shadow-lg hover:shadow-2xl transition-all group">
               <div className="relative h-80">
                 <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                  src={phred}
                   alt="Auction vehicles"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />

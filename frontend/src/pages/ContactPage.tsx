@@ -6,6 +6,9 @@ import { Card } from "../components/card";
 import { Input } from "../components/input";
 import { Textarea } from "../components/textarea";
 import { Phone, Mail, MapPin, Clock, Send, MessageCircle } from "lucide-react";
+// import phblack from "../assets/phblack.jpg";
+// import phred from "../assets/phred.jpg";
+import phwhite from "../assets/phwhite.jpg";
 
 export function ContactPage() {
   const [formData, setFormData] = useState({
@@ -59,7 +62,7 @@ export function ContactPage() {
       {/* Hero Section */}
       <div className="relative h-[40vh] bg-black overflow-hidden">
         <ImageWithFallback
-          src="https://images.unsplash.com/photo-1705747401901-28363172fe7e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjYXIlMjBzaG93cm9vbXxlbnwxfHx8fDE3NjIwMzYxMTB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+          src={phwhite}
           alt="Luxury car showroom"
           className="w-full h-full object-cover opacity-40"
         />

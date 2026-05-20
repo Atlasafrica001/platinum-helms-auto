@@ -27,6 +27,9 @@ import {
   Sparkles,
 } from "lucide-react";
 import { VehicleDetailsDialog } from "../components/VehicleDetailsDialog";
+import phblack from "../assets/phblack.jpg";
+import phred from "../assets/phred.jpg";
+// import phwhite from "../assets/phwhite.jpg";
 
 interface CarPurchasePageProps {
   onNavigate: (page: string) => void;
@@ -62,7 +65,7 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
   const [selectedTransmission, setSelectedTransmission] = useState("all");
   const [selectedFuelType, setSelectedFuelType] = useState("all");
   const [selectedBodyType, setSelectedBodyType] = useState("all");
-  const [priceRange, setPriceRange] = useState([0, 250000]);
+  const [priceRange, setPriceRange] = useState([0, 250000000]);
   const [mileageRange, setMileageRange] = useState([0, 200000]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
@@ -70,6 +73,7 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoadingVehicles, setIsLoadingVehicles] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
 
   const fallbackVehicles: Vehicle[] = [
     {
@@ -378,7 +382,7 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
     setSelectedTransmission("all");
     setSelectedFuelType("all");
     setSelectedBodyType("all");
-    setPriceRange([0, 250000]);
+    setPriceRange([0, 250000000]);
     setMileageRange([0, 200000]);
     setSearchQuery("");
   };
@@ -419,7 +423,7 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
       <section className="relative h-[400px]">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXIlMjBzaG93cm9vbXxlbnwxfHx8fDE3NjE2OTg2MTl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+            src={phred}
             alt="Car showroom"
             className="w-full h-full object-cover"
           />
@@ -453,272 +457,303 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
             </div>
           </div>
 
+
+          <div className="flex justify-center mb-8">
+            <Button
+              onClick={() => setShowFilters((prev) => !prev)}
+              className="bg-black hover:bg-gray-900 hover:scale-[1.02] text-white px-6 py-6 rounded-full backdrop-blur-md border border-white/10 shadow-lg hover:shadow-xl transition-all duration-500"
+            >
+              <Filter className="mr-2" size={18} />
+
+              {showFilters
+                ? "Hide Enhanced Search"
+                : "Reveal Filters For Enhanced Search"}
+
+            </Button>
+          </div>
+
           {/* Enhanced Filters */}
-          <Card className="p-6 mb-8 border-none shadow-lg shadow-red-600/20 hover:shadow-xl hover:shadow-red-600/30 transition-all">
-            <div className="flex items-center gap-2 mb-6">
-              <Filter className="text-red-600" size={20} />
-              <h3 className="text-black">Filters & Search</h3>
-            </div>
+          <div
+            className={`overflow-hidden transition-all duration-700 ease-in-out ${
+              showFilters
+                ? "max-h-[2500px] opacity-100 mb-8"
+                : "max-h-0 opacity-0"
+            }`}
+          >
+            <Card className="p-6 mb-8 border-none shadow-lg shadow-red-600/20 hover:shadow-xl hover:shadow-red-600/30 transition-all">
+              <div className="flex items-center gap-2 mb-6">
+                <Filter className="text-red-600" size={20} />
+                <h3 className="text-black">Filters & Search</h3>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-              {/* Brand Filter */}
-              <div>
-                <label className="block text-sm text-gray-700 mb-2">
-                  Brand / Make
-                </label>
-                <Select
-                  value={selectedBrand}
-                  onValueChange={(value) => {
-                    setSelectedBrand(value);
-                    setSelectedModel("all"); // Reset model when brand changes
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Brands" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Brands</SelectItem>
-                    {brands.map((brand) => (
-                      <SelectItem key={brand} value={brand}>
-                        {brand}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                {/* Brand Filter */}
+                <div>
+                  <label className="block text-sm text-gray-700 mb-2">
+                    Brand / Make
+                  </label>
+                  <Select
+                    value={selectedBrand}
+                    onValueChange={(value) => {
+                      setSelectedBrand(value);
+                      setSelectedModel("all"); // Reset model when brand changes
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Brands" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Brands</SelectItem>
+                      {brands.map((brand) => (
+                        <SelectItem key={brand} value={brand}>
+                          {brand}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Model Filter */}
+                <div>
+                  <label className="block text-sm text-gray-700 mb-2">
+                    Model
+                  </label>
+                  <Select value={selectedModel} onValueChange={setSelectedModel}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Models" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Models</SelectItem>
+                      {availableModels.map((model) => (
+                        <SelectItem key={model} value={model}>
+                          {model}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Year Filter */}
+                <div>
+                  <label className="block text-sm text-gray-700 mb-2">Year</label>
+                  <Select value={selectedYear} onValueChange={setSelectedYear}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Years" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Years</SelectItem>
+                      <SelectItem value="2025">2025</SelectItem>
+                      <SelectItem value="2024">2024</SelectItem>
+                      <SelectItem value="2023">2023</SelectItem>
+                      <SelectItem value="2022">2022</SelectItem>
+                      <SelectItem value="2021">2021</SelectItem>
+                      <SelectItem value="2020">2020</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Condition Filter */}
+                <div>
+                  <label className="block text-sm text-gray-700 mb-2">
+                    Condition
+                  </label>
+                  <Select
+                    value={selectedCondition}
+                    onValueChange={setSelectedCondition}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Conditions" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Conditions</SelectItem>
+                      <SelectItem value="New">New</SelectItem>
+                      <SelectItem value="Foreign Used">
+                        Foreign Used (Tokunbo)
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      <SelectItem value="Nigerian Used">Nigerian Used</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Body Type Filter */}
+                <div>
+                  <label className="block text-sm text-gray-700 mb-2">
+                    Body Type
+                  </label>
+                  <Select
+                    value={selectedBodyType}
+                    onValueChange={setSelectedBodyType}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="Sedan">Sedan</SelectItem>
+                      <SelectItem value="SUV">SUV</SelectItem>
+                      <SelectItem value="Coupe">Coupe</SelectItem>
+                      <SelectItem value="Hatchback">Hatchback</SelectItem>
+                      <SelectItem value="Truck">Truck</SelectItem>
+                      <SelectItem value="Van">Van</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Transmission Filter */}
+                <div>
+                  <label className="block text-sm text-gray-700 mb-2">
+                    Transmission
+                  </label>
+                  <Select
+                    value={selectedTransmission}
+                    onValueChange={setSelectedTransmission}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="Automatic">Automatic</SelectItem>
+                      <SelectItem value="Manual">Manual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Fuel Type Filter */}
+                <div>
+                  <label className="block text-sm text-gray-700 mb-2">
+                    Fuel Type
+                  </label>
+                  <Select
+                    value={selectedFuelType}
+                    onValueChange={setSelectedFuelType}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Fuel Types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Fuel Types</SelectItem>
+                      <SelectItem value="Petrol">Petrol</SelectItem>
+                      <SelectItem value="Diesel">Diesel</SelectItem>
+                      <SelectItem value="Hybrid">Hybrid</SelectItem>
+                      <SelectItem value="Electric">Electric</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Category Filter */}
+                <div>
+                  <label className="block text-sm text-gray-700 mb-2">
+                    Category
+                  </label>
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={setSelectedCategory}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      <SelectItem value="sedan">Sedan</SelectItem>
+                      <SelectItem value="suv">SUV</SelectItem>
+                      <SelectItem value="luxury">Luxury</SelectItem>
+                      <SelectItem value="sports">Sports</SelectItem>
+                      <SelectItem value="truck">Truck</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              {/* Model Filter */}
-              <div>
-                <label className="block text-sm text-gray-700 mb-2">
-                  Model
+              {/* Price Range Slider */}
+              <div className="mb-4">
+                <label className="block text-sm text-gray-700 mb-3">
+                  Price Range: {formatCurrency(priceRange[0])} -{" "}
+                  {formatCurrency(priceRange[1])}
                 </label>
-                <Select value={selectedModel} onValueChange={setSelectedModel}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Models" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Models</SelectItem>
-                    {availableModels.map((model) => (
-                      <SelectItem key={model} value={model}>
-                        {model}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Slider
+                  min={0}
+                  max={250000000}
+                  step={5000}
+                  value={priceRange}
+                  onValueChange={setPriceRange}
+                  className="w-full"
+                />
               </div>
 
-              {/* Year Filter */}
-              <div>
-                <label className="block text-sm text-gray-700 mb-2">Year</label>
-                <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Years" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Years</SelectItem>
-                    <SelectItem value="2025">2025</SelectItem>
-                    <SelectItem value="2024">2024</SelectItem>
-                    <SelectItem value="2023">2023</SelectItem>
-                    <SelectItem value="2022">2022</SelectItem>
-                    <SelectItem value="2021">2021</SelectItem>
-                    <SelectItem value="2020">2020</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Condition Filter */}
-              <div>
-                <label className="block text-sm text-gray-700 mb-2">
-                  Condition
+              {/* Mileage Range Slider */}
+              <div className="mb-4">
+                <label className="block text-sm text-gray-700 mb-3">
+                  Mileage: {mileageRange[0].toLocaleString()} km -{" "}
+                  {mileageRange[1].toLocaleString()} km
                 </label>
-                <Select
-                  value={selectedCondition}
-                  onValueChange={setSelectedCondition}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Conditions" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Conditions</SelectItem>
-                    <SelectItem value="New">New</SelectItem>
-                    <SelectItem value="Foreign Used">
-                      Foreign Used (Tokunbo)
-                    </SelectItem>
-                    <SelectItem value="Nigerian Used">Nigerian Used</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Slider
+                  min={0}
+                  max={200000}
+                  step={5000}
+                  value={mileageRange}
+                  onValueChange={setMileageRange}
+                  className="w-full"
+                />
               </div>
 
-              {/* Body Type Filter */}
+              {/* Search Input */}
               <div>
-                <label className="block text-sm text-gray-700 mb-2">
-                  Body Type
-                </label>
-                <Select
-                  value={selectedBodyType}
-                  onValueChange={setSelectedBodyType}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="Sedan">Sedan</SelectItem>
-                    <SelectItem value="SUV">SUV</SelectItem>
-                    <SelectItem value="Coupe">Coupe</SelectItem>
-                    <SelectItem value="Hatchback">Hatchback</SelectItem>
-                    <SelectItem value="Truck">Truck</SelectItem>
-                    <SelectItem value="Van">Van</SelectItem>
-                  </SelectContent>
-                </Select>
+                <label className="block text-sm text-gray-700 mb-2">Search</label>
+                <Input
+                  placeholder="Search by model, brand, or keyword..."
+                  className="w-full"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
-
-              {/* Transmission Filter */}
-              <div>
-                <label className="block text-sm text-gray-700 mb-2">
-                  Transmission
-                </label>
-                <Select
-                  value={selectedTransmission}
-                  onValueChange={setSelectedTransmission}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="Automatic">Automatic</SelectItem>
-                    <SelectItem value="Manual">Manual</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Fuel Type Filter */}
-              <div>
-                <label className="block text-sm text-gray-700 mb-2">
-                  Fuel Type
-                </label>
-                <Select
-                  value={selectedFuelType}
-                  onValueChange={setSelectedFuelType}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Fuel Types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Fuel Types</SelectItem>
-                    <SelectItem value="Petrol">Petrol</SelectItem>
-                    <SelectItem value="Diesel">Diesel</SelectItem>
-                    <SelectItem value="Hybrid">Hybrid</SelectItem>
-                    <SelectItem value="Electric">Electric</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Category Filter */}
-              <div>
-                <label className="block text-sm text-gray-700 mb-2">
-                  Category
-                </label>
-                <Select
-                  value={selectedCategory}
-                  onValueChange={setSelectedCategory}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="sedan">Sedan</SelectItem>
-                    <SelectItem value="suv">SUV</SelectItem>
-                    <SelectItem value="luxury">Luxury</SelectItem>
-                    <SelectItem value="sports">Sports</SelectItem>
-                    <SelectItem value="truck">Truck</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Price Range Slider */}
-            <div className="mb-4">
-              <label className="block text-sm text-gray-700 mb-3">
-                Price Range: {formatCurrency(priceRange[0])} -{" "}
-                {formatCurrency(priceRange[1])}
-              </label>
-              <Slider
-                min={0}
-                max={5000000000}
-                step={5000}
-                value={priceRange}
-                onValueChange={setPriceRange}
-                className="w-full"
-              />
-            </div>
-
-            {/* Mileage Range Slider */}
-            <div className="mb-4">
-              <label className="block text-sm text-gray-700 mb-3">
-                Mileage: {mileageRange[0].toLocaleString()} km -{" "}
-                {mileageRange[1].toLocaleString()} km
-              </label>
-              <Slider
-                min={0}
-                max={200000}
-                step={5000}
-                value={mileageRange}
-                onValueChange={setMileageRange}
-                className="w-full"
-              />
-            </div>
-
-            {/* Search Input */}
-            <div>
-              <label className="block text-sm text-gray-700 mb-2">Search</label>
-              <Input
-                placeholder="Search by model, brand, or keyword..."
-                className="w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </Card>
+            </Card>
+          </div>
 
           {/* Results Header with Sorting */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div className="text-sm text-gray-600">
-              {isLoadingVehicles ? "Loading" : sortedVehicles.length} vehicle
-              {sortedVehicles.length !== 1 ? "s" : ""} found
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="flex items-center gap-2">
-                <ArrowUpDown size={16} className="text-gray-600" />
-                <label className="text-sm text-gray-700">Sort By:</label>
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recent">Recently Added</SelectItem>
-                    <SelectItem value="priceLow">Price: Low to High</SelectItem>
-                    <SelectItem value="priceHigh">
-                      Price: High to Low
-                    </SelectItem>
-                    <SelectItem value="yearNew">Year: Newest First</SelectItem>
-                    <SelectItem value="yearOld">Year: Oldest First</SelectItem>
-                    <SelectItem value="popular">Most Popular</SelectItem>
-                  </SelectContent>
-                </Select>
+          <div
+            className={`overflow-hidden transition-all duration-700 ease-in-out ${
+              showFilters
+                ? "max-h-[300px] opacity-100 mb-6"
+                : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+              <div className="text-sm text-gray-600">
+                {isLoadingVehicles ? "Loading" : sortedVehicles.length} vehicle
+                {sortedVehicles.length !== 1 ? "s" : ""} found
               </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={clearAllFilters}
-                className="text-black border-gray-300 hover:bg-gray-100 font-medium"
-              >
-                Clear All Filters
-              </Button>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown size={16} className="text-gray-600" />
+                  <label className="text-sm text-gray-700">Sort By:</label>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Recently Added</SelectItem>
+                      <SelectItem value="priceLow">Price: Low to High</SelectItem>
+                      <SelectItem value="priceHigh">
+                        Price: High to Low
+                      </SelectItem>
+                      <SelectItem value="yearNew">Year: Newest First</SelectItem>
+                      <SelectItem value="yearOld">Year: Oldest First</SelectItem>
+                      <SelectItem value="popular">Most Popular</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="text-black border-gray-300 hover:bg-gray-100 font-medium"
+                >
+                  Clear All Filters
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -852,7 +887,7 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
             <Card className="overflow-hidden border-none shadow-lg hover:shadow-2xl transition-all group">
               <div className="relative h-80">
                 <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1759831766683-b0d6a0c41dc8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBjdXN0b20lMjBjYXIlMjBkZXNpZ258ZW58MXx8fHwxNzY2MTgwOTU1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                  src={phblack}
                   alt="Custom car importation"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
@@ -886,7 +921,7 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
             <Card className="overflow-hidden border-none shadow-lg hover:shadow-2xl transition-all group">
               <div className="relative h-80">
                 <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1541348263662-e068662d82af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjYXIlMjBmcm9udHxlbnwxfHx8fDE3NjE2MzczODV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                  src={phred}
                   alt="Auction vehicles"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
