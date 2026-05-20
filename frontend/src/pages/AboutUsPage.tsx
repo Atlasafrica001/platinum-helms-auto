@@ -2,8 +2,8 @@ import { ImageWithFallback } from "../components/ImageWithFallback";
 import { Button } from "../components/button";
 import { Card } from "../components/card";
 import { Users, Award, Globe, Heart, Target, Zap } from "lucide-react";
-import phblack from "../assets/phblack.jpg";
-import phred from "../assets/phred.jpg";
+import phblack from "../assets/phblack.png";
+import phred from "../assets/phred.png";
 import phwhite from "../assets/phwhite.png";
 
 interface AboutUsPageProps {

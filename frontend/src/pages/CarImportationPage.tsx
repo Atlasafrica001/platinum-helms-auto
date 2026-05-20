@@ -39,7 +39,7 @@ import {
 import { VehicleDetailsDialog } from "../components/VehicleDetailsDialog";
 import { ImportationRequestForm } from "../components/ImportationRequestForm";
 import { AuctionCountdown } from "../components/AuctionCountdown";
-import phblack from "../assets/phblack.jpg";
+import phblack from "../assets/phblack.png";
 // import phred from "../assets/phred.jpg";
 // import phwhite from "../assets/phwhite.png";
 
