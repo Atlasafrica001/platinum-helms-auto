@@ -363,22 +363,29 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Reveal className="mx-auto mb-12 max-w-2xl text-center">
             <h2 className="font-display text-4xl font-bold text-white">Explore More Options</h2>
-            <p className="mt-3 text-lg text-white/65">Can't find what you're looking for? Discover our importation service or bid on auction vehicles.</p>
+            <p className="mt-3 text-lg text-white/65">Can't find what you're looking for? Discover our importation service or explore what's coming next.</p>
           </Reveal>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             {[
-              { img: phblack, Icon: Sparkles, badge: "Bespoke Service", title: "Custom Importation Orders", body: "Source your dream vehicle from anywhere in the world — we handle everything to your doorstep.", cta: "Start Custom Order" },
-              { img: phred, Icon: Hammer, badge: "Live Auctions", title: "Premium Vehicle Auctions", body: "Bid on exclusive vehicles with full transparency on condition, history, and importation.", cta: "Browse Auctions" },
-            ].map(({ img, Icon, badge, title, body, cta }, i) => (
+              { img: phblack, Icon: Sparkles, badge: "Bespoke Service", title: "Custom Importation Orders", body: "Source your dream vehicle from anywhere in the world — we handle everything to your doorstep.", cta: "Start Custom Order", comingSoon: false },
+              { img: phred, Icon: Hammer, badge: "Coming Soon", title: "Premium Vehicle Auctions", body: "Our exclusive auction platform is launching soon — bid on premium vehicles with full transparency on condition and history.", cta: "", comingSoon: true },
+            ].map(({ img, Icon, badge, title, body, cta, comingSoon }, i) => (
               <Reveal key={title} delay={i * 0.08}>
                 <Card className="group relative h-80 overflow-hidden rounded-2xl border-none">
-                  <ImageWithFallback src={img} alt={title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/50 to-transparent" />
+                  <ImageWithFallback src={img} alt={title} className={`h-full w-full object-cover transition-transform duration-700 ${comingSoon ? "" : "group-hover:scale-105"}`} />
+                  <div className={`absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/50 to-transparent ${comingSoon ? "bg-obsidian/40" : ""}`} />
+                  {comingSoon && <div className="absolute inset-0 bg-obsidian/40" />}
                   <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
-                    <Badge className="mb-3 w-fit gap-2 border-none bg-brand uppercase tracking-wide text-white"><Icon size={14} /> {badge}</Badge>
+                    <Badge className={`mb-3 w-fit gap-2 border-none uppercase tracking-wide text-white ${comingSoon ? "bg-white/15" : "bg-brand"}`}><Icon size={14} /> {badge}</Badge>
                     <h3 className="font-display text-2xl font-semibold">{title}</h3>
                     <p className="mt-2 max-w-md text-sm text-white/80">{body}</p>
-                    <Button onClick={() => onNavigate("importation")} className="mt-5 w-fit gap-2 bg-white text-obsidian hover:bg-white/90">{cta} <ArrowRight size={16} /></Button>
+                    {comingSoon ? (
+                      <span className="mt-5 inline-flex w-fit cursor-default items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white/50">
+                        <Clock size={14} /> Launching Soon
+                      </span>
+                    ) : (
+                      <Button onClick={() => onNavigate("importation")} className="mt-5 w-fit gap-2 bg-white text-obsidian hover:bg-white/90">{cta} <ArrowRight size={16} /></Button>
+                    )}
                   </div>
                 </Card>
               </Reveal>

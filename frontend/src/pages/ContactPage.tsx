@@ -22,9 +22,9 @@ import {
 const initialForm = { name: "", email: "", phone: "", subject: "", message: "" };
 
 const contactCards = [
-  { Icon: Phone, title: "Phone", lines: ["+234 812 345 6789", "+234 909 876 5432"] },
+  { Icon: Phone, title: "Phone / WhatsApp", lines: ["+1 (780) 884-0893"] },
   { Icon: Mail, title: "Email", lines: ["info@platinumhelms.com", "sales@platinumhelms.com"] },
-  { Icon: MapPin, title: "Address", lines: ["123 Luxury Auto Boulevard", "Victoria Island, Lagos"] },
+  { Icon: MapPin, title: "Address", lines: ["Km 74 Ikota Lekki Expressway"] },
   { Icon: Clock, title: "Business Hours", lines: ["Mon – Fri: 9am – 7pm", "Sat: 10am – 6pm · Sun: Closed"] },
 ];
 
@@ -34,7 +34,7 @@ export function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const phoneNumber = "2348123456789";
+  const phoneNumber = "17808840893";
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
     "Hello! I have a question about Platinum Helms.",
   )}`;
@@ -82,8 +82,8 @@ export function ContactPage() {
           </p>
           {/* Quick contact chips */}
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <a href="tel:+2348123456789" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:border-white/40 hover:bg-white/10">
-              <Phone className="size-3.5" /> +234 812 345 6789
+            <a href="tel:+17808840893" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:border-white/40 hover:bg-white/10">
+              <Phone className="size-3.5" /> +1 (780) 884-0893
             </a>
             <a href="mailto:info@platinumhelms.com" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:border-white/40 hover:bg-white/10">
               <Mail className="size-3.5" /> info@platinumhelms.com
@@ -105,14 +105,20 @@ export function ContactPage() {
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
               {contactCards.map(({ Icon, title, lines }) => (
-                <Card key={title} className="rounded-2xl border-border p-6">
-                  <div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-brand text-white">
-                    <Icon className="size-5" />
+                <Card key={title} className="rounded-2xl border-border p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand text-white">
+                      <Icon className="size-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-sans text-sm font-semibold text-foreground">{title}</h3>
+                      <div className="mt-0.5 space-y-0.5">
+                        {lines.map((l) => (
+                          <p key={l} className="break-words text-sm text-muted-foreground">{l}</p>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="font-sans text-base font-semibold text-foreground">{title}</h3>
-                  {lines.map((l) => (
-                    <p key={l} className="text-sm text-muted-foreground">{l}</p>
-                  ))}
                 </Card>
               ))}
             </div>
@@ -160,7 +166,7 @@ export function ContactPage() {
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} placeholder="+234 812 345 6789" />
+                    <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} placeholder="+1 (780) 884-0893" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="subject">Subject *</Label>
@@ -199,7 +205,7 @@ export function ContactPage() {
           <div className="overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
             <iframe
               title="Platinum Helms showroom location"
-              src="https://www.google.com/maps?q=Victoria%20Island%20Lagos&output=embed"
+              src="https://www.google.com/maps?q=Ikota+Lekki+Expressway+Lagos&output=embed"
               className="h-96 w-full"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"

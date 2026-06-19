@@ -47,10 +47,10 @@ export function Footer() {
             </p>
             <div className="space-y-2 text-sm text-white/60">
               <p className="flex items-center gap-2">
-                <MapPin size={15} className="text-brand" /> Lagos, Nigeria
+                <MapPin size={15} className="text-brand" /> Km 74 Ikota Lekki Expressway
               </p>
-              <a href="tel:+2348123456789" className="flex items-center gap-2 transition-colors hover:text-white">
-                <Phone size={15} className="text-brand" /> +234 812 345 6789
+              <a href="tel:+17808840893" className="flex items-center gap-2 transition-colors hover:text-white">
+                <Phone size={15} className="text-brand" /> +1 (780) 884-0893
               </a>
               <a href="mailto:info@platinumhelms.com" className="flex items-center gap-2 transition-colors hover:text-white">
                 <Mail size={15} className="text-brand" /> info@platinumhelms.com

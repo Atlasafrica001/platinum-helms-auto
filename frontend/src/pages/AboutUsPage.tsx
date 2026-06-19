@@ -4,9 +4,8 @@ import { Button } from "../components/button";
 import { Card } from "../components/card";
 import { Users, Award, Globe, Heart, Target, Zap, Star } from "lucide-react";
 import phblack from "../assets/phblack.png";
-import phred from "../assets/phred.png";
-import phwhite from "../assets/phwhite.png";
 import mrugo from "../assets/mrugo.jpg";
+import afolabigladys from "../assets/afolabigladys.PNG";
 
 interface AboutUsPageProps {
   onNavigate: (page: string) => void;
@@ -29,9 +28,8 @@ const stats = [
 ];
 
 const team = [
-  { name: "Michael Chen", role: "Chief Executive Officer", image: phblack },
-  { name: "Sarah Williams", role: "Director of Operations", image: phred },
-  { name: "David Rodriguez", role: "Head of Customer Relations", image: phwhite },
+  { name: "The Founder", role: "Chief Executive Officer", image: null },
+  { name: "Mrs Afolabi Gladys .U.", role: "Director, Head of Operation", image: afolabigladys },
 ];
 
 const testimonials = [
@@ -144,19 +142,39 @@ export function AboutUsPage({ onNavigate }: AboutUsPageProps) {
       <section className="bg-obsidian-soft py-24 text-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Reveal className="mx-auto mb-16 max-w-2xl text-center">
-            <h2 className="font-display text-3xl font-bold sm:text-4xl lg:text-5xl">Meet Our Leadership</h2>
-            <p className="mt-3 text-lg text-white/65">Experienced professionals dedicated to delivering exceptional service.</p>
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-brand/80">The People Behind the Brand</p>
+            <h2 className="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Meet Our<br className="hidden xs:block sm:hidden" /> Leadership
+            </h2>
+            <div className="mx-auto mt-5 h-px w-10 bg-brand/40" />
+            <p className="mt-5 text-base leading-relaxed text-white/55 sm:text-lg">
+              Experienced professionals dedicated to delivering exceptional service.
+            </p>
           </Reveal>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="mx-auto grid max-w-3xl grid-cols-1 gap-8 sm:grid-cols-2">
             {team.map((member, i) => (
-              <Reveal key={member.name} delay={i * 0.08}>
-                <Card className="group overflow-hidden rounded-2xl border-white/10 bg-card/5">
-                  <div className="h-80 overflow-hidden">
-                    <ImageWithFallback src={member.image} alt={member.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <Reveal key={member.name} delay={i * 0.1}>
+                <Card className="group overflow-hidden rounded-2xl border-white/[0.08] bg-white/[0.03]">
+                  <div className="h-80 overflow-hidden bg-obsidian">
+                    {member.image ? (
+                      <ImageWithFallback
+                        src={member.image}
+                        alt={member.name}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-b from-obsidian-soft to-obsidian">
+                        <svg viewBox="0 0 100 100" className="h-28 w-28 text-white/15" fill="currentColor" aria-hidden="true">
+                          <circle cx="50" cy="36" r="20" />
+                          <path d="M8 88c0-23.2 18.8-42 42-42s42 18.8 42 42" />
+                        </svg>
+                        <p className="mt-4 text-xs uppercase tracking-widest text-white/20">Photo Coming Soon</p>
+                      </div>
+                    )}
                   </div>
-                  <div className="p-6 text-center">
-                    <h3 className="font-display text-2xl font-semibold text-white">{member.name}</h3>
-                    <p className="mt-1 text-sm text-white/60">{member.role}</p>
+                  <div className="p-7 text-center">
+                    <h3 className="font-display text-xl font-bold tracking-tight text-white sm:text-2xl">{member.name}</h3>
+                    <p className="mt-1.5 text-xs font-semibold uppercase tracking-widest text-brand/70">{member.role}</p>
                   </div>
                 </Card>
               </Reveal>

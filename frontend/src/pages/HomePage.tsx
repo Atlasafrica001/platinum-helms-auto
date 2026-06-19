@@ -443,27 +443,34 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <Eyebrow>Exclusive Services</Eyebrow>
             <h2 className="font-display text-4xl font-bold text-foreground sm:text-5xl">Beyond Our Inventory</h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Looking for something special? Explore our custom importation service or bid on exclusive auction vehicles.
+              Looking for something special? Explore our custom importation service or stay tuned for what's coming next.
             </p>
           </Reveal>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             {[
-              { img: phblack, badge: "Bespoke Service", Icon: Sparkles, title: "Custom Importation Orders", body: "Can't find it in our inventory? We'll source your dream vehicle from anywhere in the world.", cta: "Start Custom Order", to: "importation" },
-              { img: phred, badge: "Live Auctions", Icon: Hammer, title: "Premium Vehicle Auctions", body: "Bid on exclusive luxury vehicles with full transparency on condition, history, and importation.", cta: "Browse Auctions", to: "importation" },
-            ].map(({ img, badge, Icon, title, body, cta, to }, i) => (
+              { img: phblack, badge: "Bespoke Service", Icon: Sparkles, title: "Custom Importation Orders", body: "Can't find it in our inventory? We'll source your dream vehicle from anywhere in the world.", cta: "Start Custom Order", to: "importation", comingSoon: false },
+              { img: phred, badge: "Coming Soon", Icon: Hammer, title: "Premium Vehicle Auctions", body: "Our exclusive auction platform is launching soon — bid on premium vehicles with full transparency on condition and history.", cta: "", to: "", comingSoon: true },
+            ].map(({ img, badge, Icon, title, body, cta, to, comingSoon }, i) => (
               <Reveal key={title} delay={i * 0.08}>
                 <Card className="group relative h-80 overflow-hidden rounded-2xl border-none">
-                  <ImageWithFallback src={img} alt={title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                  <ImageWithFallback src={img} alt={title} className={`h-full w-full object-cover transition-transform duration-700 ${comingSoon ? "" : "group-hover:scale-105"}`} />
                   <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/50 to-transparent" />
+                  {comingSoon && <div className="absolute inset-0 bg-obsidian/40" />}
                   <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
-                    <Badge className="mb-3 w-fit gap-2 border-none bg-brand uppercase tracking-wide text-white">
+                    <Badge className={`mb-3 w-fit gap-2 border-none uppercase tracking-wide text-white ${comingSoon ? "bg-white/15" : "bg-brand"}`}>
                       <Icon size={14} /> {badge}
                     </Badge>
                     <h3 className="font-display text-2xl font-semibold">{title}</h3>
                     <p className="mt-2 max-w-md text-sm text-white/80">{body}</p>
-                    <Button onClick={() => onNavigate(to)} className="mt-5 w-fit gap-2 bg-white text-obsidian hover:bg-white/90">
-                      {cta} <ArrowRight size={16} />
-                    </Button>
+                    {comingSoon ? (
+                      <span className="mt-5 inline-flex w-fit cursor-default items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white/50">
+                        <Clock size={14} /> Launching Soon
+                      </span>
+                    ) : (
+                      <Button onClick={() => onNavigate(to)} className="mt-5 w-fit gap-2 bg-white text-obsidian hover:bg-white/90">
+                        {cta} <ArrowRight size={16} />
+                      </Button>
+                    )}
                   </div>
                 </Card>
               </Reveal>
