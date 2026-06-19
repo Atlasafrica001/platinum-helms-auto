@@ -5,7 +5,6 @@ import { Card } from "../components/card";
 import { Button } from "../components/button";
 import { Input } from "../components/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/tabs";
-import { Badge } from "../components/badge";
 import {
   Table,
   TableBody,
@@ -32,6 +31,7 @@ import {
   Clock,
   Loader2,
   RefreshCw,
+  AlertTriangle,
 } from "lucide-react";
 
 type DashboardOverview = {
@@ -68,11 +68,7 @@ type FinancingLead = {
   status?: string;
   submissionDate?: string;
   initialDepositBudget?: number | string | null;
-  selectedCar?: {
-    name?: string;
-    brand?: string;
-    model?: string;
-  } | null;
+  selectedCar?: { name?: string; brand?: string; model?: string } | null;
 };
 
 type ContactMessage = {
@@ -100,29 +96,22 @@ const emptyOverview: DashboardOverview = {
   newContactMessages: 0,
 };
 
-const formatCurrency = (value?: number | string | null) => {
-  const amount = Number(value || 0);
-
-  return new Intl.NumberFormat("en-NG", {
+const formatCurrency = (value?: number | string | null) =>
+  new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency: "NGN",
     maximumFractionDigits: 0,
-  }).format(amount);
-};
+  }).format(Number(value || 0));
 
 const formatDate = (value?: string) => {
   if (!value) return "N/A";
-
-  return new Intl.DateTimeFormat("en-NG", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(value));
+  return new Intl.DateTimeFormat("en-NG", { year: "numeric", month: "short", day: "numeric" }).format(
+    new Date(value),
+  );
 };
 
 const labelStatus = (status?: string) => {
   if (!status) return "Unknown";
-
   return status
     .split(/[_\s-]+/)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
@@ -131,13 +120,11 @@ const labelStatus = (status?: string) => {
 
 const downloadCsv = (fileName: string, rows: Record<string, unknown>[]) => {
   if (rows.length === 0) return;
-
   const headers = Object.keys(rows[0]);
-  const escapeCell = (value: unknown) =>
-    `"${String(value ?? "").replace(/"/g, '""')}"`;
+  const escapeCell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
   const csv = [
     headers.join(","),
-    ...rows.map((row) => headers.map((header) => escapeCell(row[header])).join(",")),
+    ...rows.map((row) => headers.map((h) => escapeCell(row[h])).join(",")),
   ].join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
@@ -147,6 +134,29 @@ const downloadCsv = (fileName: string, rows: Record<string, unknown>[]) => {
   link.click();
   URL.revokeObjectURL(url);
 };
+
+const statusVariant: Record<string, string> = {
+  available: "bg-green-100 text-green-800 border-green-200",
+  reserved: "bg-amber-100 text-amber-800 border-amber-200",
+  sold: "bg-gray-100 text-gray-700 border-gray-200",
+  hidden: "bg-gray-100 text-gray-600 border-gray-200",
+  approved: "bg-green-100 text-green-800 border-green-200",
+  contacted: "bg-blue-100 text-blue-800 border-blue-200",
+  pending: "bg-amber-100 text-amber-800 border-amber-200",
+  rejected: "bg-red-100 text-red-700 border-red-200",
+  closed: "bg-gray-100 text-gray-600 border-gray-200",
+  new: "bg-blue-100 text-blue-800 border-blue-200",
+  responded: "bg-green-100 text-green-800 border-green-200",
+};
+
+function StatusBadge({ status }: { status?: string }) {
+  const cls = statusVariant[(status || "").toLowerCase()] || "bg-gray-100 text-gray-600 border-gray-200";
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${cls}`}>
+      {labelStatus(status)}
+    </span>
+  );
+}
 
 export function AdminDashboard() {
   const navigate = useNavigate();
@@ -176,15 +186,12 @@ export function AdminDashboard() {
         api.cars.getAllAdmin(filters),
         api.leads.getAll(filters),
       ]);
-
       setOverview(statsResponse.data?.overview || emptyOverview);
       setVehicles(carsResponse.data || []);
       setApplications(leadsResponse.data?.financing?.leads || []);
       setContacts(leadsResponse.data?.contact?.messages || []);
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Unable to load dashboard data";
-      setError(message);
+      setError(err instanceof Error ? err.message : "Unable to load dashboard data");
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -196,44 +203,17 @@ export function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      loadDashboard(searchTerm, true);
-    }, 350);
-
+    const timeout = window.setTimeout(() => loadDashboard(searchTerm, true), 350);
     return () => window.clearTimeout(timeout);
   }, [searchTerm]);
 
   const totalInventoryValue = useMemo(
-    () => vehicles.reduce((total, vehicle) => total + Number(vehicle.price || 0), 0),
+    () => vehicles.reduce((total, v) => total + Number(v.price || 0), 0),
     [vehicles],
   );
 
-  const getStatusBadge = (status?: string) => {
-    const normalized = (status || "").toLowerCase();
-    const statusColors: Record<string, string> = {
-      available: "bg-green-100 text-green-800",
-      reserved: "bg-yellow-100 text-yellow-800",
-      sold: "bg-gray-100 text-gray-800",
-      hidden: "bg-gray-100 text-gray-800",
-      approved: "bg-green-100 text-green-800",
-      contacted: "bg-blue-100 text-blue-800",
-      pending: "bg-yellow-100 text-yellow-800",
-      rejected: "bg-red-100 text-red-800",
-      closed: "bg-gray-100 text-gray-800",
-      new: "bg-blue-100 text-blue-800",
-      responded: "bg-green-100 text-green-800",
-    };
-
-    return (
-      <Badge className={statusColors[normalized] || "bg-gray-100 text-gray-800"}>
-        {labelStatus(status)}
-      </Badge>
-    );
-  };
-
   const deleteVehicle = async (id: number) => {
     if (!window.confirm("Delete this vehicle from inventory?")) return;
-
     setActionId(`vehicle-${id}`);
     try {
       await api.cars.delete(id);
@@ -271,7 +251,6 @@ export function AdminDashboard() {
 
   const deleteContact = async (id: number) => {
     if (!window.confirm("Delete this contact message?")) return;
-
     setActionId(`contact-${id}`);
     try {
       await api.leads.delete("contact", id);
@@ -287,247 +266,246 @@ export function AdminDashboard() {
     if (activeTab === "vehicles") {
       downloadCsv(
         "vehicles.csv",
-        vehicles.map((vehicle) => ({
-          id: vehicle.id,
-          vehicle: vehicle.name || `${vehicle.brand || vehicle.make || ""} ${vehicle.model || ""}`.trim(),
-          year: vehicle.year,
-          vin: vehicle.vin,
-          price: vehicle.price,
-          status: vehicle.status,
+        vehicles.map((v) => ({
+          id: v.id,
+          vehicle: v.name || `${v.brand || v.make || ""} ${v.model || ""}`.trim(),
+          year: v.year,
+          vin: v.vin,
+          price: v.price,
+          status: v.status,
         })),
       );
       return;
     }
-
     if (activeTab === "applications") {
       downloadCsv(
         "finance-applications.csv",
-        applications.map((application) => ({
-          id: application.id,
-          name: `${application.firstName || ""} ${application.lastName || ""}`.trim(),
-          email: application.email,
-          vehicle: application.selectedCar?.name || "N/A",
-          depositBudget: application.initialDepositBudget,
-          status: application.status,
-          date: application.submissionDate,
+        applications.map((a) => ({
+          id: a.id,
+          name: `${a.firstName || ""} ${a.lastName || ""}`.trim(),
+          email: a.email,
+          vehicle: a.selectedCar?.name || "N/A",
+          depositBudget: a.initialDepositBudget,
+          status: a.status,
+          date: a.submissionDate,
         })),
       );
       return;
     }
-
     downloadCsv(
       "contacts.csv",
-      contacts.map((contact) => ({
-        id: contact.id,
-        name: contact.name,
-        email: contact.email,
-        phone: contact.phone,
-        subject: contact.subject,
-        status: contact.status,
-        date: contact.createdAt,
+      contacts.map((c) => ({
+        id: c.id,
+        name: c.name,
+        email: c.email,
+        phone: c.phone,
+        subject: c.subject,
+        status: c.status,
+        date: c.createdAt,
       })),
     );
   };
 
   const renderEmptyRow = (message: string, colSpan: number) => (
     <TableRow>
-      <TableCell colSpan={colSpan} className="py-10 text-center text-gray-500">
+      <TableCell colSpan={colSpan} className="py-12 text-center text-muted-foreground">
         {message}
       </TableCell>
     </TableRow>
   );
 
+  const statCards = [
+    {
+      icon: Car,
+      iconBg: "bg-blue-50",
+      iconColor: "text-blue-600",
+      value: overview.totalCars,
+      label: "Total Vehicles",
+      sub: `${overview.activeCars} active listings`,
+      subColor: "text-green-600",
+    },
+    {
+      icon: FileText,
+      iconBg: "bg-green-50",
+      iconColor: "text-green-600",
+      value: overview.totalFinancingLeads,
+      label: "Finance Applications",
+      sub: `${overview.pendingFinancingLeads} pending review`,
+      subColor: "text-amber-600",
+    },
+    {
+      icon: MessageSquare,
+      iconBg: "bg-purple-50",
+      iconColor: "text-purple-600",
+      value: overview.totalContactMessages,
+      label: "Contact Messages",
+      sub: `${overview.newContactMessages} new`,
+      subColor: "text-blue-600",
+    },
+    {
+      icon: DollarSign,
+      iconBg: "bg-red-50",
+      iconColor: "text-red-600",
+      value: formatCurrency(totalInventoryValue),
+      label: "Inventory Value",
+      sub: `${overview.soldCars} vehicles sold`,
+      subColor: "text-green-600",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+      {/* Sub-header */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h1 className="mb-2">Admin Dashboard</h1>
-              <p className="text-gray-600">
-                Manage your automotive business operations
-              </p>
+              <h1 className="font-display text-2xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-sm text-gray-500">Manage your automotive business operations</p>
             </div>
             <div className="flex gap-2">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => loadDashboard(searchTerm, true)}
                 disabled={isRefreshing}
               >
                 {isRefreshing ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 size={14} className="mr-1.5 animate-spin" />
                 ) : (
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <RefreshCw size={14} className="mr-1.5" />
                 )}
                 Refresh
               </Button>
-              <Button
-                className="bg-red-600 hover:bg-red-700 text-white"
-                onClick={exportCurrentTab}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export Report
+              <Button size="sm" className="bg-brand hover:bg-brand-strong text-white" onClick={exportCurrentTab}>
+                <Download size={14} className="mr-1.5" />
+                Export
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {error && (
-          <div className="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <AlertTriangle size={15} className="mt-0.5 shrink-0" />
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 border-none shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Car className="w-6 h-6 text-blue-600" />
+        {/* Stat cards */}
+        <div className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {statCards.map(({ icon: Icon, iconBg, iconColor, value, label, sub, subColor }) => (
+            <Card key={label} className="border-none p-5 shadow-sm">
+              <div className="mb-4 flex items-center justify-between">
+                <div className={`flex size-11 items-center justify-center rounded-xl ${iconBg}`}>
+                  <Icon size={20} className={iconColor} />
+                </div>
+                <TrendingUp size={16} className="text-green-500" />
               </div>
-              <TrendingUp className="w-5 h-5 text-green-500" />
-            </div>
-            <h3 className="mb-1">{isLoading ? "..." : overview.totalCars}</h3>
-            <p className="text-sm text-gray-600">Total Vehicles</p>
-            <p className="text-xs text-green-600 mt-2">
-              {overview.activeCars} active listings
-            </p>
-          </Card>
-
-          <Card className="p-6 border-none shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <FileText className="w-6 h-6 text-green-600" />
-              </div>
-              <TrendingUp className="w-5 h-5 text-green-500" />
-            </div>
-            <h3 className="mb-1">
-              {isLoading ? "..." : overview.totalFinancingLeads}
-            </h3>
-            <p className="text-sm text-gray-600">Finance Applications</p>
-            <p className="text-xs text-yellow-600 mt-2">
-              {overview.pendingFinancingLeads} pending review
-            </p>
-          </Card>
-
-          <Card className="p-6 border-none shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-purple-600" />
-              </div>
-              <TrendingUp className="w-5 h-5 text-green-500" />
-            </div>
-            <h3 className="mb-1">
-              {isLoading ? "..." : overview.totalContactMessages}
-            </h3>
-            <p className="text-sm text-gray-600">Contact Messages</p>
-            <p className="text-xs text-blue-600 mt-2">
-              {overview.newContactMessages} new messages
-            </p>
-          </Card>
-
-          <Card className="p-6 border-none shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-red-600" />
-              </div>
-              <TrendingUp className="w-5 h-5 text-green-500" />
-            </div>
-            <h3 className="mb-1">{formatCurrency(totalInventoryValue)}</h3>
-            <p className="text-sm text-gray-600">Loaded Inventory Value</p>
-            <p className="text-xs text-green-600 mt-2">
-              {overview.soldCars} sold vehicles
-            </p>
-          </Card>
+              <p className="mb-0.5 font-display text-2xl font-bold text-gray-900">
+                {isLoading ? <Loader2 size={20} className="animate-spin text-gray-400" /> : value}
+              </p>
+              <p className="text-sm text-gray-600">{label}</p>
+              <p className={`mt-1.5 text-xs font-medium ${subColor}`}>{sub}</p>
+            </Card>
+          ))}
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white border">
-            <TabsTrigger value="vehicles" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
-              <Car className="w-4 h-4 mr-2" />
-              Vehicles
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
+          <TabsList className="border border-gray-200 bg-white">
+            <TabsTrigger
+              value="vehicles"
+              className="data-[state=active]:bg-brand data-[state=active]:text-white"
+            >
+              <Car size={14} className="mr-1.5" /> Vehicles
             </TabsTrigger>
-            <TabsTrigger value="applications" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
-              <FileText className="w-4 h-4 mr-2" />
-              Applications
+            <TabsTrigger
+              value="applications"
+              className="data-[state=active]:bg-brand data-[state=active]:text-white"
+            >
+              <FileText size={14} className="mr-1.5" /> Applications
             </TabsTrigger>
-            <TabsTrigger value="contacts" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
-              <MessageSquare className="w-4 h-4 mr-2" />
-              Contacts
+            <TabsTrigger
+              value="contacts"
+              className="data-[state=active]:bg-brand data-[state=active]:text-white"
+            >
+              <MessageSquare size={14} className="mr-1.5" /> Contacts
             </TabsTrigger>
           </TabsList>
 
+          {/* Vehicles tab */}
           <TabsContent value="vehicles">
-            <Card className="border-none shadow-sm">
-              <div className="p-6 border-b">
-                <div className="flex items-center justify-between mb-4">
-                  <h2>Vehicle Inventory</h2>
+            <Card className="overflow-hidden border-none shadow-sm">
+              <div className="border-b border-gray-100 p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="font-semibold text-gray-900">Vehicle Inventory</h2>
                   <Button
-                    className="bg-red-600 hover:bg-red-700 text-white"
+                    size="sm"
+                    className="bg-brand hover:bg-brand-strong text-white"
                     onClick={() => navigate("/admin/vehicles")}
                   >
-                    <Package className="w-4 h-4 mr-2" />
-                    See All Vehicles
+                    <Package size={14} className="mr-1.5" /> Manage All
                   </Button>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <Input
-                      placeholder="Search vehicles..."
-                      className="pl-10"
+                      placeholder="Search vehicles…"
+                      className="pl-9"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
-                  <Button variant="outline" disabled>
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filter
+                  <Button variant="outline" size="sm" disabled>
+                    <Filter size={14} className="mr-1.5" /> Filter
                   </Button>
                 </div>
               </div>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Vehicle</TableHead>
-                      <TableHead>Year</TableHead>
-                      <TableHead>VIN</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                    <TableRow className="bg-gray-50/50">
+                      <TableHead className="font-semibold">Vehicle</TableHead>
+                      <TableHead className="font-semibold">Year</TableHead>
+                      <TableHead className="font-semibold">VIN</TableHead>
+                      <TableHead className="font-semibold">Price</TableHead>
+                      <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="text-right font-semibold">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {isLoading && renderEmptyRow("Loading vehicles...", 6)}
-                    {!isLoading &&
-                      vehicles.length === 0 &&
-                      renderEmptyRow("No vehicles found.", 6)}
+                    {isLoading && renderEmptyRow("Loading vehicles…", 6)}
+                    {!isLoading && vehicles.length === 0 && renderEmptyRow("No vehicles found.", 6)}
                     {!isLoading &&
                       vehicles.map((vehicle) => (
-                        <TableRow key={vehicle.id}>
+                        <TableRow key={vehicle.id} className="hover:bg-gray-50/50">
                           <TableCell>
-                            <div>
-                              <div>{vehicle.name || vehicle.brand || vehicle.make || "Unnamed vehicle"}</div>
-                              <div className="text-sm text-gray-600">
-                                {vehicle.model || "N/A"}
-                              </div>
+                            <div className="font-medium text-gray-900">
+                              {vehicle.name || vehicle.brand || vehicle.make || "Unnamed"}
                             </div>
+                            <div className="text-sm text-gray-500">{vehicle.model || "N/A"}</div>
                           </TableCell>
-                          <TableCell>{vehicle.year || "N/A"}</TableCell>
-                          <TableCell className="text-sm text-gray-600">
+                          <TableCell className="text-gray-700">{vehicle.year || "N/A"}</TableCell>
+                          <TableCell className="font-mono text-xs text-gray-500">
                             {vehicle.vin || "N/A"}
                           </TableCell>
-                          <TableCell>{formatCurrency(vehicle.price)}</TableCell>
-                          <TableCell>{getStatusBadge(vehicle.status)}</TableCell>
+                          <TableCell className="font-medium text-gray-900">
+                            {formatCurrency(vehicle.price)}
+                          </TableCell>
+                          <TableCell>
+                            <StatusBadge status={vehicle.status} />
+                          </TableCell>
                           <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end gap-1">
                               <Button variant="ghost" size="sm" disabled>
-                                <Eye className="w-4 h-4" />
+                                <Eye size={15} className="text-gray-400" />
                               </Button>
                               <Button variant="ghost" size="sm" disabled>
-                                <Edit className="w-4 h-4" />
+                                <Edit size={15} className="text-gray-400" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -536,9 +514,9 @@ export function AdminDashboard() {
                                 disabled={actionId === `vehicle-${vehicle.id}`}
                               >
                                 {actionId === `vehicle-${vehicle.id}` ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  <Loader2 size={15} className="animate-spin" />
                                 ) : (
-                                  <Trash2 className="w-4 h-4 text-red-600" />
+                                  <Trash2 size={15} className="text-red-500" />
                                 )}
                               </Button>
                             </div>
@@ -551,108 +529,99 @@ export function AdminDashboard() {
             </Card>
           </TabsContent>
 
+          {/* Applications tab */}
           <TabsContent value="applications">
-            <Card className="border-none shadow-sm">
-              <div className="p-6 border-b">
-                <div className="flex items-center justify-between mb-4">
-                  <h2>Finance Applications</h2>
+            <Card className="overflow-hidden border-none shadow-sm">
+              <div className="border-b border-gray-100 p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="font-semibold text-gray-900">Finance Applications</h2>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                      {overview.approvedFinancingLeads} Approved
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Clock className="w-4 h-4 mr-2 text-yellow-600" />
-                      {overview.pendingFinancingLeads} Pending
-                    </Button>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
+                      <CheckCircle size={12} /> {overview.approvedFinancingLeads} Approved
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+                      <Clock size={12} /> {overview.pendingFinancingLeads} Pending
+                    </span>
                   </div>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <Input
-                      placeholder="Search applications..."
-                      className="pl-10"
+                      placeholder="Search applications…"
+                      className="pl-9"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
-                  <Button variant="outline" disabled>
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filter
+                  <Button variant="outline" size="sm" disabled>
+                    <Filter size={14} className="mr-1.5" /> Filter
                   </Button>
                 </div>
               </div>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Applicant</TableHead>
-                      <TableHead>Vehicle Interest</TableHead>
-                      <TableHead>Deposit Budget</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                    <TableRow className="bg-gray-50/50">
+                      <TableHead className="font-semibold">Applicant</TableHead>
+                      <TableHead className="font-semibold">Vehicle Interest</TableHead>
+                      <TableHead className="font-semibold">Deposit Budget</TableHead>
+                      <TableHead className="font-semibold">Date</TableHead>
+                      <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="text-right font-semibold">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {isLoading && renderEmptyRow("Loading applications...", 6)}
+                    {isLoading && renderEmptyRow("Loading applications…", 6)}
+                    {!isLoading && applications.length === 0 && renderEmptyRow("No applications found.", 6)}
                     {!isLoading &&
-                      applications.length === 0 &&
-                      renderEmptyRow("No applications found.", 6)}
-                    {!isLoading &&
-                      applications.map((application) => (
-                        <TableRow key={application.id}>
+                      applications.map((app) => (
+                        <TableRow key={app.id} className="hover:bg-gray-50/50">
                           <TableCell>
-                            <div>
-                              <div>
-                                {`${application.firstName || ""} ${application.lastName || ""}`.trim() ||
-                                  "Unnamed applicant"}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                {application.email || "N/A"}
-                              </div>
+                            <div className="font-medium text-gray-900">
+                              {`${app.firstName || ""} ${app.lastName || ""}`.trim() || "Unnamed"}
                             </div>
+                            <div className="text-sm text-gray-500">{app.email || "N/A"}</div>
                           </TableCell>
-                          <TableCell>
-                            {application.selectedCar?.name ||
-                              `${application.selectedCar?.brand || ""} ${application.selectedCar?.model || ""}`.trim() ||
+                          <TableCell className="text-gray-700">
+                            {app.selectedCar?.name ||
+                              `${app.selectedCar?.brand || ""} ${app.selectedCar?.model || ""}`.trim() ||
                               "N/A"}
                           </TableCell>
-                          <TableCell>
-                            {formatCurrency(application.initialDepositBudget)}
+                          <TableCell className="text-gray-700">
+                            {formatCurrency(app.initialDepositBudget)}
                           </TableCell>
-                          <TableCell>{formatDate(application.submissionDate)}</TableCell>
-                          <TableCell>{getStatusBadge(application.status)}</TableCell>
+                          <TableCell className="text-gray-500">{formatDate(app.submissionDate)}</TableCell>
+                          <TableCell>
+                            <StatusBadge status={app.status} />
+                          </TableCell>
                           <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end gap-1">
                               <Button variant="ghost" size="sm" disabled>
-                                <Eye className="w-4 h-4" />
+                                <Eye size={15} className="text-gray-400" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="text-green-600"
-                                onClick={() => updateApplicationStatus(application.id, "approved")}
-                                disabled={actionId === `application-${application.id}-approved`}
+                                onClick={() => updateApplicationStatus(app.id, "approved")}
+                                disabled={actionId === `application-${app.id}-approved`}
                               >
-                                {actionId === `application-${application.id}-approved` ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                {actionId === `application-${app.id}-approved` ? (
+                                  <Loader2 size={15} className="animate-spin" />
                                 ) : (
-                                  <CheckCircle className="w-4 h-4" />
+                                  <CheckCircle size={15} className="text-green-600" />
                                 )}
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="text-red-600"
-                                onClick={() => updateApplicationStatus(application.id, "rejected")}
-                                disabled={actionId === `application-${application.id}-rejected`}
+                                onClick={() => updateApplicationStatus(app.id, "rejected")}
+                                disabled={actionId === `application-${app.id}-rejected`}
                               >
-                                {actionId === `application-${application.id}-rejected` ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                {actionId === `application-${app.id}-rejected` ? (
+                                  <Loader2 size={15} className="animate-spin" />
                                 ) : (
-                                  <XCircle className="w-4 h-4" />
+                                  <XCircle size={15} className="text-red-500" />
                                 )}
                               </Button>
                             </div>
@@ -665,76 +634,66 @@ export function AdminDashboard() {
             </Card>
           </TabsContent>
 
+          {/* Contacts tab */}
           <TabsContent value="contacts">
-            <Card className="border-none shadow-sm">
-              <div className="p-6 border-b">
-                <div className="flex items-center justify-between mb-4">
-                  <h2>Contact Messages</h2>
-                  <Button
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                    onClick={exportCurrentTab}
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Export
+            <Card className="overflow-hidden border-none shadow-sm">
+              <div className="border-b border-gray-100 p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="font-semibold text-gray-900">Contact Messages</h2>
+                  <Button size="sm" className="bg-brand hover:bg-brand-strong text-white" onClick={exportCurrentTab}>
+                    <Download size={14} className="mr-1.5" /> Export
                   </Button>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <Input
-                      placeholder="Search contacts..."
-                      className="pl-10"
+                      placeholder="Search contacts…"
+                      className="pl-9"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
-                  <Button variant="outline" disabled>
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filter
+                  <Button variant="outline" size="sm" disabled>
+                    <Filter size={14} className="mr-1.5" /> Filter
                   </Button>
                 </div>
               </div>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Subject</TableHead>
-                      <TableHead>Message</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                    <TableRow className="bg-gray-50/50">
+                      <TableHead className="font-semibold">Contact</TableHead>
+                      <TableHead className="font-semibold">Subject</TableHead>
+                      <TableHead className="font-semibold">Message</TableHead>
+                      <TableHead className="font-semibold">Date</TableHead>
+                      <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="text-right font-semibold">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {isLoading && renderEmptyRow("Loading contacts...", 6)}
-                    {!isLoading &&
-                      contacts.length === 0 &&
-                      renderEmptyRow("No contacts found.", 6)}
+                    {isLoading && renderEmptyRow("Loading contacts…", 6)}
+                    {!isLoading && contacts.length === 0 && renderEmptyRow("No contacts found.", 6)}
                     {!isLoading &&
                       contacts.map((contact) => (
-                        <TableRow key={contact.id}>
+                        <TableRow key={contact.id} className="hover:bg-gray-50/50">
                           <TableCell>
-                            <div>
-                              <div>{contact.name || "Unnamed contact"}</div>
-                              <div className="text-sm text-gray-600">
-                                {contact.email || "N/A"}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                {contact.phone || "N/A"}
-                              </div>
-                            </div>
+                            <div className="font-medium text-gray-900">{contact.name || "Unnamed"}</div>
+                            <div className="text-sm text-gray-500">{contact.email || "N/A"}</div>
+                            <div className="text-sm text-gray-500">{contact.phone || "N/A"}</div>
                           </TableCell>
-                          <TableCell>{contact.subject || "N/A"}</TableCell>
-                          <TableCell className="max-w-xs truncate">
+                          <TableCell className="text-gray-700">{contact.subject || "N/A"}</TableCell>
+                          <TableCell className="max-w-xs truncate text-sm text-gray-500">
                             {contact.message || "N/A"}
                           </TableCell>
-                          <TableCell>{formatDate(contact.createdAt)}</TableCell>
-                          <TableCell>{getStatusBadge(contact.status)}</TableCell>
+                          <TableCell className="text-gray-500">{formatDate(contact.createdAt)}</TableCell>
+                          <TableCell>
+                            <StatusBadge status={contact.status} />
+                          </TableCell>
                           <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end gap-1">
                               <Button variant="ghost" size="sm" disabled>
-                                <Eye className="w-4 h-4" />
+                                <Eye size={15} className="text-gray-400" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -743,9 +702,9 @@ export function AdminDashboard() {
                                 disabled={actionId === `contact-${contact.id}-responded`}
                               >
                                 {actionId === `contact-${contact.id}-responded` ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  <Loader2 size={15} className="animate-spin" />
                                 ) : (
-                                  <Edit className="w-4 h-4" />
+                                  <Edit size={15} className="text-blue-500" />
                                 )}
                               </Button>
                               <Button
@@ -755,9 +714,9 @@ export function AdminDashboard() {
                                 disabled={actionId === `contact-${contact.id}`}
                               >
                                 {actionId === `contact-${contact.id}` ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  <Loader2 size={15} className="animate-spin" />
                                 ) : (
-                                  <Trash2 className="w-4 h-4 text-red-600" />
+                                  <Trash2 size={15} className="text-red-500" />
                                 )}
                               </Button>
                             </div>

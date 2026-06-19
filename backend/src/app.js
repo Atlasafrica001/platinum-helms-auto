@@ -11,6 +11,9 @@ const { RATE_LIMIT } = require('./config/constants');
 // Initialize Express app
 const app = express();
 
+// Trust Render's proxy (required for express-rate-limit and correct IP detection)
+app.set('trust proxy', 1);
+
 // ============================================================================
 // SECURITY MIDDLEWARE
 // ============================================================================

@@ -1,14 +1,13 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import api from "@/lib/api";
 import { Button } from "../components/button";
 import { Input } from "../components/input";
 import { Label } from "../components/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/select";
 import { Textarea } from "../components/textarea";
-// import { RadioGroup, RadioGroupItem } from "../components/radio-group";
-import { Card } from "../components/card";
-import { CheckCircle2, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/dialog";
+import { CheckCircle2, Loader2, AlertTriangle, Sparkles } from "lucide-react";
 
 interface FinancingEligibilityFormProps {
   isOpen: boolean;
@@ -28,14 +27,12 @@ export function FinancingEligibilityForm({ isOpen, onClose, selectedCar }: Finan
     initialDeposit: "",
     additionalNotes: "",
   });
-
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const [firstName, ...lastNameParts] = formData.fullName.trim().split(" ");
     setIsSubmitting(true);
     setError("");
@@ -53,14 +50,19 @@ export function FinancingEligibilityForm({ isOpen, onClose, selectedCar }: Finan
         additionalNotes: [
           formData.selectedCar ? `Selected car: ${formData.selectedCar}` : "",
           formData.additionalNotes,
-        ].filter(Boolean).join("\n"),
+        ]
+          .filter(Boolean)
+          .join("\n"),
         authorizeCredit: true,
         agreeToTerms: true,
         source: "Financing Page",
       });
       setIsSubmitted(true);
+      toast.success("Eligibility request submitted!");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to submit financing request");
+      const message = err instanceof Error ? err.message : "Unable to submit financing request";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -84,220 +86,234 @@ export function FinancingEligibilityForm({ isOpen, onClose, selectedCar }: Finan
 
   const openWhatsApp = () => {
     const message = `Hi, I just submitted a financing eligibility form for ${formData.selectedCar || "a vehicle"}. My name is ${formData.fullName}.`;
-    const whatsappUrl = `https://wa.me/2348123456789?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank");
+    window.open(`https://wa.me/2348123456789?text=${encodeURIComponent(message)}`, "_blank");
     handleReset();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={(v) => !v && handleReset()}>
+      <DialogContent className="w-[96vw] max-w-2xl overflow-hidden rounded-2xl border-border p-0">
         {!isSubmitted ? (
           <>
-            <DialogHeader>
-              <div className="flex items-center justify-between">
-                <DialogTitle className="text-black">Check Your Auto Financing Eligibility</DialogTitle>
-                <Button variant="ghost" size="icon" onClick={onClose}>
-                  <X size={20} />
-                </Button>
-              </div>
-              <DialogDescription className="text-gray-600 text-sm mt-2">
-                Fill out this form and our financing team will contact you shortly to discuss your eligibility and available plans.
-              </DialogDescription>
-            </DialogHeader>
-
-            <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-              {error && (
-                <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {error}
-                </div>
-              )}
-              {/* Personal Information */}
-              <div className="space-y-4">
-                <h3 className="text-black">Personal Information</h3>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name *</Label>
-                  <Input
-                    id="fullName"
-                    placeholder="John Doe"
-                    required
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="johndoe@email.com"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number (WhatsApp preferred) *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+234 812 345 6789"
-                    required
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              {/* Vehicle & Financial Information */}
-              <div className="space-y-4">
-                <h3 className="text-black">Vehicle & Financial Details</h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="selectedCar">Selected Car</Label>
-                  <Input
-                    id="selectedCar"
-                    placeholder="e.g., Toyota Corolla 2020"
-                    value={formData.selectedCar}
-                    onChange={(e) => setFormData({ ...formData, selectedCar: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="employmentStatus">Employment Status *</Label>
-                  <Select
-                    value={formData.employmentStatus}
-                    onValueChange={(value) => setFormData({ ...formData, employmentStatus: value })}
-                    required
-                  >
-                    <SelectTrigger id="employmentStatus">
-                      <SelectValue placeholder="Select your employment status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="full-time">Employed</SelectItem>
-                      <SelectItem value="self-employed">Self-Employed</SelectItem>
-                      <SelectItem value="business-owner">Business Owner</SelectItem>
-                      <SelectItem value="student">Student</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="monthlyIncome">Monthly Income Range *</Label>
-                  <Select
-                    value={formData.monthlyIncome}
-                    onValueChange={(value) => setFormData({ ...formData, monthlyIncome: value })}
-                    required
-                  >
-                    <SelectTrigger id="monthlyIncome">
-                      <SelectValue placeholder="Select your income range" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="100k-250k">â‚¦100,000 - â‚¦250,000</SelectItem>
-                      <SelectItem value="250k-500k">â‚¦250,000 - â‚¦500,000</SelectItem>
-                      <SelectItem value="500k-1m">â‚¦500,000 - â‚¦1,000,000</SelectItem>
-                      <SelectItem value="1m+">â‚¦1,000,000+</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="repaymentDuration">Preferred Repayment Duration *</Label>
-                  <Select
-                    value={formData.repaymentDuration}
-                    onValueChange={(value) => setFormData({ ...formData, repaymentDuration: value })}
-                    required
-                  >
-                    <SelectTrigger id="repaymentDuration">
-                      <SelectValue placeholder="Select repayment duration" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="6">6 months</SelectItem>
-                      <SelectItem value="12">12 months</SelectItem>
-                      <SelectItem value="18">18 months</SelectItem>
-                      <SelectItem value="24">24 months</SelectItem>
-                      <SelectItem value="36">36 months</SelectItem>
-                      <SelectItem value="48">48 months</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="initialDeposit">Initial Deposit Budget (â‚¦)</Label>
-                  <Input
-                    id="initialDeposit"
-                    type="number"
-                    placeholder="e.g., 1500000"
-                    value={formData.initialDeposit}
-                    onChange={(e) => setFormData({ ...formData, initialDeposit: e.target.value })}
-                  />
-                  <p className="text-xs text-gray-500">Optional but helpful for assessment</p>
-                </div>
-              </div>
-
-              {/* Additional Notes */}
-              <div className="space-y-2">
-                <Label htmlFor="additionalNotes">Additional Notes / Message</Label>
-                <Textarea
-                  id="additionalNotes"
-                  placeholder="e.g., I'm interested in the Corolla 2020 model..."
-                  rows={4}
-                  value={formData.additionalNotes}
-                  onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
-                />
-              </div>
-
-              <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-medium" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Check My Eligibility"}
-              </Button>
-            </form>
-          </>
-        ) : (
-          <div className="py-8">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 className="text-green-600" size={32} />
-              </div>
-              <h3 className="text-black mb-2">Thank You, {formData.fullName}!</h3>
-              <p className="text-gray-600">
-                Your financing eligibility request has been received. Our financing team will contact you shortly to discuss your eligibility and available plans.
-              </p>
+            <div className="bg-gradient-to-br from-obsidian to-slate-deep px-8 py-6 text-white">
+              <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand">
+                <Sparkles size={12} /> Financing
+              </span>
+              <DialogHeader>
+                <DialogTitle className="font-display text-2xl font-bold text-white">
+                  Check Your Financing Eligibility
+                </DialogTitle>
+                <DialogDescription className="mt-1 text-sm text-white/70">
+                  Our financing team will review your details and reach out with available plans.
+                </DialogDescription>
+              </DialogHeader>
             </div>
 
-            <Card className="p-4 bg-gray-50 border-none mb-6">
-              <h4 className="text-black text-sm mb-3">Submission Summary:</h4>
-              <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex justify-between">
-                  <span>Vehicle:</span>
-                  <span className="text-black">{formData.selectedCar || "Not specified"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Income Range:</span>
-                  <span className="text-black">{formData.monthlyIncome}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Repayment Term:</span>
-                  <span className="text-black">{formData.repaymentDuration} months</span>
-                </div>
-              </div>
-            </Card>
+            <div className="max-h-[62vh] overflow-y-auto px-8 py-6">
+              <form id="ef-form" onSubmit={handleSubmit} className="space-y-6">
+                {error && (
+                  <div className="flex items-start gap-3 rounded-xl border border-brand/40 bg-brand/5 px-4 py-3 text-sm text-brand">
+                    <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+                    {error}
+                  </div>
+                )}
 
-            <div className="flex flex-col gap-3">
+                <div className="space-y-4">
+                  <h3 className="font-display text-lg font-semibold text-foreground">Personal Information</h3>
+                  <div className="space-y-2">
+                    <Label htmlFor="ef-fullName">Full Name *</Label>
+                    <Input
+                      id="ef-fullName"
+                      placeholder="John Doe"
+                      required
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="ef-email">Email Address *</Label>
+                      <Input
+                        id="ef-email"
+                        type="email"
+                        placeholder="johndoe@email.com"
+                        required
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ef-phone">Phone (WhatsApp preferred) *</Label>
+                      <Input
+                        id="ef-phone"
+                        type="tel"
+                        placeholder="+234 812 345 6789"
+                        required
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-display text-lg font-semibold text-foreground">Vehicle & Financial Details</h3>
+                  <div className="space-y-2">
+                    <Label htmlFor="ef-car">Selected Car</Label>
+                    <Input
+                      id="ef-car"
+                      placeholder="e.g., Toyota Corolla 2020"
+                      value={formData.selectedCar}
+                      onChange={(e) => setFormData({ ...formData, selectedCar: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="ef-employment">Employment Status *</Label>
+                      <Select
+                        value={formData.employmentStatus}
+                        onValueChange={(value) => setFormData({ ...formData, employmentStatus: value })}
+                        required
+                      >
+                        <SelectTrigger id="ef-employment">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="full-time">Employed</SelectItem>
+                          <SelectItem value="self-employed">Self-Employed</SelectItem>
+                          <SelectItem value="business-owner">Business Owner</SelectItem>
+                          <SelectItem value="student">Student</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ef-income">Monthly Income Range *</Label>
+                      <Select
+                        value={formData.monthlyIncome}
+                        onValueChange={(value) => setFormData({ ...formData, monthlyIncome: value })}
+                        required
+                      >
+                        <SelectTrigger id="ef-income">
+                          <SelectValue placeholder="Select range" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="100k-250k">₦100,000 – ₦250,000</SelectItem>
+                          <SelectItem value="250k-500k">₦250,000 – ₦500,000</SelectItem>
+                          <SelectItem value="500k-1m">₦500,000 – ₦1,000,000</SelectItem>
+                          <SelectItem value="1m+">₦1,000,000+</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ef-duration">Repayment Duration *</Label>
+                      <Select
+                        value={formData.repaymentDuration}
+                        onValueChange={(value) => setFormData({ ...formData, repaymentDuration: value })}
+                        required
+                      >
+                        <SelectTrigger id="ef-duration">
+                          <SelectValue placeholder="Select term" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[6, 12, 18, 24, 36, 48].map((m) => (
+                            <SelectItem key={m} value={String(m)}>
+                              {m} months
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ef-deposit">Initial Deposit Budget (₦)</Label>
+                      <Input
+                        id="ef-deposit"
+                        type="number"
+                        placeholder="e.g., 1,500,000"
+                        value={formData.initialDeposit}
+                        onChange={(e) => setFormData({ ...formData, initialDeposit: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ef-notes">Additional Notes</Label>
+                  <Textarea
+                    id="ef-notes"
+                    placeholder="Specific preferences or questions…"
+                    rows={3}
+                    value={formData.additionalNotes}
+                    onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
+                  />
+                </div>
+              </form>
+            </div>
+
+            <div className="border-t border-border px-8 py-4">
               <Button
+                form="ef-form"
+                type="submit"
+                size="lg"
+                className="w-full bg-brand hover:bg-brand-strong"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={16} className="mr-2 animate-spin" />
+                    Submitting…
+                  </>
+                ) : (
+                  "Check My Eligibility"
+                )}
+              </Button>
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                We respect your privacy. Your information is secure and never shared with third parties.
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center px-8 py-12 text-center">
+            <div className="mb-5 flex size-16 items-center justify-center rounded-2xl bg-brand/10">
+              <CheckCircle2 size={32} className="text-brand" />
+            </div>
+            <h3 className="font-display text-2xl font-bold text-foreground">Request Submitted!</h3>
+            <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+              Thank you, <span className="font-medium text-foreground">{formData.fullName}</span>. Our
+              financing team will contact you shortly with available plans.
+            </p>
+
+            <div className="mt-6 w-full rounded-xl border border-border bg-muted/40 p-4 text-left">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Summary
+              </p>
+              {[
+                ["Vehicle", formData.selectedCar || "Not specified"],
+                ["Income Range", formData.monthlyIncome || "—"],
+                [
+                  "Repayment Term",
+                  formData.repaymentDuration ? `${formData.repaymentDuration} months` : "—",
+                ],
+              ].map(([k, v]) => (
+                <div
+                  key={k}
+                  className="flex justify-between border-b border-border py-2 text-sm last:border-0"
+                >
+                  <span className="text-muted-foreground">{k}</span>
+                  <span className="font-medium text-foreground">{v}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex w-full flex-col gap-3">
+              <Button
+                size="lg"
+                className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white"
                 onClick={openWhatsApp}
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium"
               >
                 Continue on WhatsApp
               </Button>
-              <Button
-                onClick={handleReset}
-                variant="outline"
-                className="w-full text-black border-gray-300 hover:bg-gray-100 font-medium"
-              >
+              <Button size="lg" variant="outline" className="w-full" onClick={handleReset}>
                 Close
               </Button>
             </div>

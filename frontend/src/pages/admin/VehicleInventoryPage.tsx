@@ -8,7 +8,6 @@ import {
   labelStatus,
   normalizeCar,
 } from "@/lib/adminUtils";
-import { Badge } from "@/components/badge";
 import { Button } from "@/components/button";
 import { Card } from "@/components/card";
 import { Input } from "@/components/input";
@@ -24,7 +23,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/table";
-import { CheckCircle, Download, ImagePlus, Loader2, Star, Trash2, Upload } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle,
+  CheckCircle2,
+  Download,
+  ImagePlus,
+  Loader2,
+  Star,
+  Trash2,
+  Upload,
+} from "lucide-react";
 
 const initialCarForm = {
   name: "",
@@ -64,7 +73,6 @@ export default function VehicleInventoryPage() {
     setIsLoading(true);
     setError("");
     setMessage("");
-
     try {
       const response = await api.cars.getAllAdmin({ limit: 100, search });
       setCars((response.data || []).map(normalizeCar));
@@ -80,10 +88,7 @@ export default function VehicleInventoryPage() {
     return () => window.clearTimeout(timeout);
   }, [search]);
 
-  const featuredCars = useMemo(
-    () => cars.filter((car) => car.tags.includes("popular")),
-    [cars],
-  );
+  const featuredCars = useMemo(() => cars.filter((car) => car.tags.includes("popular")), [cars]);
 
   const setField = (field: keyof typeof initialCarForm, value: string | boolean) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -98,11 +103,11 @@ export default function VehicleInventoryPage() {
     country: form.country || undefined,
     features: form.features
       .split(",")
-      .map((feature) => feature.trim())
+      .map((f) => f.trim())
       .filter(Boolean),
     tags: form.tags
       .split(",")
-      .map((tag) => tag.trim())
+      .map((t) => t.trim())
       .filter(Boolean),
   });
 
@@ -110,7 +115,6 @@ export default function VehicleInventoryPage() {
     event.preventDefault();
     setIsSaving(true);
     setError("");
-
     try {
       const response = await api.cars.create(carPayload());
       const carId = response.data?.id;
@@ -131,7 +135,9 @@ export default function VehicleInventoryPage() {
 
   const updateNewFiles = (fileList: FileList | null) => {
     setFiles(fileList);
-    setNewImagePreviews(fileList ? Array.from(fileList).map((file) => URL.createObjectURL(file)) : []);
+    setNewImagePreviews(
+      fileList ? Array.from(fileList).map((file) => URL.createObjectURL(file)) : [],
+    );
   };
 
   const updateExistingFiles = (carId: number, fileList: FileList | null) => {
@@ -149,7 +155,6 @@ export default function VehicleInventoryPage() {
     try {
       await api.cars.uploadImages(carId, imageFiles);
       setExistingImagePreviews((current) => ({ ...current, [carId]: [] }));
-      window.alert("Images uploaded successfully.");
       setMessage("Images uploaded successfully.");
       await loadCars();
     } catch (err) {
@@ -160,8 +165,7 @@ export default function VehicleInventoryPage() {
   };
 
   const deleteImage = async (carId: number, imageId: number) => {
-    if (!window.confirm("Delete this image? Deletion is permanent and cannot be undone.")) return;
-
+    if (!window.confirm("Delete this image? This cannot be undone.")) return;
     setActionId(`image-${imageId}`);
     try {
       await api.cars.deleteImage(carId, imageId);
@@ -230,84 +234,94 @@ export default function VehicleInventoryPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
+      {/* Page header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Vehicle Inventory</h1>
-          <p className="text-gray-600">Upload, organize, feature, and publish cars across the site.</p>
+          <h1 className="font-display text-2xl font-bold text-gray-900">Vehicle Inventory</h1>
+          <p className="text-sm text-gray-500">Upload, organise, feature, and publish cars across the site.</p>
         </div>
-        <Button onClick={exportVehicles} className="bg-red-600 hover:bg-red-700 text-white">
-          <Download className="w-4 h-4 mr-2" />
-          Export Vehicles
+        <Button onClick={exportVehicles} className="bg-brand hover:bg-brand-strong text-white">
+          <Download size={15} className="mr-1.5" /> Export Vehicles
         </Button>
       </div>
 
-      {error && <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
-      {message && <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{message}</div>}
+      {/* Feedback banners */}
+      {error && (
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertTriangle size={15} className="mt-0.5 shrink-0" /> {error}
+        </div>
+      )}
+      {message && (
+        <div className="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          <CheckCircle2 size={15} className="mt-0.5 shrink-0" /> {message}
+        </div>
+      )}
 
-      <Card className="p-6 border-none shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Upload New Vehicle</h2>
-        <form onSubmit={createCar} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Upload form */}
+      <Card className="border-none p-6 shadow-sm">
+        <h2 className="mb-5 font-semibold text-gray-900">Upload New Vehicle</h2>
+        <form onSubmit={createCar} className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <Label>Name</Label>
+            <Label>Name *</Label>
             <Input required value={form.name} onChange={(e) => setField("name", e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Brand</Label>
+            <Label>Brand *</Label>
             <Input required value={form.brand} onChange={(e) => setField("brand", e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Model</Label>
+            <Label>Model *</Label>
             <Input required value={form.model} onChange={(e) => setField("model", e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Year</Label>
+            <Label>Year *</Label>
             <Input required type="number" value={form.year} onChange={(e) => setField("year", e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Price</Label>
+            <Label>Price (₦) *</Label>
             <Input required type="number" value={form.price} onChange={(e) => setField("price", e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Mileage</Label>
+            <Label>Mileage (km)</Label>
             <Input type="number" value={form.mileage} onChange={(e) => setField("mileage", e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label>Category</Label>
-            <Select value={form.category} onValueChange={(value) => setField("category", value)}>
+            <Select value={form.category} onValueChange={(v) => setField("category", v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {["luxury", "sedan", "suv", "sports", "coupe", "hatchback", "truck", "van"].map((value) => (
-                  <SelectItem key={value} value={value}>{value}</SelectItem>
+                {["luxury", "sedan", "suv", "sports", "coupe", "hatchback", "truck", "van"].map((v) => (
+                  <SelectItem key={v} value={v}>{v}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
             <Label>Body Type</Label>
-            <Select value={form.bodyType} onValueChange={(value) => setField("bodyType", value)}>
+            <Select value={form.bodyType} onValueChange={(v) => setField("bodyType", v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {["Sedan", "SUV", "Coupe", "Hatchback", "Truck", "Van", "Wagon", "Convertible"].map((value) => (
-                  <SelectItem key={value} value={value}>{value}</SelectItem>
+                {["Sedan", "SUV", "Coupe", "Hatchback", "Truck", "Van", "Wagon", "Convertible"].map((v) => (
+                  <SelectItem key={v} value={v}>{v}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
             <Label>Condition</Label>
-            <Select value={form.condition} onValueChange={(value) => setField("condition", value)}>
+            <Select value={form.condition} onValueChange={(v) => setField("condition", v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {["New", "Foreign Used", "Nigerian Used"].map((value) => (
-                  <SelectItem key={value} value={value}>{value}</SelectItem>
+                {["New", "Foreign Used", "Nigerian Used"].map((v) => (
+                  <SelectItem key={v} value={v}>{v}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
             <Label>Transmission</Label>
-            <Select value={form.transmission} onValueChange={(value) => setField("transmission", value)}>
+            <Select value={form.transmission} onValueChange={(v) => setField("transmission", v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="Automatic">Automatic</SelectItem>
@@ -317,22 +331,22 @@ export default function VehicleInventoryPage() {
           </div>
           <div className="space-y-2">
             <Label>Fuel Type</Label>
-            <Select value={form.fuelType} onValueChange={(value) => setField("fuelType", value)}>
+            <Select value={form.fuelType} onValueChange={(v) => setField("fuelType", v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {["Petrol", "Diesel", "Hybrid", "Electric"].map((value) => (
-                  <SelectItem key={value} value={value}>{value}</SelectItem>
+                {["Petrol", "Diesel", "Hybrid", "Electric"].map((v) => (
+                  <SelectItem key={v} value={v}>{v}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
             <Label>Status</Label>
-            <Select value={form.status} onValueChange={(value) => setField("status", value)}>
+            <Select value={form.status} onValueChange={(v) => setField("status", v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {["available", "reserved", "sold", "hidden"].map((value) => (
-                  <SelectItem key={value} value={value}>{labelStatus(value)}</SelectItem>
+                {["available", "reserved", "sold", "hidden"].map((v) => (
+                  <SelectItem key={v} value={v}>{labelStatus(v)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -342,144 +356,240 @@ export default function VehicleInventoryPage() {
             <Input value={form.vin} onChange={(e) => setField("vin", e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Country</Label>
+            <Label>Country of Origin</Label>
             <Input value={form.country} onChange={(e) => setField("country", e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label>Images</Label>
-            <Input type="file" multiple accept="image/*" onChange={(e) => updateNewFiles(e.target.files)} />
+            <Input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) => updateNewFiles(e.target.files)}
+            />
           </div>
           {newImagePreviews.length > 0 && (
-            <div className="md:col-span-3 flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2 md:col-span-3">
               {newImagePreviews.map((preview, index) => (
-                <img key={preview} src={preview} alt={`New vehicle preview ${index + 1}`} className="h-20 w-28 rounded object-cover border" />
+                <img
+                  key={preview}
+                  src={preview}
+                  alt={`Preview ${index + 1}`}
+                  className="h-20 w-28 rounded-lg border border-border object-cover"
+                />
               ))}
             </div>
           )}
           <div className="space-y-2 md:col-span-3">
-            <Label>Features</Label>
-            <Input placeholder="Comma-separated features" value={form.features} onChange={(e) => setField("features", e.target.value)} />
+            <Label>Features (comma-separated)</Label>
+            <Input
+              placeholder="e.g. Leather seats, Sunroof, Navigation"
+              value={form.features}
+              onChange={(e) => setField("features", e.target.value)}
+            />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label>Tags</Label>
-            <Input placeholder="popular, hotDeal, promo, searched" value={form.tags} onChange={(e) => setField("tags", e.target.value)} />
+            <Label>Tags (comma-separated)</Label>
+            <Input
+              placeholder="popular, hotDeal, promo, searched"
+              value={form.tags}
+              onChange={(e) => setField("tags", e.target.value)}
+            />
           </div>
-          <div className="flex items-center gap-3 pt-8">
-            <Switch checked={form.visibility} onCheckedChange={(checked) => setField("visibility", checked)} />
+          <div className="flex items-center gap-3 pt-7">
+            <Switch
+              checked={form.visibility}
+              onCheckedChange={(checked) => setField("visibility", checked)}
+            />
             <Label>Visible on public site</Label>
           </div>
           <div className="space-y-2 md:col-span-3">
             <Label>Description</Label>
-            <Textarea value={form.description} onChange={(e) => setField("description", e.target.value)} />
+            <Textarea
+              value={form.description}
+              onChange={(e) => setField("description", e.target.value)}
+            />
           </div>
           <div className="md:col-span-3">
-            <Button type="submit" disabled={isSaving} className="bg-red-600 hover:bg-red-700 text-white">
-              {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+            <Button type="submit" disabled={isSaving} className="bg-brand hover:bg-brand-strong text-white">
+              {isSaving ? (
+                <Loader2 size={15} className="mr-2 animate-spin" />
+              ) : (
+                <Upload size={15} className="mr-2" />
+              )}
               Upload Vehicle
             </Button>
           </div>
         </form>
       </Card>
 
-      <Card className="p-6 border-none shadow-sm">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-4">
+      {/* Featured cars */}
+      <Card className="border-none p-6 shadow-sm">
+        <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold">Featured Cars</h2>
-            <p className="text-sm text-gray-600">Cars marked featured appear in the homepage Featured Collection.</p>
+            <h2 className="font-semibold text-gray-900">Featured Collection</h2>
+            <p className="text-sm text-gray-500">Cars marked featured appear on the homepage.</p>
           </div>
-          <Badge className="bg-red-600 text-white">{featuredCars.length} featured</Badge>
+          <span className="inline-flex items-center rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand">
+            {featuredCars.length} featured
+          </span>
         </div>
         <div className="flex flex-wrap gap-2">
           {featuredCars.length === 0 ? (
-            <p className="text-sm text-gray-500">No cars are currently featured.</p>
+            <p className="text-sm text-gray-400">No cars are currently featured.</p>
           ) : (
-            featuredCars.map((car) => <Badge key={car.id} variant="outline">{car.brand} {car.model}</Badge>)
+            featuredCars.map((car) => (
+              <span
+                key={car.id}
+                className="inline-flex items-center rounded-full border border-border bg-muted/40 px-3 py-1 text-sm text-gray-700"
+              >
+                {car.brand} {car.model}
+              </span>
+            ))
           )}
         </div>
       </Card>
 
-      <Card className="border-none shadow-sm overflow-hidden">
-        <div className="p-6 border-b flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <h2 className="text-lg font-semibold">All Vehicles</h2>
-          <Input className="md:max-w-sm" placeholder="Search vehicles..." value={search} onChange={(e) => setSearch(e.target.value)} />
+      {/* Vehicles table */}
+      <Card className="overflow-hidden border-none shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-gray-100 p-5 md:flex-row md:items-center md:justify-between">
+          <h2 className="font-semibold text-gray-900">All Vehicles</h2>
+          <Input
+            className="md:max-w-sm"
+            placeholder="Search vehicles…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Vehicle</TableHead>
-                <TableHead>Details</TableHead>
-                <TableHead>Images</TableHead>
-                <TableHead>Visibility</TableHead>
-                <TableHead>Featured</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+              <TableRow className="bg-gray-50/50">
+                <TableHead className="font-semibold">Vehicle</TableHead>
+                <TableHead className="font-semibold">Details</TableHead>
+                <TableHead className="font-semibold">Images</TableHead>
+                <TableHead className="font-semibold">Visible</TableHead>
+                <TableHead className="font-semibold">Featured</TableHead>
+                <TableHead className="font-semibold">Date</TableHead>
+                <TableHead className="text-right font-semibold">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading && (
-                <TableRow><TableCell colSpan={7} className="py-10 text-center text-gray-500">Loading vehicles...</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={7} className="py-12 text-center">
+                    <Loader2 size={20} className="mx-auto animate-spin text-gray-400" />
+                  </TableCell>
+                </TableRow>
               )}
               {!isLoading && cars.length === 0 && (
-                <TableRow><TableCell colSpan={7} className="py-10 text-center text-gray-500">No vehicles found.</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={7} className="py-12 text-center text-muted-foreground">
+                    No vehicles found.
+                  </TableCell>
+                </TableRow>
               )}
               {cars.map((car) => (
-                <TableRow key={car.id}>
+                <TableRow key={car.id} className="hover:bg-gray-50/50">
                   <TableCell>
-                    <div className="flex items-center gap-3 min-w-[220px]">
-                      <img src={car.image} alt={car.name} className="h-16 w-20 rounded object-cover bg-gray-100" />
+                    <div className="flex min-w-[220px] items-center gap-3">
+                      <img
+                        src={car.image}
+                        alt={car.name}
+                        className="h-14 w-20 rounded-lg bg-gray-100 object-cover"
+                      />
                       <div>
-                        <div className="font-medium">{car.name}</div>
-                        <div className="text-sm text-gray-600">{car.brand} {car.model}</div>
-                        <div className="text-sm text-gray-600">{formatCurrency(car.price)}</div>
+                        <div className="font-medium text-gray-900">{car.name}</div>
+                        <div className="text-sm text-gray-500">
+                          {car.brand} {car.model}
+                        </div>
+                        <div className="text-sm font-medium text-brand">{formatCurrency(car.price)}</div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-gray-600">
-                    <div>{car.year} • {car.condition} • {car.bodyType}</div>
-                    <div>{car.transmission} • {car.fuelType} • {car.mileage.toLocaleString()} km</div>
-                    <div>{labelStatus(car.status)}</div>
+                    <div>
+                      {car.year} · {car.condition} · {car.bodyType}
+                    </div>
+                    <div>
+                      {car.transmission} · {car.fuelType} · {car.mileage.toLocaleString()} km
+                    </div>
+                    <div className="mt-0.5">
+                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+                        {labelStatus(car.status)}
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-2 max-w-[220px]">
-                        {car.images.map((image) => (
+                    <div className="flex flex-wrap gap-1.5 max-w-[220px]">
+                      {car.images.map((image) => (
                         <div key={image.id} className="relative">
-                          <img src={image.url} alt={car.name} className="h-12 w-16 rounded object-cover" />
+                          <img
+                            src={image.url}
+                            alt={car.name}
+                            className="h-12 w-16 rounded-lg object-cover"
+                          />
                           <button
                             type="button"
                             onClick={() => deleteImage(car.id, image.id)}
-                            className="absolute -right-2 -top-2 rounded-full bg-red-600 p-1 text-white"
+                            className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-red-600 text-white shadow"
                             disabled={actionId === `image-${image.id}`}
                           >
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 size={10} />
                           </button>
                         </div>
                       ))}
-                      <label className="h-12 w-16 cursor-pointer rounded border border-dashed border-gray-300 flex items-center justify-center">
-                        <ImagePlus className="h-4 w-4 text-gray-500" />
-                        <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => updateExistingFiles(car.id, e.target.files)} />
+                      <label className="flex h-12 w-16 cursor-pointer items-center justify-center rounded-lg border border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50">
+                        <ImagePlus size={16} className="text-gray-400" />
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => updateExistingFiles(car.id, e.target.files)}
+                        />
                       </label>
                       {existingImagePreviews[car.id]?.map((preview, index) => (
-                        <img key={preview} src={preview} alt={`Pending upload ${index + 1}`} className="h-12 w-16 rounded object-cover border border-green-300" />
+                        <img
+                          key={preview}
+                          src={preview}
+                          alt={`Pending ${index + 1}`}
+                          className="h-12 w-16 rounded-lg border border-green-300 object-cover"
+                        />
                       ))}
                     </div>
                   </TableCell>
                   <TableCell>
                     <Switch
                       checked={!!car.visibility}
-                      onCheckedChange={(checked) => updateCar(car, { visibility: checked } as Partial<CarRecord>)}
+                      onCheckedChange={(checked) =>
+                        updateCar(car, { visibility: checked } as Partial<CarRecord>)
+                      }
                       disabled={actionId === `car-${car.id}`}
                     />
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm" onClick={() => toggleFeatured(car)}>
-                      {car.tags.includes("popular") ? <CheckCircle className="h-4 w-4 text-green-600" /> : <Star className="h-4 w-4" />}
+                    <Button variant="ghost" size="sm" onClick={() => toggleFeatured(car)} title="Toggle featured">
+                      {car.tags.includes("popular") ? (
+                        <CheckCircle size={16} className="text-green-600" />
+                      ) : (
+                        <Star size={16} className="text-gray-400" />
+                      )}
                     </Button>
                   </TableCell>
-                  <TableCell className="text-sm text-gray-600">{formatDate(car.createdAt)}</TableCell>
+                  <TableCell className="text-sm text-gray-500">{formatDate(car.createdAt)}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => deleteCar(car.id)} disabled={actionId === `delete-${car.id}`}>
-                      {actionId === `delete-${car.id}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-red-600" />}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteCar(car.id)}
+                      disabled={actionId === `delete-${car.id}`}
+                    >
+                      {actionId === `delete-${car.id}` ? (
+                        <Loader2 size={15} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={15} className="text-red-500" />
+                      )}
                     </Button>
                   </TableCell>
                 </TableRow>

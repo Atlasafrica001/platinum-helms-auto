@@ -4,8 +4,9 @@
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
-console.log(import.meta.env.VITE_API_BASE_URL);
-console.log(API_BASE_URL);
+
+// Abort a request if the backend doesn't respond in time
+const REQUEST_TIMEOUT_MS = 15000;
 
 // Token storage keys
 const TOKEN_KEY = 'admin_token';
@@ -95,12 +96,28 @@ async function fetchApi<T = any>(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  // Make request
-  const response = await fetch(url, {
-    ...options,
-    headers,
-    credentials: 'include', // Include cookies for HTTP-only cookie support
-  });
+  // Make request with a timeout so a hung backend doesn't spin forever
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+      credentials: 'include', // Include cookies for HTTP-only cookie support
+      signal: controller.signal,
+    });
+  } catch (error) {
+    // Network failure, CORS, or timeout — surface a human-readable message
+    const message =
+      error instanceof DOMException && error.name === 'AbortError'
+        ? 'The request timed out. Please try again.'
+        : 'Unable to reach the server. Please check your connection and try again.';
+    throw new ApiError(message, 0);
+  } finally {
+    clearTimeout(timeout);
+  }
 
   // Parse response
   let data: ApiResponse<T>;

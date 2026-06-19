@@ -1,41 +1,67 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AdminAuthProvider } from "./context/AdminAuthContext";
 import { Navigation } from "./components/Navigation";
 import { Footer } from "./components/Footer";
-import { HomePage } from "./pages/HomePage";
-import { CarPurchasePage } from "./pages/CarPurchasePage";
-import { CarImportationPage } from "./pages/CarImportationPage";
-import { CarFinancingPage } from "./pages/CarFinancingPage";
-import { AboutUsPage } from "./pages/AboutUsPage";
-import { ContactPage } from "./pages/ContactPage";
-import { ComingSoonPage } from "./pages/ComingSoonPage";
-import AdminLogin from "./pages/admin/AdminLogin";
-import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
-import ContactLeadsPage from "./pages/admin/ContactLeadsPage";
-import FinanceApplicationsPage from "./pages/admin/FinanceApplicationsPage";
-import VehicleInventoryPage from "./pages/admin/VehicleInventoryPage";
-import AdminDashboardWrapper from "./components/AdminDashboardWrapper";
-import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import { LeadCaptureDialog } from "./components/LeadCaptureDialog";
 import { FloatingWhatsAppButton } from "./components/FloatingWhatsAppButton";
+import { ErrorBoundary } from "./components/feedback/ErrorBoundary";
+import { Toaster } from "./components/sonner";
+import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 
-/**
- * Scroll to top on route change
- */
+// Lazy-load all page chunks — keeps the initial JS bundle slim
+const HomePage = lazy(() =>
+  import("./pages/HomePage").then((m) => ({ default: m.HomePage })),
+);
+const CarPurchasePage = lazy(() =>
+  import("./pages/CarPurchasePage").then((m) => ({ default: m.CarPurchasePage })),
+);
+const CarImportationPage = lazy(() =>
+  import("./pages/CarImportationPage").then((m) => ({ default: m.CarImportationPage })),
+);
+const CarFinancingPage = lazy(() =>
+  import("./pages/CarFinancingPage").then((m) => ({ default: m.CarFinancingPage })),
+);
+const AboutUsPage = lazy(() =>
+  import("./pages/AboutUsPage").then((m) => ({ default: m.AboutUsPage })),
+);
+const ContactPage = lazy(() =>
+  import("./pages/ContactPage").then((m) => ({ default: m.ContactPage })),
+);
+const ComingSoonPage = lazy(() =>
+  import("./pages/ComingSoonPage").then((m) => ({ default: m.ComingSoonPage })),
+);
+
+// Admin pages (each becomes its own chunk; split from public pages)
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminDashboardWrapper = lazy(() => import("./components/AdminDashboardWrapper"));
+const VehicleInventoryPage = lazy(() => import("./pages/admin/VehicleInventoryPage"));
+const FinanceApplicationsPage = lazy(() => import("./pages/admin/FinanceApplicationsPage"));
+const ContactLeadsPage = lazy(() => import("./pages/admin/ContactLeadsPage"));
+const AdminSettingsPage = lazy(() => import("./pages/admin/AdminSettingsPage"));
+
+/** Full-page loading spinner shown while lazy chunks load */
+function PageLoader() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-obsidian">
+      <div className="flex flex-col items-center gap-4">
+        <div className="size-9 animate-spin rounded-full border-2 border-brand/20 border-t-brand" />
+        <p className="text-xs tracking-widest text-white/30 uppercase">Loading</p>
+      </div>
+    </div>
+  );
+}
+
+/** Scroll to top on every route change */
 function ScrollToTop() {
   const { pathname } = useLocation();
-
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [pathname]);
-
   return null;
 }
 
-/**
- * Layout wrapper for public pages
- */
+/** Shared nav → content → footer shell for public pages */
 function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
@@ -48,237 +74,169 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-/**
- * Wrapper components that provide onNavigate prop using React Router
- */
+/** Injects the onNavigate prop using React Router for each public page */
+function usePageNavigate() {
+  const navigate = useNavigate();
+  const routes: Record<string, string> = {
+    home: "/home",
+    purchase: "/purchase",
+    importation: "/importation",
+    financing: "/financing",
+    about: "/about",
+    contact: "/contact",
+    admin: "/admin",
+    comingsoon: "/coming-soon",
+  };
+  return (page: string) => navigate(routes[page.toLowerCase()] ?? `/${page}`);
+}
+
 function HomePageWrapper() {
-  const navigate = useNavigate();
-  const handleNavigate = (page: string) => {
-    const routes: Record<string, string> = {
-      home: "/home",
-      purchase: "/purchase",
-      importation: "/importation",
-      financing: "/financing",
-      about: "/about",
-      contact: "/contact",
-      admin: "/admin",
-      comingsoon: "/coming-soon",
-    };
-    navigate(routes[page.toLowerCase()] || `/${page}`);
-  };
-  return <HomePage onNavigate={handleNavigate} />;
+  const onNavigate = usePageNavigate();
+  return <HomePage onNavigate={onNavigate} />;
 }
-
 function CarPurchasePageWrapper() {
-  const navigate = useNavigate();
-  const handleNavigate = (page: string) => {
-    const routes: Record<string, string> = {
-      home: "/home",
-      purchase: "/purchase",
-      importation: "/importation",
-      financing: "/financing",
-      about: "/about",
-      contact: "/contact",
-      admin: "/admin",
-      comingsoon: "/coming-soon",
-    };
-    navigate(routes[page.toLowerCase()] || `/${page}`);
-  };
-  return <CarPurchasePage onNavigate={handleNavigate} />;
+  const onNavigate = usePageNavigate();
+  return <CarPurchasePage onNavigate={onNavigate} />;
 }
-
 function CarImportationPageWrapper() {
-  const navigate = useNavigate();
-  const handleNavigate = (page: string) => {
-    const routes: Record<string, string> = {
-      home: "/home",
-      purchase: "/purchase",
-      importation: "/importation",
-      financing: "/financing",
-      about: "/about",
-      contact: "/contact",
-      admin: "/admin",
-      comingsoon: "/coming-soon",
-    };
-    navigate(routes[page.toLowerCase()] || `/${page}`);
-  };
-  return <CarImportationPage onNavigate={handleNavigate} />;
+  const onNavigate = usePageNavigate();
+  return <CarImportationPage onNavigate={onNavigate} />;
 }
-
 function CarFinancingPageWrapper() {
-  const navigate = useNavigate();
-  const handleNavigate = (page: string) => {
-    const routes: Record<string, string> = {
-      home: "/home",
-      purchase: "/purchase",
-      importation: "/importation",
-      financing: "/financing",
-      about: "/about",
-      contact: "/contact",
-      admin: "/admin",
-      comingsoon: "/coming-soon",
-    };
-    navigate(routes[page.toLowerCase()] || `/${page}`);
-  };
-  return <CarFinancingPage onNavigate={handleNavigate} />;
+  const onNavigate = usePageNavigate();
+  return <CarFinancingPage onNavigate={onNavigate} />;
 }
-
 function AboutUsPageWrapper() {
-  const navigate = useNavigate();
-  const handleNavigate = (page: string) => {
-    const routes: Record<string, string> = {
-      home: "/home",
-      purchase: "/purchase",
-      importation: "/importation",
-      financing: "/financing",
-      about: "/about",
-      contact: "/contact",
-      admin: "/admin",
-      comingsoon: "/coming-soon",
-    };
-    navigate(routes[page.toLowerCase()] || `/${page}`);
-  };
-  return <AboutUsPage onNavigate={handleNavigate} />;
+  const onNavigate = usePageNavigate();
+  return <AboutUsPage onNavigate={onNavigate} />;
 }
-
 function ComingSoonPageWrapper() {
-  const navigate = useNavigate();
-  const handleNavigate = (page: string) => {
-    const routes: Record<string, string> = {
-      home: "/home",
-      purchase: "/purchase",
-      importation: "/importation",
-      financing: "/financing",
-      about: "/about",
-      contact: "/contact",
-      admin: "/admin",
-      comingsoon: "/coming-soon",
-    };
-    navigate(routes[page.toLowerCase()] || `/${page}`);
-  };
-  return <ComingSoonPage onNavigate={handleNavigate} />;
+  const onNavigate = usePageNavigate();
+  return <ComingSoonPage onNavigate={onNavigate} />;
 }
 
-/**
- * Main App Component
- */
 export default function App() {
   return (
-    <BrowserRouter>
-      <AdminAuthProvider>
-        <ScrollToTop />
-        <div className="min-h-screen bg-white">
-          <Routes>
-            {/* Home as Landing Page */}
-            <Route path="/" element={<Navigate to="/home" replace />} />
-            
-            {/* Public Routes */}
-            <Route
-              path="/home"
-              element={
-                <PublicLayout>
-                  <HomePageWrapper />
-                </PublicLayout>
-              }
-            />
-            <Route
-              path="/purchase"
-              element={
-                <PublicLayout>
-                  <CarPurchasePageWrapper />
-                </PublicLayout>
-              }
-            />
-            <Route
-              path="/importation"
-              element={
-                <PublicLayout>
-                  <CarImportationPageWrapper />
-                </PublicLayout>
-              }
-            />
-            <Route
-              path="/financing"
-              element={
-                <PublicLayout>
-                  <CarFinancingPageWrapper />
-                </PublicLayout>
-              }
-            />
-            <Route
-              path="/about"
-              element={
-                <PublicLayout>
-                  <AboutUsPageWrapper />
-                </PublicLayout>
-              }
-            />
-            <Route
-              path="/contact"
-              element={
-                <PublicLayout>
-                  <ContactPage />
-                </PublicLayout>
-              }
-            />
-            <Route path="/coming-soon" element={<ComingSoonPageWrapper />} />
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AdminAuthProvider>
+          <Toaster position="top-right" richColors closeButton />
+          <ScrollToTop />
+          <div className="min-h-screen bg-white">
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* Root redirect */}
+                <Route path="/" element={<Navigate to="/home" replace />} />
 
-            {/* Admin Routes */}
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminDashboardWrapper />
-                </ProtectedAdminRoute>
-              }
-            />
-            <Route
-              path="/admin/vehicles"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminDashboardWrapper>
-                    <VehicleInventoryPage />
-                  </AdminDashboardWrapper>
-                </ProtectedAdminRoute>
-              }
-            />
-            <Route
-              path="/admin/finance-applications"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminDashboardWrapper>
-                    <FinanceApplicationsPage />
-                  </AdminDashboardWrapper>
-                </ProtectedAdminRoute>
-              }
-            />
-            <Route
-              path="/admin/contact-leads"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminDashboardWrapper>
-                    <ContactLeadsPage />
-                  </AdminDashboardWrapper>
-                </ProtectedAdminRoute>
-              }
-            />
-            <Route
-              path="/admin/settings"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminDashboardWrapper>
-                    <AdminSettingsPage />
-                  </AdminDashboardWrapper>
-                </ProtectedAdminRoute>
-              }
-            />
+                {/* Public routes */}
+                <Route
+                  path="/home"
+                  element={
+                    <PublicLayout>
+                      <HomePageWrapper />
+                    </PublicLayout>
+                  }
+                />
+                <Route
+                  path="/purchase"
+                  element={
+                    <PublicLayout>
+                      <CarPurchasePageWrapper />
+                    </PublicLayout>
+                  }
+                />
+                <Route
+                  path="/importation"
+                  element={
+                    <PublicLayout>
+                      <CarImportationPageWrapper />
+                    </PublicLayout>
+                  }
+                />
+                <Route
+                  path="/financing"
+                  element={
+                    <PublicLayout>
+                      <CarFinancingPageWrapper />
+                    </PublicLayout>
+                  }
+                />
+                <Route
+                  path="/about"
+                  element={
+                    <PublicLayout>
+                      <AboutUsPageWrapper />
+                    </PublicLayout>
+                  }
+                />
+                <Route
+                  path="/contact"
+                  element={
+                    <PublicLayout>
+                      <ContactPage />
+                    </PublicLayout>
+                  }
+                />
+                <Route path="/coming-soon" element={<ComingSoonPageWrapper />} />
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
-      </AdminAuthProvider>
-    </BrowserRouter>
+                {/* Admin routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedAdminRoute>
+                      <AdminDashboardWrapper />
+                    </ProtectedAdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/vehicles"
+                  element={
+                    <ProtectedAdminRoute>
+                      <AdminDashboardWrapper>
+                        <VehicleInventoryPage />
+                      </AdminDashboardWrapper>
+                    </ProtectedAdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/finance-applications"
+                  element={
+                    <ProtectedAdminRoute>
+                      <AdminDashboardWrapper>
+                        <FinanceApplicationsPage />
+                      </AdminDashboardWrapper>
+                    </ProtectedAdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/contact-leads"
+                  element={
+                    <ProtectedAdminRoute>
+                      <AdminDashboardWrapper>
+                        <ContactLeadsPage />
+                      </AdminDashboardWrapper>
+                    </ProtectedAdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/settings"
+                  element={
+                    <ProtectedAdminRoute>
+                      <AdminDashboardWrapper>
+                        <AdminSettingsPage />
+                      </AdminDashboardWrapper>
+                    </ProtectedAdminRoute>
+                  }
+                />
+
+                {/* Fallback */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+          </div>
+        </AdminAuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
