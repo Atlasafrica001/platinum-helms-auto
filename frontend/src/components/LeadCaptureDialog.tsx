@@ -1,147 +1,77 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/dialog";
 import { Button } from "../components/button";
 import { Input } from "../components/input";
 import { Label } from "../components/label";
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/select";
-import { X } from "lucide-react";
+import { Sparkles } from "lucide-react";
+
+const STORAGE_KEY = "platinum_helms_lead_submitted";
 
 export function LeadCaptureDialog() {
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    interest: "",
-  });
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
 
   useEffect(() => {
-    // Check if user has already submitted the form
-    const hasSubmitted = localStorage.getItem("platinum_helms_lead_submitted");
-    
-    if (!hasSubmitted) {
-      // Show dialog after a short delay for better UX
-      const timer = setTimeout(() => {
-        setOpen(true);
-      }, 1500);
-      
-      return () => clearTimeout(timer);
-    }
+    if (localStorage.getItem(STORAGE_KEY)) return;
+    const timer = setTimeout(() => setOpen(true), 2500);
+    return () => clearTimeout(timer);
   }, []);
+
+  const dismiss = () => {
+    localStorage.setItem(STORAGE_KEY, "true");
+    setOpen(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Store form data (in a real app, send to backend)
-    console.log("Lead captured:", formData);
-    
-    // Mark as submitted in localStorage
-    localStorage.setItem("platinum_helms_lead_submitted", "true");
-    
-    // Redirect to WhatsApp
-    const message = `Hi! I'm ${formData.name}. I'm interested in ${formData.interest || "luxury vehicles"} at Platinum Helms.`;
-    const whatsappUrl = `https://wa.me/15551234567?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-    
-    // Close dialog
+    localStorage.setItem(STORAGE_KEY, "true");
     setOpen(false);
-  };
-
-  const handleSkip = () => {
-    localStorage.setItem("platinum_helms_lead_submitted", "true");
-    setOpen(false);
+    toast.success("Thanks! Continuing your enquiry on WhatsApp…");
+    const message = `Hi! I'm ${formData.name}. I'm interested in luxury vehicles at Platinum Helms.`;
+    window.open(`https://wa.me/2348123456789?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent
-        className="fixed left-1/2 top-1/2 lg:-translate-x-64 lg:-translate-y-64 md:-translate-x-72 md:-translate-y-72 sm:-translate-x-80 sm:-translate-y-80 sm:max-w-[500px] w-[90vw] max-w-md max-h-[85vh] overflow-y-auto p-0 rounded-lg "
-      >
-        <div className="relative">
-          {/* Close button */}
-          <button
-            onClick={handleSkip}
-            className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-          >
-            <X size={20} className="text-white" />
-          </button>
-
-          {/* Header with red accent */}
-          <div className="bg-gradient-to-br from-black to-gray-900 p-8 text-white">
-            <DialogHeader>
-              <DialogTitle className="text-white text-2xl mb-2">
-                Welcome to Platinum Helms
-              </DialogTitle>
-              <DialogDescription className="text-white/90 text-base">
-                Discover exclusive offers and personalized recommendations for your
-                luxury vehicle journey.
-              </DialogDescription>
-            </DialogHeader>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="p-8 space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name *</Label>
-              <Input
-                id="name"
-                placeholder="John Doe"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address *</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="john@example.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+1 (555) 000-0000"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              />
-            </div>
-
-
-
-            <div className="flex gap-3 pt-2">
-              <Button
-                type="submit"
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                size="lg"
-              >
-                Get Started
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleSkip}
-                className="flex-1"
-                size="lg"
-              >
-                Skip for Now
-              </Button>
-            </div>
-
-            <p className="text-xs text-gray-500 text-center">
-              We respect your privacy. Your information is secure and will never be
-              shared with third parties.
-            </p>
-          </form>
+    <Dialog open={open} onOpenChange={(v) => (v ? setOpen(true) : dismiss())}>
+      <DialogContent className="w-[92vw] max-w-md overflow-hidden rounded-2xl border-border p-0">
+        {/* Header with brand accent */}
+        <div className="relative bg-gradient-to-br from-obsidian to-slate-deep p-8 text-white">
+          <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand">
+            <Sparkles size={13} /> Exclusive Access
+          </span>
+          <DialogHeader>
+            <DialogTitle className="font-display text-3xl font-bold text-white">
+              Welcome to Platinum Helms
+            </DialogTitle>
+            <DialogDescription className="mt-1 text-white/70">
+              Discover exclusive offers and personalised recommendations for your luxury vehicle journey.
+            </DialogDescription>
+          </DialogHeader>
         </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-5 p-8">
+          <div className="space-y-2">
+            <Label htmlFor="lead-name">Full Name *</Label>
+            <Input id="lead-name" placeholder="John Doe" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="lead-email">Email Address *</Label>
+            <Input id="lead-email" type="email" placeholder="john@example.com" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="lead-phone">Phone Number</Label>
+            <Input id="lead-phone" type="tel" placeholder="+234 812 345 6789" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+          </div>
+          <div className="flex gap-3 pt-1">
+            <Button type="submit" size="lg" className="flex-1 bg-brand hover:bg-brand-strong">Get Started</Button>
+            <Button type="button" size="lg" variant="outline" className="flex-1" onClick={dismiss}>Skip for Now</Button>
+          </div>
+          <p className="text-center text-xs text-muted-foreground">
+            We respect your privacy. Your information is secure and never shared with third parties.
+          </p>
+        </form>
       </DialogContent>
     </Dialog>
   );

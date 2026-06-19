@@ -1,165 +1,147 @@
-/**
- * Admin Login Page
- * Handles authentication for admin users
- */
-
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAdminAuth } from '@/context/AdminAuthContext';
-import { Button } from '@/components/button';
-import { Input } from '@/components/input';
-import { Label } from '@/components/label';
-import { Alert, AlertDescription } from '@/components/alert';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card';
-import { Loader2, Lock, Mail, AlertCircle } from 'lucide-react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAdminAuth } from "@/context/AdminAuthContext";
+import { Button } from "@/components/button";
+import { Input } from "@/components/input";
+import { Label } from "@/components/label";
+import { Loader2, Lock, Mail, AlertTriangle, ShieldCheck } from "lucide-react";
 
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAdminAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Redirect if already authenticated
   React.useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/admin');
-    }
+    if (isAuthenticated) navigate("/admin");
   }, [isAuthenticated, navigate]);
 
-  /**
-   * Handle form submission
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
-    // Validation
     if (!email || !password) {
-      setError('Please enter both email and password');
+      setError("Please enter both email and password.");
       return;
     }
-
-    if (!email.includes('@')) {
-      setError('Please enter a valid email address');
+    if (!email.includes("@")) {
+      setError("Please enter a valid email address.");
       return;
     }
-
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError("Password must be at least 6 characters.");
       return;
     }
 
     setIsLoading(true);
-
     try {
       await login(email, password);
-      // Redirect handled by auth state change
-      navigate('/admin');
+      navigate("/admin");
     } catch (err: any) {
-      console.error('Login error:', err);
-      setError(err.message || 'Invalid email or password. Please try again.');
+      setError(err.message || "Invalid email or password. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary/10 rounded-full">
-              <Lock className="h-8 w-8 text-primary" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
-          <CardDescription>
-            Enter your credentials to access the admin dashboard
-          </CardDescription>
-        </CardHeader>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-obsidian px-4">
+      {/* Background glow blobs */}
+      <div className="pointer-events-none absolute -left-40 -top-40 size-[600px] rounded-full bg-brand/10 blur-[120px]" />
+      <div className="pointer-events-none absolute -bottom-40 -right-40 size-[500px] rounded-full bg-brand/5 blur-[100px]" />
 
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Error Alert */}
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+      <div className="relative w-full max-w-md">
+        {/* Card */}
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-deep/60 shadow-luxe backdrop-blur-xl">
+          {/* Top accent bar */}
+          <div className="h-1 w-full bg-gradient-to-r from-brand via-brand/60 to-transparent" />
 
-            {/* Email Field */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@platinumhelms.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  disabled={isLoading}
-                  autoComplete="email"
-                  required
-                />
+          <div className="px-8 py-10">
+            {/* Icon + Brand */}
+            <div className="mb-8 flex flex-col items-center">
+              <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-brand/15 ring-1 ring-brand/30">
+                <ShieldCheck size={28} className="text-brand" />
               </div>
+              <p className="font-display text-2xl font-bold tracking-tight text-white">
+                Platinum Helms
+              </p>
+              <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-widest text-white/50">
+                Admin Portal
+              </span>
             </div>
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
-                  disabled={isLoading}
-                  autoComplete="current-password"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Logging in...
-                </>
-              ) : (
-                'Login'
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="flex items-start gap-3 rounded-xl border border-brand/30 bg-brand/10 px-4 py-3 text-sm text-brand">
+                  <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+                  {error}
+                </div>
               )}
-            </Button>
 
-            {/* Info Text */}
-            <p className="text-sm text-center text-gray-500 mt-4">
-              Default credentials for testing:
-              <br />
-              <code className="text-xs bg-gray-100 px-2 py-1 rounded mt-1 inline-block">
-                admin@platinumhelms.com / Admin123!
-              </code>
-            </p>
-          </form>
-        </CardContent>
-      </Card>
+              <div className="space-y-2">
+                <Label htmlFor="login-email" className="text-sm text-white/70">
+                  Email Address
+                </Label>
+                <div className="relative">
+                  <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
+                  <Input
+                    id="login-email"
+                    type="email"
+                    placeholder="admin@platinumhelms.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/25 focus-visible:ring-brand/50"
+                    disabled={isLoading}
+                    autoComplete="email"
+                    required
+                  />
+                </div>
+              </div>
 
-      {/* Footer */}
-      <div className="absolute bottom-4 text-center w-full">
-        <p className="text-sm text-gray-500">
+              <div className="space-y-2">
+                <Label htmlFor="login-password" className="text-sm text-white/70">
+                  Password
+                </Label>
+                <div className="relative">
+                  <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
+                  <Input
+                    id="login-password"
+                    type="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/25 focus-visible:ring-brand/50"
+                    disabled={isLoading}
+                    autoComplete="current-password"
+                    required
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                size="lg"
+                className="mt-2 w-full bg-brand hover:bg-brand-strong"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 size={16} className="mr-2 animate-spin" />
+                    Signing in…
+                  </>
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+            </form>
+
+          </div>
+        </div>
+
+        <p className="mt-6 text-center text-xs text-white/25">
           © {new Date().getFullYear()} Platinum Helms Autos. All rights reserved.
         </p>
       </div>

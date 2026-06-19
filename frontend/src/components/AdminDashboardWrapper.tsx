@@ -1,15 +1,10 @@
-/**
- * Admin Dashboard Wrapper
- * Adds auth integration, logout, and user display to existing dashboard
- */
-
-import { ReactNode, useEffect } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useAdminAuth } from '@/context/AdminAuthContext';
-import { AdminDashboard } from './AdminDashboard';
-import { Button } from './button';
-import { Avatar, AvatarFallback } from './avatar';
-import { Car, FileText, LayoutDashboard, LogOut, MessageSquare, Settings, User } from 'lucide-react';
+import { ReactNode, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAdminAuth } from "@/context/AdminAuthContext";
+import { AdminDashboard } from "./AdminDashboard";
+import { Button } from "./button";
+import { Avatar, AvatarFallback } from "./avatar";
+import { Car, FileText, LayoutDashboard, LogOut, MessageSquare, Settings, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from './dropdown-menu';
+} from "./dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,161 +23,176 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from './alert-dialog';
+} from "./alert-dialog";
 
 interface AdminDashboardWrapperProps {
   children?: ReactNode;
 }
 
 const adminNavigation = [
-  { label: 'Dashboard', path: '/admin', icon: LayoutDashboard },
-  { label: 'Vehicle Inventory', path: '/admin/vehicles', icon: Car },
-  { label: 'Finance Applications', path: '/admin/finance-applications', icon: FileText },
-  { label: 'Contact Leads', path: '/admin/contact-leads', icon: MessageSquare },
-  { label: 'Admin Settings', path: '/admin/settings', icon: Settings },
+  { label: "Dashboard", path: "/admin", icon: LayoutDashboard },
+  { label: "Inventory", path: "/admin/vehicles", icon: Car },
+  { label: "Finance Apps", path: "/admin/finance-applications", icon: FileText },
+  { label: "Leads", path: "/admin/contact-leads", icon: MessageSquare },
+  { label: "Settings", path: "/admin/settings", icon: Settings },
 ];
 
 const AdminDashboardWrapper = ({ children }: AdminDashboardWrapperProps) => {
   const { user, logout, refreshUser } = useAdminAuth();
   const navigate = useNavigate();
 
-  // Refresh user data on mount
   useEffect(() => {
     refreshUser();
   }, []);
 
-  /**
-   * Handle logout
-   */
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/home');
-    } catch (error) {
-      console.error('Logout failed:', error);
+      navigate("/home");
+    } catch {
+      // swallow logout errors
     }
   };
 
-  /**
-   * Get user initials for avatar
-   */
   const getUserInitials = () => {
-    if (!user) return 'A';
-    return `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase();
+    if (!user) return "A";
+    return `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase();
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Admin Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="flex flex-col gap-4 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Platinum Helms Admin
-            </h1>
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-obsidian shadow-sm">
+        <div className="mx-auto flex max-w-screen-2xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+          {/* Brand */}
+          <div className="flex items-center gap-3">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-brand">
+              <Car size={16} className="text-white" />
+            </div>
+            <span className="font-display text-base font-bold text-white">
+              Platinum Helms
+              <span className="ml-2 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-normal uppercase tracking-widest text-white/50">
+                Admin
+              </span>
+            </span>
           </div>
 
-          <nav className="flex flex-wrap items-center gap-2">
+          {/* Nav */}
+          <nav className="hidden items-center gap-1 lg:flex">
             {adminNavigation.map((item) => {
               const Icon = item.icon;
-
               return (
                 <NavLink
                   key={item.path}
                   to={item.path}
-                  end={item.path === '/admin'}
+                  end={item.path === "/admin"}
                   className={({ isActive }) =>
-                    `inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                    `inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-red-600 text-white'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                        ? "bg-brand text-white"
+                        : "text-white/60 hover:bg-white/10 hover:text-white"
                     }`
                   }
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon size={15} />
                   {item.label}
                 </NavLink>
               );
             })}
           </nav>
 
-          {/* User Menu */}
-          <div className="flex items-center gap-4">
-            {user && (
-              <div className="hidden md:block text-sm text-right">
-                <p className="font-medium text-gray-900">
-                  {user.firstName} {user.lastName}
-                </p>
-                <p className="text-gray-500">{user.email}</p>
-              </div>
-            )}
+          {/* Mobile nav */}
+          <nav className="flex items-center gap-1 lg:hidden">
+            {adminNavigation.map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  end={item.path === "/admin"}
+                  className={({ isActive }) =>
+                    `flex size-9 items-center justify-center rounded-lg transition-colors ${
+                      isActive
+                        ? "bg-brand text-white"
+                        : "text-white/50 hover:bg-white/10 hover:text-white"
+                    }`
+                  }
+                  title={item.label}
+                >
+                  <Icon size={16} />
+                </NavLink>
+              );
+            })}
+          </nav>
 
+          {/* User menu + Logout */}
+          <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar>
-                    <AvatarFallback className="bg-primary text-white">
+                <Button variant="ghost" className="h-9 gap-2 rounded-lg px-2 text-white/70 hover:bg-white/10 hover:text-white">
+                  <Avatar className="size-7">
+                    <AvatarFallback className="bg-brand text-xs font-semibold text-white">
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
+                  <span className="hidden text-sm md:block">
+                    {user?.firstName}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
-                  <div className="flex flex-col space-y-1">
+                  <div className="flex flex-col space-y-0.5">
                     <p className="text-sm font-medium">
                       {user?.firstName} {user?.lastName}
                     </p>
-                    <p className="text-xs text-gray-500">{user?.email}</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      Role: {user?.role}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/admin/settings')}>
-                  <User className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={() => navigate("/admin/settings")}>
+                  <User size={14} className="mr-2" />
                   Profile Settings
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem
-                      className="text-red-600"
-                      onSelect={(event) => event.preventDefault()}
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Logout
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Log out of admin dashboard?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        You will be signed out of the admin dashboard and returned to the homepage.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleLogout}
-                        className="bg-red-600 text-white hover:bg-red-700"
-                      >
-                        Logout
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Visible logout button */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 gap-1.5 rounded-lg border border-white/10 px-3 text-white/60 hover:border-brand/40 hover:bg-brand/10 hover:text-brand"
+                >
+                  <LogOut size={14} />
+                  <span className="hidden text-sm sm:block">Logout</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Log out of admin dashboard?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You will be signed out and returned to the homepage.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleLogout}
+                    className="bg-brand text-white hover:bg-brand-strong"
+                  >
+                    Logout
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </header>
 
-      {/* Dashboard Content */}
-      <main>
-        {children || <AdminDashboard />}
-      </main>
+      <main>{children || <AdminDashboard />}</main>
     </div>
   );
 };

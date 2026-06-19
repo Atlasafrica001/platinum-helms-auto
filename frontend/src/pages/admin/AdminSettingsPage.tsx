@@ -5,7 +5,7 @@ import { Button } from "@/components/button";
 import { Card } from "@/components/card";
 import { Input } from "@/components/input";
 import { Label } from "@/components/label";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 
 export default function AdminSettingsPage() {
   const { user, refreshUser } = useAdminAuth();
@@ -37,46 +37,75 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Admin Settings</h1>
-        <p className="text-gray-600">Manage your dashboard account and security settings.</p>
+        <h1 className="font-display text-2xl font-bold text-gray-900">Admin Settings</h1>
+        <p className="text-sm text-gray-500">Manage your dashboard account and security settings.</p>
       </div>
 
-      {message && <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{message}</div>}
-      {error && <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+      {message && (
+        <div className="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          <CheckCircle2 size={15} className="mt-0.5 shrink-0" /> {message}
+        </div>
+      )}
+      {error && (
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertTriangle size={15} className="mt-0.5 shrink-0" /> {error}
+        </div>
+      )}
 
-      <Card className="p-6 border-none shadow-sm">
+      {/* Current admin card */}
+      <Card className="border-none p-6 shadow-sm">
         <div className="flex items-start gap-4">
-          <div className="h-12 w-12 rounded-lg bg-red-50 flex items-center justify-center">
-            <ShieldCheck className="h-6 w-6 text-red-600" />
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand/10">
+            <ShieldCheck size={22} className="text-brand" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold">Current Admin</h2>
-            <p className="text-sm text-gray-600">{user?.firstName} {user?.lastName}</p>
-            <p className="text-sm text-gray-600">{user?.email}</p>
-            <p className="text-sm text-gray-500">Role: {user?.role}</p>
+            <h2 className="font-semibold text-gray-900">Current Admin</h2>
+            <p className="mt-0.5 text-sm text-gray-700">
+              {user?.firstName} {user?.lastName}
+            </p>
+            <p className="text-sm text-gray-500">{user?.email}</p>
+            <span className="mt-1.5 inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs font-medium capitalize text-gray-600">
+              {user?.role}
+            </span>
           </div>
         </div>
       </Card>
 
-      <Card className="p-6 border-none shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Change Password</h2>
+      {/* Change password card */}
+      <Card className="border-none p-6 shadow-sm">
+        <h2 className="mb-5 font-semibold text-gray-900">Change Password</h2>
         <form onSubmit={changePassword} className="space-y-4">
           <div className="space-y-2">
             <Label>Current Password</Label>
-            <Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
+            <Input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label>New Password</Label>
-            <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+            <Input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label>Confirm New Password</Label>
-            <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+            <Input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
           </div>
-          <Button type="submit" disabled={isSaving} className="bg-red-600 hover:bg-red-700 text-white">
-            {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          <Button type="submit" disabled={isSaving} className="bg-brand hover:bg-brand-strong text-white">
+            {isSaving && <Loader2 size={14} className="mr-2 animate-spin" />}
             Save Password
           </Button>
         </form>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import api from "@/lib/api";
 import { formatCurrency } from "@/lib/adminUtils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/dialog";
@@ -7,8 +8,6 @@ import { Input } from "../components/input";
 import { Label } from "../components/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/select";
 import { Separator } from "../components/separator";
-import { Progress } from "../components/progress";
-import { Badge } from "../components/badge";
 import { Checkbox } from "../components/checkbox";
 import {
   FileText,
@@ -19,7 +18,9 @@ import {
   Clock,
   Search,
   CreditCard,
-  X,
+  Loader2,
+  AlertTriangle,
+  FileCheck,
 } from "lucide-react";
 
 interface FinancialApplicationFormProps {
@@ -31,7 +32,6 @@ interface FinancialApplicationFormProps {
 type ApplicationStatus = "draft" | "submitted" | "verifying" | "eligibility" | "approved" | "denied";
 
 interface FormData {
-  // Personal Information
   firstName: string;
   lastName: string;
   dateOfBirth: string;
@@ -42,21 +42,15 @@ interface FormData {
   city: string;
   state: string;
   zipCode: string;
-  
-  // Employment Information
   employmentStatus: string;
   employer: string;
   jobTitle: string;
   employmentLength: string;
   workPhone: string;
-  
-  // Financial Information
   annualIncome: string;
   additionalIncome: string;
   monthlyHousing: string;
   monthlyDebt: string;
-  
-  // Credit Authorization
   authorizeCredit: boolean;
   agreeToTerms: boolean;
 }
@@ -64,7 +58,7 @@ interface FormData {
 const statusSteps = [
   { id: "submitted", label: "Submitted", icon: FileText },
   { id: "verifying", label: "Verifying", icon: Search },
-  { id: "eligibility", label: "Credit Eligibility", icon: CreditCard },
+  { id: "eligibility", label: "Credit Check", icon: CreditCard },
   { id: "approved", label: "Approved", icon: CheckCircle },
 ];
 
@@ -78,7 +72,7 @@ export function FinancialApplicationForm({
   const [estimatedRate, setEstimatedRate] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  
+
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -109,7 +103,6 @@ export function FinancialApplicationForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setIsSubmitting(true);
     setError("");
 
@@ -120,511 +113,347 @@ export function FinancialApplicationForm({
       });
 
       setApplicationStatus("submitted");
-
-      setTimeout(() => {
-        setApplicationStatus("verifying");
-      }, 1000);
-
-      setTimeout(() => {
-        setApplicationStatus("eligibility");
-      }, 2200);
-
+      setTimeout(() => setApplicationStatus("verifying"), 1000);
+      setTimeout(() => setApplicationStatus("eligibility"), 2200);
       setTimeout(() => {
         setApplicationStatus("approved");
         const income = parseFloat(formData.annualIncome) || 0;
-        const approved = Math.min(income * 0.4, vehiclePrice * 1.2);
-        setApprovedAmount(approved);
+        setApprovedAmount(Math.min(income * 0.4, vehiclePrice * 1.2));
         setEstimatedRate(4.9);
       }, 3400);
+
+      toast.success("Application submitted successfully!");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to submit application");
+      const message = err instanceof Error ? err.message : "Unable to submit application";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const getStatusIndex = () => {
-    const statusOrder = ["draft", "submitted", "verifying", "eligibility", "approved", "denied"];
-    return statusOrder.indexOf(applicationStatus);
-  };
+  const isFormValid = () =>
+    formData.firstName &&
+    formData.lastName &&
+    formData.email &&
+    formData.ssn &&
+    formData.annualIncome &&
+    formData.authorizeCredit &&
+    formData.agreeToTerms;
 
-  const isFormValid = () => {
-    return (
-      formData.firstName &&
-      formData.lastName &&
-      formData.email &&
-      formData.ssn &&
-      formData.annualIncome &&
-      formData.authorizeCredit &&
-      formData.agreeToTerms
-    );
-  };
+  const currentStepIndex = statusSteps.findIndex((s) => s.id === applicationStatus);
+  const progressPct = applicationStatus === "draft" ? 0 : ((currentStepIndex + 1) / statusSteps.length) * 100;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
-        <button
-          onClick={onClose}
-          className="absolute right-4 top-4 z-50 rounded-full bg-black/50 p-2 text-white hover:bg-black/70 transition-colors"
-        >
-          <X size={20} />
-        </button>
-
-        {/* Header */}
-        <div className="bg-gradient-to-br from-black to-gray-900 p-8 text-white">
+      <DialogContent className="w-[96vw] max-w-4xl overflow-hidden rounded-2xl border-border p-0">
+        {/* Dark header */}
+        <div className="bg-gradient-to-br from-obsidian to-slate-deep px-8 py-6 text-white">
+          <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand">
+            <FileCheck size={12} /> Full Application
+          </span>
           <DialogHeader>
-            <DialogTitle className="text-white text-2xl mb-2">
+            <DialogTitle className="font-display text-2xl font-bold text-white">
               Financing Application
             </DialogTitle>
-            <DialogDescription className="text-white/90 text-base">
-              Complete your financial application to get pre-approved for vehicle financing
+            <DialogDescription className="mt-1 text-sm text-white/70">
+              Complete your application to get pre-approved for vehicle financing.
             </DialogDescription>
           </DialogHeader>
         </div>
 
-        {/* Application Status Tracker */}
+        {/* Status tracker (shown after submit) */}
         {applicationStatus !== "draft" && (
-          <div className="px-8 pt-8">
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h3 className="mb-4 flex items-center gap-2">
-                <Clock className="text-red-600" size={20} />
-                Application Status
-              </h3>
-              
-              {/* Progress Bar */}
-              <div className="mb-6">
-                <Progress 
-                  value={((getStatusIndex()) / 4) * 100} 
-                  className="h-2"
-                />
-              </div>
-
-              {/* Status Steps */}
-              <div className="grid grid-cols-4 gap-4">
-                {statusSteps.map((step, index) => {
-                  const isActive = statusSteps.findIndex(s => s.id === applicationStatus) >= index;
-                  const isCurrent = step.id === applicationStatus;
-                  const StepIcon = step.icon;
-                  
-                  return (
+          <div className="border-b border-border bg-muted/30 px-8 py-6">
+            <div className="mb-4 flex items-center gap-2">
+              <Clock size={16} className="text-brand" />
+              <span className="text-sm font-semibold text-foreground">Application Status</span>
+            </div>
+            {/* Progress bar */}
+            <div className="mb-6 h-1.5 w-full overflow-hidden rounded-full bg-border">
+              <div
+                className="h-full rounded-full bg-brand transition-all duration-700"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+            {/* Steps */}
+            <div className="grid grid-cols-4 gap-2">
+              {statusSteps.map((step, index) => {
+                const isActive = currentStepIndex >= index;
+                const isCurrent = step.id === applicationStatus;
+                const StepIcon = step.icon;
+                return (
+                  <div key={step.id} className={`flex flex-col items-center text-center ${isActive ? "opacity-100" : "opacity-35"}`}>
                     <div
-                      key={step.id}
-                      className={`flex flex-col items-center text-center ${
-                        isActive ? "opacity-100" : "opacity-40"
+                      className={`mb-2 flex size-11 items-center justify-center rounded-full transition-all ${
+                        isCurrent
+                          ? "animate-pulse bg-brand text-white"
+                          : isActive
+                          ? "bg-green-600 text-white"
+                          : "bg-muted text-muted-foreground"
                       }`}
                     >
-                      <div
-                        className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all ${
-                          isCurrent
-                            ? "bg-red-600 text-white animate-pulse"
-                            : isActive
-                            ? "bg-green-600 text-white"
-                            : "bg-gray-200 text-gray-400"
-                        }`}
-                      >
-                        <StepIcon size={20} />
-                      </div>
-                      <p className="text-xs">{step.label}</p>
-                      {isCurrent && (
-                        <Badge className="mt-2 bg-red-600 text-white border-none text-xs">
-                          In Progress
-                        </Badge>
-                      )}
+                      <StepIcon size={18} />
                     </div>
-                  );
-                })}
-              </div>
-
-              {/* Approval Result */}
-              {applicationStatus === "approved" && (
-                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex items-center gap-2 mb-3">
-                    <CheckCircle className="text-green-600" size={24} />
-                    <h4 className="text-green-900">Congratulations! You're Pre-Approved</h4>
+                    <p className="text-xs font-medium text-foreground">{step.label}</p>
+                    {isCurrent && (
+                      <span className="mt-1 rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-semibold text-brand">
+                        Processing
+                      </span>
+                    )}
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs text-green-700 mb-1">Approved Amount</p>
-                      <p className="text-green-900">{formatCurrency(approvedAmount)}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-green-700 mb-1">Estimated Rate</p>
-                      <p className="text-green-900">{estimatedRate.toFixed(2)}% APR</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-green-700 mt-3 mb-4">
-                    A financing specialist will contact you within 24 hours to finalize your application.
-                  </p>
-                  <a
-                    href={`https://wa.me/15551234567?text=${encodeURIComponent(`Hi! I've been pre-approved for financing. Reference: ${formData.firstName} ${formData.lastName}`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block"
-                  >
-                    <Button type="button" className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white">
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                      </svg>
-                      Continue on WhatsApp
-                    </Button>
-                  </a>
-                </div>
-              )}
+                );
+              })}
             </div>
-          </div>
-        )}
 
-        {/* Application Form */}
-        {applicationStatus === "draft" && (
-          <form onSubmit={handleSubmit} className="p-8">
-            {error && (
-              <div className="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {error}
+            {/* Approval result */}
+            {applicationStatus === "approved" && (
+              <div className="mt-6 rounded-2xl bg-gradient-to-br from-obsidian to-slate-deep p-6 text-white">
+                <div className="mb-4 flex items-center gap-2">
+                  <CheckCircle size={20} className="text-green-400" />
+                  <h4 className="font-display text-lg font-semibold">Congratulations! You're Pre-Approved</h4>
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <p className="mb-1 text-xs text-white/60">Approved Amount</p>
+                    <p className="font-display text-2xl font-bold text-brand">{formatCurrency(approvedAmount)}</p>
+                  </div>
+                  <div>
+                    <p className="mb-1 text-xs text-white/60">Estimated Rate</p>
+                    <p className="font-display text-2xl font-bold text-brand">{estimatedRate.toFixed(2)}% APR</p>
+                  </div>
+                </div>
+                <p className="mt-4 text-xs text-white/60">
+                  A financing specialist will contact you within 24 hours to finalise your application.
+                </p>
+                <a
+                  href={`https://wa.me/2348123456789?text=${encodeURIComponent(`Hi! I've been pre-approved for financing. Reference: ${formData.firstName} ${formData.lastName}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 block"
+                >
+                  <Button className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white">
+                    Continue on WhatsApp
+                  </Button>
+                </a>
+                <Button variant="outline" className="mt-2 w-full border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={onClose}>
+                  Close
+                </Button>
               </div>
             )}
-            {/* Personal Information */}
-            <div className="mb-8">
-              <h3 className="mb-4 flex items-center gap-2">
-                <User className="text-red-600" size={20} />
-                Personal Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name *</Label>
-                  <Input
-                    id="firstName"
-                    value={formData.firstName}
-                    onChange={(e) => updateField("firstName", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name *</Label>
-                  <Input
-                    id="lastName"
-                    value={formData.lastName}
-                    onChange={(e) => updateField("lastName", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth">Date of Birth *</Label>
-                  <Input
-                    id="dateOfBirth"
-                    type="date"
-                    value={formData.dateOfBirth}
-                    onChange={(e) => updateField("dateOfBirth", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="ssn">Social Security Number *</Label>
-                  <Input
-                    id="ssn"
-                    type="password"
-                    placeholder="XXX-XX-XXXX"
-                    value={formData.ssn}
-                    onChange={(e) => updateField("ssn", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => updateField("phone", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => updateField("email", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="address">Street Address *</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => updateField("address", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="city">City *</Label>
-                  <Input
-                    id="city"
-                    value={formData.city}
-                    onChange={(e) => updateField("city", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="state">State *</Label>
-                  <Input
-                    id="state"
-                    value={formData.state}
-                    onChange={(e) => updateField("state", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="zipCode">ZIP Code *</Label>
-                  <Input
-                    id="zipCode"
-                    value={formData.zipCode}
-                    onChange={(e) => updateField("zipCode", e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            <Separator className="my-8" />
-
-            {/* Employment Information */}
-            <div className="mb-8">
-              <h3 className="mb-4 flex items-center gap-2">
-                <Briefcase className="text-red-600" size={20} />
-                Employment Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="employmentStatus">Employment Status *</Label>
-                  <Select
-                    value={formData.employmentStatus}
-                    onValueChange={(value) => updateField("employmentStatus", value)}
-                  >
-                    <SelectTrigger id="employmentStatus">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="full-time">Employed Full-Time</SelectItem>
-                      <SelectItem value="part-time">Employed Part-Time</SelectItem>
-                      <SelectItem value="self-employed">Self-Employed</SelectItem>
-                      <SelectItem value="retired">Retired</SelectItem>
-                      <SelectItem value="student">Student</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="employer">Employer Name *</Label>
-                  <Input
-                    id="employer"
-                    value={formData.employer}
-                    onChange={(e) => updateField("employer", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="jobTitle">Job Title *</Label>
-                  <Input
-                    id="jobTitle"
-                    value={formData.jobTitle}
-                    onChange={(e) => updateField("jobTitle", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="employmentLength">Time at Current Job *</Label>
-                  <Select
-                    value={formData.employmentLength}
-                    onValueChange={(value) => updateField("employmentLength", value)}
-                  >
-                    <SelectTrigger id="employmentLength">
-                      <SelectValue placeholder="Select duration" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="less1">Less than 1 year</SelectItem>
-                      <SelectItem value="1-2">1-2 years</SelectItem>
-                      <SelectItem value="2-5">2-5 years</SelectItem>
-                      <SelectItem value="5plus">5+ years</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="workPhone">Work Phone Number</Label>
-                  <Input
-                    id="workPhone"
-                    type="tel"
-                    value={formData.workPhone}
-                    onChange={(e) => updateField("workPhone", e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <Separator className="my-8" />
-
-            {/* Financial Information */}
-            <div className="mb-8">
-              <h3 className="mb-4 flex items-center gap-2">
-                <DollarSign className="text-red-600" size={20} />
-                Financial Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="annualIncome">Annual Gross Income *</Label>
-                  <Input
-                    id="annualIncome"
-                    type="number"
-                    placeholder="Naira amount"
-                    value={formData.annualIncome}
-                    onChange={(e) => updateField("annualIncome", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="additionalIncome">Additional Monthly Income</Label>
-                  <Input
-                    id="additionalIncome"
-                    type="number"
-                    placeholder="Naira amount"
-                    value={formData.additionalIncome}
-                    onChange={(e) => updateField("additionalIncome", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="monthlyHousing">Monthly Housing Payment *</Label>
-                  <Input
-                    id="monthlyHousing"
-                    type="number"
-                    placeholder="Naira amount (rent or mortgage)"
-                    value={formData.monthlyHousing}
-                    onChange={(e) => updateField("monthlyHousing", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="monthlyDebt">Other Monthly Debt Payments</Label>
-                  <Input
-                    id="monthlyDebt"
-                    type="number"
-                    placeholder="Naira amount (credit cards, loans, etc.)"
-                    value={formData.monthlyDebt}
-                    onChange={(e) => updateField("monthlyDebt", e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <Separator className="my-8" />
-
-            {/* Credit Authorization */}
-            <div className="mb-8">
-              <h3 className="mb-4">Authorization & Consent</h3>
-              <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="authorizeCredit"
-                    checked={formData.authorizeCredit}
-                    onCheckedChange={(checked) =>
-                      updateField("authorizeCredit", checked as boolean)
-                    }
-                  />
-                  <div className="grid gap-1.5 leading-none">
-                    <label
-                      htmlFor="authorizeCredit"
-                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      I authorize Platinum Helms to obtain my credit report *
-                    </label>
-                    <p className="text-xs text-gray-500">
-                      This authorization allows us to check your credit history and score
-                      from credit bureaus to determine your financing eligibility.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="agreeToTerms"
-                    checked={formData.agreeToTerms}
-                    onCheckedChange={(checked) =>
-                      updateField("agreeToTerms", checked as boolean)
-                    }
-                  />
-                  <div className="grid gap-1.5 leading-none">
-                    <label
-                      htmlFor="agreeToTerms"
-                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      I agree to the terms and conditions *
-                    </label>
-                    <p className="text-xs text-gray-500">
-                      By submitting this application, you certify that all information
-                      provided is accurate and complete.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Disclaimer */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-              <p className="text-xs text-yellow-900">
-                <strong>Important:</strong> Submitting this application will result in a
-                hard inquiry on your credit report, which may temporarily affect your
-                credit score. Your information is encrypted and secure.
-              </p>
-            </div>
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full bg-red-600 hover:bg-red-700 text-white"
-              size="lg"
-              disabled={!isFormValid() || isSubmitting}
-            >
-              {isSubmitting ? "Submitting..." : "Submit Application"}
-            </Button>
-
-            <p className="text-xs text-gray-500 text-center mt-4">
-              * Required fields. All information is kept confidential and secure.
-            </p>
-          </form>
-        )}
-
-        {/* Processing State */}
-        {applicationStatus !== "draft" && applicationStatus !== "approved" && (
-          <div className="px-8 pb-8">
-            <div className="text-center py-8">
-              <p className="text-gray-600 mb-4">
-                Please wait while we process your application...
-              </p>
-              <p className="text-sm text-gray-500">
-                This typically takes 3-5 minutes. Do not close this window.
-              </p>
-            </div>
           </div>
         )}
 
-        {/* Approved State Actions */}
-        {applicationStatus === "approved" && (
-          <div className="px-8 pb-8">
-            <div className="flex gap-4">
-              <Button
-                onClick={onClose}
-                variant="outline"
-                className="flex-1 border-gray-300"
-                size="lg"
-              >
-                Close
-              </Button>
-              <Button
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                size="lg"
-              >
-                Continue to Vehicle Selection
-              </Button>
-            </div>
+        {/* Processing state */}
+        {applicationStatus !== "draft" && applicationStatus !== "approved" && (
+          <div className="px-8 py-8 text-center">
+            <Loader2 size={32} className="mx-auto mb-3 animate-spin text-brand" />
+            <p className="text-sm text-muted-foreground">Processing your application… Do not close this window.</p>
+          </div>
+        )}
+
+        {/* Application form */}
+        {applicationStatus === "draft" && (
+          <div className="max-h-[62vh] overflow-y-auto">
+            <form id="fa-form" onSubmit={handleSubmit} className="space-y-0 px-8 py-6">
+              {error && (
+                <div className="mb-6 flex items-start gap-3 rounded-xl border border-brand/40 bg-brand/5 px-4 py-3 text-sm text-brand">
+                  <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+                  {error}
+                </div>
+              )}
+
+              {/* Personal Information */}
+              <div className="mb-8">
+                <h3 className="mb-4 flex items-center gap-2 font-display text-lg font-semibold text-foreground">
+                  <User size={18} className="text-brand" /> Personal Information
+                </h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-firstName">First Name *</Label>
+                    <Input id="fa-firstName" value={formData.firstName} onChange={(e) => updateField("firstName", e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-lastName">Last Name *</Label>
+                    <Input id="fa-lastName" value={formData.lastName} onChange={(e) => updateField("lastName", e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-dob">Date of Birth *</Label>
+                    <Input id="fa-dob" type="date" value={formData.dateOfBirth} onChange={(e) => updateField("dateOfBirth", e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-ssn">NIN / ID Number *</Label>
+                    <Input id="fa-ssn" type="password" placeholder="Enter securely" value={formData.ssn} onChange={(e) => updateField("ssn", e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-phone">Phone Number *</Label>
+                    <Input id="fa-phone" type="tel" value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-email">Email Address *</Label>
+                    <Input id="fa-email" type="email" value={formData.email} onChange={(e) => updateField("email", e.target.value)} required />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="fa-address">Street Address *</Label>
+                    <Input id="fa-address" value={formData.address} onChange={(e) => updateField("address", e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-city">City *</Label>
+                    <Input id="fa-city" value={formData.city} onChange={(e) => updateField("city", e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-state">State *</Label>
+                    <Input id="fa-state" value={formData.state} onChange={(e) => updateField("state", e.target.value)} required />
+                  </div>
+                </div>
+              </div>
+
+              <Separator className="my-6" />
+
+              {/* Employment */}
+              <div className="mb-8">
+                <h3 className="mb-4 flex items-center gap-2 font-display text-lg font-semibold text-foreground">
+                  <Briefcase size={18} className="text-brand" /> Employment Information
+                </h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-empStatus">Employment Status *</Label>
+                    <Select value={formData.employmentStatus} onValueChange={(v) => updateField("employmentStatus", v)}>
+                      <SelectTrigger id="fa-empStatus"><SelectValue placeholder="Select status" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="full-time">Employed Full-Time</SelectItem>
+                        <SelectItem value="part-time">Employed Part-Time</SelectItem>
+                        <SelectItem value="self-employed">Self-Employed</SelectItem>
+                        <SelectItem value="retired">Retired</SelectItem>
+                        <SelectItem value="student">Student</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-employer">Employer Name *</Label>
+                    <Input id="fa-employer" value={formData.employer} onChange={(e) => updateField("employer", e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-jobTitle">Job Title *</Label>
+                    <Input id="fa-jobTitle" value={formData.jobTitle} onChange={(e) => updateField("jobTitle", e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-empLength">Time at Current Job *</Label>
+                    <Select value={formData.employmentLength} onValueChange={(v) => updateField("employmentLength", v)}>
+                      <SelectTrigger id="fa-empLength"><SelectValue placeholder="Select duration" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="less1">Less than 1 year</SelectItem>
+                        <SelectItem value="1-2">1–2 years</SelectItem>
+                        <SelectItem value="2-5">2–5 years</SelectItem>
+                        <SelectItem value="5plus">5+ years</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-workPhone">Work Phone</Label>
+                    <Input id="fa-workPhone" type="tel" value={formData.workPhone} onChange={(e) => updateField("workPhone", e.target.value)} />
+                  </div>
+                </div>
+              </div>
+
+              <Separator className="my-6" />
+
+              {/* Financial */}
+              <div className="mb-8">
+                <h3 className="mb-4 flex items-center gap-2 font-display text-lg font-semibold text-foreground">
+                  <DollarSign size={18} className="text-brand" /> Financial Information
+                </h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-income">Annual Gross Income (₦) *</Label>
+                    <Input id="fa-income" type="number" placeholder="Enter amount" value={formData.annualIncome} onChange={(e) => updateField("annualIncome", e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-addIncome">Additional Monthly Income (₦)</Label>
+                    <Input id="fa-addIncome" type="number" placeholder="Enter amount" value={formData.additionalIncome} onChange={(e) => updateField("additionalIncome", e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-housing">Monthly Housing Payment (₦) *</Label>
+                    <Input id="fa-housing" type="number" placeholder="Rent or mortgage" value={formData.monthlyHousing} onChange={(e) => updateField("monthlyHousing", e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fa-debt">Other Monthly Debt Payments (₦)</Label>
+                    <Input id="fa-debt" type="number" placeholder="Credit cards, loans, etc." value={formData.monthlyDebt} onChange={(e) => updateField("monthlyDebt", e.target.value)} />
+                  </div>
+                </div>
+              </div>
+
+              <Separator className="my-6" />
+
+              {/* Consent */}
+              <div className="mb-6">
+                <h3 className="mb-4 font-display text-lg font-semibold text-foreground">Authorization & Consent</h3>
+                <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="fa-credit"
+                      checked={formData.authorizeCredit}
+                      onCheckedChange={(checked) => updateField("authorizeCredit", checked as boolean)}
+                    />
+                    <div>
+                      <label htmlFor="fa-credit" className="cursor-pointer text-sm font-medium leading-none text-foreground">
+                        I authorise Platinum Helms to obtain my credit report *
+                      </label>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        This allows us to check your credit history to determine financing eligibility.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="fa-terms"
+                      checked={formData.agreeToTerms}
+                      onCheckedChange={(checked) => updateField("agreeToTerms", checked as boolean)}
+                    />
+                    <div>
+                      <label htmlFor="fa-terms" className="cursor-pointer text-sm font-medium leading-none text-foreground">
+                        I agree to the terms and conditions *
+                      </label>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        By submitting, you certify that all information provided is accurate and complete.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <p className="text-xs text-amber-900">
+                  <strong>Important:</strong> Submitting this application may result in a credit inquiry. Your information is encrypted and secure.
+                </p>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Footer actions (draft state only) */}
+        {applicationStatus === "draft" && (
+          <div className="border-t border-border px-8 py-4">
+            <Button
+              form="fa-form"
+              type="submit"
+              size="lg"
+              className="w-full bg-brand hover:bg-brand-strong"
+              disabled={!isFormValid() || isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                  Submitting…
+                </>
+              ) : (
+                "Submit Application"
+              )}
+            </Button>
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              * Required fields. All information is kept confidential and secure.
+            </p>
           </div>
         )}
       </DialogContent>

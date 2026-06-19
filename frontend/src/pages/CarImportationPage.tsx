@@ -850,7 +850,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-20">
+    <div className="bg-background">
       {/* Hero Section */}
       <section className="relative h-[500px]">
         <div className="absolute inset-0">
@@ -863,12 +863,12 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
         </div>
 
         <div className="relative h-full flex items-center">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-20">
             <div className="max-w-2xl">
-              <h1 className="text-white mb-6 text-[64px] font-bold font-[Roboto] tracking-tight leading-tight">
+              <h1 className="text-white mb-6 font-display text-5xl sm:text-6xl font-bold tracking-tight leading-tight">
                 Global Vehicle Importation
               </h1>
-              <p className="text-white/90 mb-8 leading-relaxed text-[24px] text-left italic">
+              <p className="text-white/90 mb-8 leading-relaxed text-xl text-left">
                 Access the world's finest vehicles. We handle every aspect of
                 international car importation with expertise and precision.
               </p>
@@ -888,7 +888,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="mb-4 text-[20px] font-bold">
+            <h2 className="mb-4 font-display text-4xl font-bold text-foreground">
               Why Import With Platinum Helms
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
@@ -921,7 +921,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="mb-4 text-[20px] font-bold">Our Import Process</h2>
+            <h2 className="mb-4 font-display text-4xl font-bold text-foreground">Our Import Process</h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
               A transparent, efficient process from selection to delivery.
             </p>
@@ -971,7 +971,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
                 <Badge className="bg-black text-white hover:bg-gray-800 border-none px-3 py-1 mb-4">
                   CUSTOM ORDERS
                 </Badge>
-                <h2 className="mb-6 text-[40px] font-bold font-[Roboto] tracking-tight leading-tight">
+                <h2 className="mb-6 font-display text-4xl font-bold tracking-tight leading-tight">
                   Can't Find What You're Looking For?
                 </h2>
                 <p className="text-gray-600 text-lg leading-relaxed mb-8">
@@ -1074,7 +1074,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
               <Hammer size={16} className="mr-2" />
               LIVE AUCTIONS
             </Badge>
-            <h2 className="text-white mb-4 text-[40px] tracking-tight leading-tight">
+            <h2 className="text-white mb-4 font-display text-4xl font-bold tracking-tight leading-tight">
               Premium Vehicle Auctions
             </h2>
             <p className="text-white/80 text-lg max-w-2xl mx-auto">
@@ -1354,7 +1354,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="mb-4 text-[20px] font-bold">
+            <h2 className="mb-4 font-display text-4xl font-bold text-foreground">
               Available Import Vehicles
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
@@ -1672,7 +1672,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="mb-4 text-[20px] font-bold">
+            <h2 className="mb-4 font-display text-4xl font-bold text-foreground">
               Popular Import Markets
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
@@ -1775,7 +1775,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       {/* Contact Form */}
       <section className="py-24 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="mb-4 text-[20px] font-bold">
+          <h2 className="mb-4 font-display text-4xl font-bold text-foreground">
             Request an Import Quote
           </h2>
           <p className="text-gray-600 text-lg mb-8">
@@ -1798,7 +1798,7 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
       {/* CTA Section */}
       <section className="py-16 bg-black text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-white mb-6 text-[20px] font-bold">
+          <h2 className="text-white mb-6 font-display text-4xl font-bold">
             Questions About Importing?
           </h2>
           <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
