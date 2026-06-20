@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
-import { formatCurrency, normalizeCar } from "@/lib/adminUtils";
+import { CarRecord, formatCurrency, normalizeCar } from "@/lib/adminUtils";
 import { ImageWithFallback } from "../components/ImageWithFallback";
 import { Button } from "../components/button";
 import { Card } from "../components/card";
@@ -198,7 +198,9 @@ export function CarImportationPage({ onNavigate }: CarImportationPageProps) {
     api.cars
       .getAll({ limit: 100 })
       .then((response) => {
-        const cars = (response.data || []).map(normalizeCar);
+        const cars = (response.data || [])
+          .map(normalizeCar)
+          .filter((c: CarRecord) => c.listingType === "importation");
         setDatabaseImportVehicles(cars);
       })
       .catch(() => {

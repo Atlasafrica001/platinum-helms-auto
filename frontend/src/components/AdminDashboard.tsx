@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { Card } from "../components/card";
 import { Button } from "../components/button";
 import { Input } from "../components/input";
 import {
@@ -20,9 +21,18 @@ import {
 } from "../components/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/tabs";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/table";
+import {
   Car,
   FileText,
   MessageSquare,
+  TrendingUp,
   DollarSign,
   Package,
   Search,
@@ -151,34 +161,27 @@ const downloadCsv = (fileName: string, rows: Record<string, unknown>[]) => {
 };
 
 const statusVariant: Record<string, string> = {
-  available: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
-  reserved: "bg-amber-500/15 text-amber-400 border-amber-500/25",
-  sold: "bg-blue-500/15 text-blue-400 border-blue-500/25",
-  hidden: "bg-white/10 text-white/40 border-white/15",
-  approved: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
-  contacted: "bg-blue-500/15 text-blue-400 border-blue-500/25",
-  pending: "bg-amber-500/15 text-amber-400 border-amber-500/25",
-  rejected: "bg-red-500/15 text-red-400 border-red-500/25",
-  closed: "bg-white/10 text-white/40 border-white/15",
-  new: "bg-blue-500/15 text-blue-400 border-blue-500/25",
-  responded: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+  available: "bg-green-100 text-green-800 border-green-200",
+  reserved: "bg-amber-100 text-amber-800 border-amber-200",
+  sold: "bg-gray-100 text-gray-700 border-gray-200",
+  hidden: "bg-gray-100 text-gray-600 border-gray-200",
+  approved: "bg-green-100 text-green-800 border-green-200",
+  contacted: "bg-blue-100 text-blue-800 border-blue-200",
+  pending: "bg-amber-100 text-amber-800 border-amber-200",
+  rejected: "bg-red-100 text-red-700 border-red-200",
+  closed: "bg-gray-100 text-gray-600 border-gray-200",
+  new: "bg-blue-100 text-blue-800 border-blue-200",
+  responded: "bg-green-100 text-green-800 border-green-200",
 };
 
 function StatusBadge({ status }: { status?: string }) {
-  const cls = statusVariant[(status || "").toLowerCase()] || "bg-white/10 text-white/40 border-white/15";
+  const cls = statusVariant[(status || "").toLowerCase()] || "bg-gray-100 text-gray-600 border-gray-200";
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${cls}`}>
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${cls}`}>
       {labelStatus(status)}
     </span>
   );
 }
-
-const cell =
-  "bg-white/[0.035] px-4 py-3.5 align-middle transition-colors first:rounded-l-xl last:rounded-r-xl group-hover:bg-white/[0.055]";
-const th =
-  "px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/25";
-const iconBtn =
-  "flex size-8 items-center justify-center rounded-lg transition hover:bg-white/[0.08] disabled:opacity-50";
 
 const STATUS_FILTERS: Record<string, { value: string; label: string }[]> = {
   vehicles: [
@@ -267,7 +270,6 @@ export function AdminDashboard() {
     return () => window.clearTimeout(timeout);
   }, [searchTerm]);
 
-  // Reset the status filter when switching tabs (options differ per tab).
   useEffect(() => {
     setStatusFilter("all");
   }, [activeTab]);
@@ -406,13 +408,13 @@ export function AdminDashboard() {
 
   const SectionError = ({ message }: { message: string }) =>
     message ? (
-      <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+      <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
         <span className="flex items-start gap-2">
           <AlertTriangle size={15} className="mt-0.5 shrink-0" /> {message}
         </span>
         <button
           onClick={() => loadDashboard(searchTerm, true)}
-          className="shrink-0 rounded-lg border border-red-500/30 px-2.5 py-1 text-xs font-medium text-red-300 transition hover:bg-red-500/10"
+          className="shrink-0 rounded-lg border border-red-200 px-2.5 py-1 text-xs font-medium text-red-700 transition hover:bg-red-100"
         >
           Retry
         </button>
@@ -422,16 +424,16 @@ export function AdminDashboard() {
   const FilterToolbar = ({ placeholder }: { placeholder: string }) => (
     <div className="flex flex-col gap-3 sm:flex-row">
       <div className="relative flex-1">
-        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <Input
           placeholder={placeholder}
-          className="border-white/[0.12] bg-white/[0.05] pl-9 text-white placeholder:text-white/30"
+          className="pl-9"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
       <Select value={statusFilter} onValueChange={setStatusFilter}>
-        <SelectTrigger className="border-white/[0.12] bg-white/[0.05] text-white sm:w-44">
+        <SelectTrigger className="sm:w-44">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -448,56 +450,54 @@ export function AdminDashboard() {
   const statCards = [
     {
       icon: Car,
-      iconBg: "bg-blue-500/15",
-      iconColor: "text-blue-400",
+      iconBg: "bg-blue-50",
+      iconColor: "text-blue-600",
       value: overview.totalCars,
       label: "Total Vehicles",
       sub: `${overview.activeCars} active listings`,
+      subColor: "text-green-600",
     },
     {
       icon: FileText,
-      iconBg: "bg-emerald-500/15",
-      iconColor: "text-emerald-400",
+      iconBg: "bg-green-50",
+      iconColor: "text-green-600",
       value: overview.totalFinancingLeads,
       label: "Finance Applications",
       sub: `${overview.pendingFinancingLeads} pending review`,
+      subColor: "text-amber-600",
     },
     {
       icon: MessageSquare,
-      iconBg: "bg-purple-500/15",
-      iconColor: "text-purple-400",
+      iconBg: "bg-purple-50",
+      iconColor: "text-purple-600",
       value: overview.totalContactMessages,
       label: "Contact Messages",
       sub: `${overview.newContactMessages} new`,
+      subColor: "text-blue-600",
     },
     {
       icon: DollarSign,
-      iconBg: "bg-brand/15",
-      iconColor: "text-brand",
+      iconBg: "bg-red-50",
+      iconColor: "text-red-600",
       value: formatCurrency(totalInventoryValue),
       label: "Inventory Value",
       sub: `${overview.soldCars} vehicles sold`,
+      subColor: "text-green-600",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-obsidian">
+    <div className="min-h-screen bg-gray-50">
       {/* Sub-header */}
-      <div className="border-b border-white/[0.06]">
+      <div className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h1 className="font-display text-2xl font-bold text-white">Dashboard</h1>
-              <p className="text-sm text-white/50">Manage your automotive business operations</p>
+              <h1 className="font-display text-2xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-sm text-gray-500">Manage your automotive business operations</p>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => loadDashboard(searchTerm, true)}
-                disabled={isRefreshing}
-                className="border-white/[0.12] bg-white/[0.04] text-white/70 hover:bg-white/[0.08] hover:text-white"
-              >
+              <Button variant="outline" size="sm" onClick={() => loadDashboard(searchTerm, true)} disabled={isRefreshing}>
                 {isRefreshing ? (
                   <Loader2 size={14} className="mr-1.5 animate-spin" />
                 ) : (
@@ -519,336 +519,247 @@ export function AdminDashboard() {
 
         {/* Stat cards */}
         <div className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {statCards.map(({ icon: Icon, iconBg, iconColor, value, label, sub }) => (
-            <div key={label} className="rounded-2xl border border-white/[0.08] bg-obsidian-soft p-5">
+          {statCards.map(({ icon: Icon, iconBg, iconColor, value, label, sub, subColor }) => (
+            <Card key={label} className="border-none p-5 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <div className={`flex size-11 items-center justify-center rounded-xl ${iconBg}`}>
                   <Icon size={20} className={iconColor} />
                 </div>
+                <TrendingUp size={16} className="text-green-500" />
               </div>
-              <p className="mb-0.5 font-display text-2xl font-bold text-white">
-                {isLoading ? <Loader2 size={20} className="animate-spin text-white/30" /> : value}
+              <p className="mb-0.5 font-display text-2xl font-bold text-gray-900">
+                {isLoading ? <Loader2 size={20} className="animate-spin text-gray-400" /> : value}
               </p>
-              <p className="text-sm text-white/60">{label}</p>
-              <p className="mt-1.5 text-xs font-medium text-white/40">{sub}</p>
-            </div>
+              <p className="text-sm text-gray-600">{label}</p>
+              <p className={`mt-1.5 text-xs font-medium ${subColor}`}>{sub}</p>
+            </Card>
           ))}
         </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
-          <TabsList className="border border-white/[0.08] bg-white/[0.04]">
-            <TabsTrigger value="vehicles" className="text-white/60 data-[state=active]:bg-brand data-[state=active]:text-white">
+          <TabsList className="border border-gray-200 bg-white">
+            <TabsTrigger value="vehicles" className="data-[state=active]:bg-brand data-[state=active]:text-white">
               <Car size={14} className="mr-1.5" /> Vehicles
             </TabsTrigger>
-            <TabsTrigger value="applications" className="text-white/60 data-[state=active]:bg-brand data-[state=active]:text-white">
+            <TabsTrigger value="applications" className="data-[state=active]:bg-brand data-[state=active]:text-white">
               <FileText size={14} className="mr-1.5" /> Applications
             </TabsTrigger>
-            <TabsTrigger value="contacts" className="text-white/60 data-[state=active]:bg-brand data-[state=active]:text-white">
+            <TabsTrigger value="contacts" className="data-[state=active]:bg-brand data-[state=active]:text-white">
               <MessageSquare size={14} className="mr-1.5" /> Contacts
             </TabsTrigger>
           </TabsList>
 
           {/* Vehicles tab */}
           <TabsContent value="vehicles">
-            <div className="rounded-2xl border border-white/[0.08] bg-obsidian-soft">
-              <div className="border-b border-white/[0.06] p-5">
+            <Card className="overflow-hidden border-none shadow-sm">
+              <div className="border-b border-gray-100 p-5">
                 <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <h2 className="font-display text-base font-semibold text-white">Vehicle Inventory</h2>
-                    <p className="mt-0.5 text-xs text-white/40">{filteredVehicles.length} shown</p>
-                  </div>
-                  <Button
-                    size="sm"
-                    className="bg-brand hover:bg-brand-strong text-white"
-                    onClick={() => navigate("/admin/vehicles")}
-                  >
+                  <h2 className="font-semibold text-gray-900">Vehicle Inventory</h2>
+                  <Button size="sm" className="bg-brand hover:bg-brand-strong text-white" onClick={() => navigate("/admin/vehicles")}>
                     <Package size={14} className="mr-1.5" /> Manage All
                   </Button>
                 </div>
                 <FilterToolbar placeholder="Search vehicles…" />
               </div>
-              <div className="overflow-x-auto px-4 pb-4 pt-2 sm:px-5">
-                <SectionError message={vehiclesError} />
-                <table className="w-full border-separate" style={{ borderSpacing: "0 6px", minWidth: 720 }}>
-                  <thead>
-                    <tr>
-                      <th className={th}>Vehicle</th>
-                      <th className={th}>Year</th>
-                      <th className={th}>VIN</th>
-                      <th className={th}>Price</th>
-                      <th className={th}>Status</th>
-                      <th className={`${th} text-right`}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <div className="overflow-x-auto">
+                <div className="px-5 pt-4"><SectionError message={vehiclesError} /></div>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50/50">
+                      <TableHead className="font-semibold">Vehicle</TableHead>
+                      <TableHead className="font-semibold">Year</TableHead>
+                      <TableHead className="font-semibold">VIN</TableHead>
+                      <TableHead className="font-semibold">Price</TableHead>
+                      <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="text-right font-semibold">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {isLoading && (
-                      <tr>
-                        <td colSpan={6} className="rounded-xl bg-white/[0.03] px-4 py-12 text-center text-sm text-white/30">
-                          <Loader2 size={16} className="mx-auto mb-2 animate-spin" /> Loading vehicles…
-                        </td>
-                      </tr>
+                      <TableRow><TableCell colSpan={6} className="py-12 text-center text-muted-foreground">Loading vehicles…</TableCell></TableRow>
                     )}
                     {!isLoading && filteredVehicles.length === 0 && (
-                      <tr>
-                        <td colSpan={6} className="rounded-xl bg-white/[0.03] px-4 py-12 text-center text-sm text-white/30">
-                          No vehicles found.
-                        </td>
-                      </tr>
+                      <TableRow><TableCell colSpan={6} className="py-12 text-center text-muted-foreground">No vehicles found.</TableCell></TableRow>
                     )}
                     {!isLoading &&
                       filteredVehicles.map((vehicle) => (
-                        <tr key={vehicle.id} className="group">
-                          <td className={cell}>
-                            <div className="min-w-[160px]">
-                              <div className="text-sm font-medium text-white">
-                                {vehicle.name || vehicle.brand || vehicle.make || "Unnamed"}
-                              </div>
-                              <div className="text-xs text-white/40">{vehicle.model || "N/A"}</div>
-                            </div>
-                          </td>
-                          <td className={`${cell} text-sm text-white/70`}>{vehicle.year || "N/A"}</td>
-                          <td className={`${cell} font-mono text-xs text-white/40`}>{vehicle.vin || "N/A"}</td>
-                          <td className={`${cell} text-sm font-semibold text-brand`}>{formatCurrency(vehicle.price)}</td>
-                          <td className={cell}><StatusBadge status={vehicle.status} /></td>
-                          <td className={cell}>
+                        <TableRow key={vehicle.id} className="hover:bg-gray-50/50">
+                          <TableCell>
+                            <div className="font-medium text-gray-900">{vehicle.name || vehicle.brand || vehicle.make || "Unnamed"}</div>
+                            <div className="text-sm text-gray-500">{vehicle.model || "N/A"}</div>
+                          </TableCell>
+                          <TableCell className="text-gray-700">{vehicle.year || "N/A"}</TableCell>
+                          <TableCell className="font-mono text-xs text-gray-500">{vehicle.vin || "N/A"}</TableCell>
+                          <TableCell className="font-medium text-gray-900">{formatCurrency(vehicle.price)}</TableCell>
+                          <TableCell><StatusBadge status={vehicle.status} /></TableCell>
+                          <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
-                              <button className={iconBtn} title="View" onClick={() => setDetail({ type: "vehicle", data: vehicle })}>
-                                <Eye size={15} className="text-white/50" />
-                              </button>
-                              <button className={iconBtn} title="Edit in inventory" onClick={() => navigate("/admin/vehicles")}>
-                                <Edit size={15} className="text-white/50" />
-                              </button>
-                              <button
-                                className={`${iconBtn} hover:bg-red-500/10`}
-                                title="Delete"
-                                onClick={() => deleteVehicle(vehicle.id)}
-                                disabled={actionId === `vehicle-${vehicle.id}`}
-                              >
-                                {actionId === `vehicle-${vehicle.id}` ? (
-                                  <Loader2 size={15} className="animate-spin text-white/30" />
-                                ) : (
-                                  <Trash2 size={15} className="text-red-400" />
-                                )}
-                              </button>
+                              <Button variant="ghost" size="sm" onClick={() => setDetail({ type: "vehicle", data: vehicle })}>
+                                <Eye size={15} className="text-gray-500" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => navigate("/admin/vehicles")}>
+                                <Edit size={15} className="text-gray-500" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => deleteVehicle(vehicle.id)} disabled={actionId === `vehicle-${vehicle.id}`}>
+                                {actionId === `vehicle-${vehicle.id}` ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} className="text-red-500" />}
+                              </Button>
                             </div>
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
-            </div>
+            </Card>
           </TabsContent>
 
           {/* Applications tab */}
           <TabsContent value="applications">
-            <div className="rounded-2xl border border-white/[0.08] bg-obsidian-soft">
-              <div className="border-b border-white/[0.06] p-5">
+            <Card className="overflow-hidden border-none shadow-sm">
+              <div className="border-b border-gray-100 p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <h2 className="font-display text-base font-semibold text-white">Finance Applications</h2>
+                  <h2 className="font-semibold text-gray-900">Finance Applications</h2>
                   <div className="flex flex-wrap gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
                       <CheckCircle size={12} /> {overview.approvedFinancingLeads} Approved
                     </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-400">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
                       <Clock size={12} /> {overview.pendingFinancingLeads} Pending
                     </span>
                   </div>
                 </div>
                 <FilterToolbar placeholder="Search applications…" />
               </div>
-              <div className="overflow-x-auto px-4 pb-4 pt-2 sm:px-5">
-                <SectionError message={leadsError} />
-                <table className="w-full border-separate" style={{ borderSpacing: "0 6px", minWidth: 720 }}>
-                  <thead>
-                    <tr>
-                      <th className={th}>Applicant</th>
-                      <th className={th}>Vehicle Interest</th>
-                      <th className={th}>Deposit</th>
-                      <th className={th}>Date</th>
-                      <th className={th}>Status</th>
-                      <th className={`${th} text-right`}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <div className="overflow-x-auto">
+                <div className="px-5 pt-4"><SectionError message={leadsError} /></div>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50/50">
+                      <TableHead className="font-semibold">Applicant</TableHead>
+                      <TableHead className="font-semibold">Vehicle Interest</TableHead>
+                      <TableHead className="font-semibold">Deposit Budget</TableHead>
+                      <TableHead className="font-semibold">Date</TableHead>
+                      <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="text-right font-semibold">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {isLoading && (
-                      <tr>
-                        <td colSpan={6} className="rounded-xl bg-white/[0.03] px-4 py-12 text-center text-sm text-white/30">
-                          <Loader2 size={16} className="mx-auto mb-2 animate-spin" /> Loading applications…
-                        </td>
-                      </tr>
+                      <TableRow><TableCell colSpan={6} className="py-12 text-center text-muted-foreground">Loading applications…</TableCell></TableRow>
                     )}
                     {!isLoading && filteredApplications.length === 0 && (
-                      <tr>
-                        <td colSpan={6} className="rounded-xl bg-white/[0.03] px-4 py-12 text-center text-sm text-white/30">
-                          No applications found.
-                        </td>
-                      </tr>
+                      <TableRow><TableCell colSpan={6} className="py-12 text-center text-muted-foreground">No applications found.</TableCell></TableRow>
                     )}
                     {!isLoading &&
                       filteredApplications.map((app) => (
-                        <tr key={app.id} className="group">
-                          <td className={cell}>
-                            <div className="min-w-[150px]">
-                              <div className="text-sm font-medium text-white">
-                                {`${app.firstName || ""} ${app.lastName || ""}`.trim() || "Unnamed"}
-                              </div>
-                              <div className="text-xs text-white/40">{app.email || "N/A"}</div>
-                            </div>
-                          </td>
-                          <td className={`${cell} text-sm text-white/70`}>
-                            {app.selectedCar?.name ||
-                              `${app.selectedCar?.brand || ""} ${app.selectedCar?.model || ""}`.trim() ||
-                              "—"}
-                          </td>
-                          <td className={`${cell} text-sm font-semibold text-brand`}>{formatCurrency(app.initialDepositBudget)}</td>
-                          <td className={`${cell} text-xs text-white/35`}>{formatDate(app.submissionDate)}</td>
-                          <td className={cell}><StatusBadge status={app.status} /></td>
-                          <td className={cell}>
+                        <TableRow key={app.id} className="hover:bg-gray-50/50">
+                          <TableCell>
+                            <div className="font-medium text-gray-900">{`${app.firstName || ""} ${app.lastName || ""}`.trim() || "Unnamed"}</div>
+                            <div className="text-sm text-gray-500">{app.email || "N/A"}</div>
+                          </TableCell>
+                          <TableCell className="text-gray-700">
+                            {app.selectedCar?.name || `${app.selectedCar?.brand || ""} ${app.selectedCar?.model || ""}`.trim() || "N/A"}
+                          </TableCell>
+                          <TableCell className="text-gray-700">{formatCurrency(app.initialDepositBudget)}</TableCell>
+                          <TableCell className="text-gray-500">{formatDate(app.submissionDate)}</TableCell>
+                          <TableCell><StatusBadge status={app.status} /></TableCell>
+                          <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
-                              <button className={iconBtn} title="View" onClick={() => setDetail({ type: "application", data: app })}>
-                                <Eye size={15} className="text-white/50" />
-                              </button>
-                              <button
-                                className={`${iconBtn} hover:bg-emerald-500/10`}
-                                title="Approve"
-                                onClick={() => updateApplicationStatus(app.id, "approved")}
-                                disabled={actionId === `application-${app.id}-approved`}
-                              >
-                                {actionId === `application-${app.id}-approved` ? (
-                                  <Loader2 size={15} className="animate-spin text-white/30" />
-                                ) : (
-                                  <CheckCircle size={15} className="text-emerald-400" />
-                                )}
-                              </button>
-                              <button
-                                className={`${iconBtn} hover:bg-red-500/10`}
-                                title="Reject"
-                                onClick={() => updateApplicationStatus(app.id, "rejected")}
-                                disabled={actionId === `application-${app.id}-rejected`}
-                              >
-                                {actionId === `application-${app.id}-rejected` ? (
-                                  <Loader2 size={15} className="animate-spin text-white/30" />
-                                ) : (
-                                  <XCircle size={15} className="text-red-400" />
-                                )}
-                              </button>
+                              <Button variant="ghost" size="sm" onClick={() => setDetail({ type: "application", data: app })}>
+                                <Eye size={15} className="text-gray-500" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => updateApplicationStatus(app.id, "approved")} disabled={actionId === `application-${app.id}-approved`}>
+                                {actionId === `application-${app.id}-approved` ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle size={15} className="text-green-600" />}
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => updateApplicationStatus(app.id, "rejected")} disabled={actionId === `application-${app.id}-rejected`}>
+                                {actionId === `application-${app.id}-rejected` ? <Loader2 size={15} className="animate-spin" /> : <XCircle size={15} className="text-red-500" />}
+                              </Button>
                             </div>
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
-            </div>
+            </Card>
           </TabsContent>
 
           {/* Contacts tab */}
           <TabsContent value="contacts">
-            <div className="rounded-2xl border border-white/[0.08] bg-obsidian-soft">
-              <div className="border-b border-white/[0.06] p-5">
+            <Card className="overflow-hidden border-none shadow-sm">
+              <div className="border-b border-gray-100 p-5">
                 <div className="mb-4 flex items-center justify-between">
-                  <h2 className="font-display text-base font-semibold text-white">Contact Messages</h2>
+                  <h2 className="font-semibold text-gray-900">Contact Messages</h2>
                   <Button size="sm" className="bg-brand hover:bg-brand-strong text-white" onClick={exportCurrentTab}>
                     <Download size={14} className="mr-1.5" /> Export
                   </Button>
                 </div>
                 <FilterToolbar placeholder="Search contacts…" />
               </div>
-              <div className="overflow-x-auto px-4 pb-4 pt-2 sm:px-5">
-                <SectionError message={leadsError} />
-                <table className="w-full border-separate" style={{ borderSpacing: "0 6px", minWidth: 720 }}>
-                  <thead>
-                    <tr>
-                      <th className={th}>Contact</th>
-                      <th className={th}>Subject</th>
-                      <th className={th}>Message</th>
-                      <th className={th}>Date</th>
-                      <th className={th}>Status</th>
-                      <th className={`${th} text-right`}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <div className="overflow-x-auto">
+                <div className="px-5 pt-4"><SectionError message={leadsError} /></div>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50/50">
+                      <TableHead className="font-semibold">Contact</TableHead>
+                      <TableHead className="font-semibold">Subject</TableHead>
+                      <TableHead className="font-semibold">Message</TableHead>
+                      <TableHead className="font-semibold">Date</TableHead>
+                      <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="text-right font-semibold">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {isLoading && (
-                      <tr>
-                        <td colSpan={6} className="rounded-xl bg-white/[0.03] px-4 py-12 text-center text-sm text-white/30">
-                          <Loader2 size={16} className="mx-auto mb-2 animate-spin" /> Loading contacts…
-                        </td>
-                      </tr>
+                      <TableRow><TableCell colSpan={6} className="py-12 text-center text-muted-foreground">Loading contacts…</TableCell></TableRow>
                     )}
                     {!isLoading && filteredContacts.length === 0 && (
-                      <tr>
-                        <td colSpan={6} className="rounded-xl bg-white/[0.03] px-4 py-12 text-center text-sm text-white/30">
-                          No contacts found.
-                        </td>
-                      </tr>
+                      <TableRow><TableCell colSpan={6} className="py-12 text-center text-muted-foreground">No contacts found.</TableCell></TableRow>
                     )}
                     {!isLoading &&
                       filteredContacts.map((contact) => (
-                        <tr key={contact.id} className="group">
-                          <td className={cell}>
-                            <div className="min-w-[150px]">
-                              <div className="text-sm font-medium text-white">{contact.name || "Unnamed"}</div>
-                              <div className="text-xs text-white/40">{contact.email || "N/A"}</div>
-                              <div className="text-xs text-white/30">{contact.phone || ""}</div>
-                            </div>
-                          </td>
-                          <td className={`${cell} text-sm text-white/70`}>{contact.subject || "N/A"}</td>
-                          <td className={`${cell} max-w-xs truncate text-sm text-white/45`}>{contact.message || "N/A"}</td>
-                          <td className={`${cell} text-xs text-white/35`}>{formatDate(contact.createdAt)}</td>
-                          <td className={cell}><StatusBadge status={contact.status} /></td>
-                          <td className={cell}>
+                        <TableRow key={contact.id} className="hover:bg-gray-50/50">
+                          <TableCell>
+                            <div className="font-medium text-gray-900">{contact.name || "Unnamed"}</div>
+                            <div className="text-sm text-gray-500">{contact.email || "N/A"}</div>
+                            <div className="text-sm text-gray-500">{contact.phone || ""}</div>
+                          </TableCell>
+                          <TableCell className="text-gray-700">{contact.subject || "N/A"}</TableCell>
+                          <TableCell className="max-w-xs truncate text-sm text-gray-500">{contact.message || "N/A"}</TableCell>
+                          <TableCell className="text-gray-500">{formatDate(contact.createdAt)}</TableCell>
+                          <TableCell><StatusBadge status={contact.status} /></TableCell>
+                          <TableCell className="text-right">
                             <div className="flex justify-end gap-1">
-                              <button className={iconBtn} title="View" onClick={() => setDetail({ type: "contact", data: contact })}>
-                                <Eye size={15} className="text-white/50" />
-                              </button>
-                              <button
-                                className={`${iconBtn} hover:bg-blue-500/10`}
-                                title="Mark responded"
-                                onClick={() => markContactResponded(contact.id)}
-                                disabled={actionId === `contact-${contact.id}-responded`}
-                              >
-                                {actionId === `contact-${contact.id}-responded` ? (
-                                  <Loader2 size={15} className="animate-spin text-white/30" />
-                                ) : (
-                                  <CheckCircle size={15} className="text-blue-400" />
-                                )}
-                              </button>
-                              <button
-                                className={`${iconBtn} hover:bg-red-500/10`}
-                                title="Delete"
-                                onClick={() => deleteContact(contact.id)}
-                                disabled={actionId === `contact-${contact.id}`}
-                              >
-                                {actionId === `contact-${contact.id}` ? (
-                                  <Loader2 size={15} className="animate-spin text-white/30" />
-                                ) : (
-                                  <Trash2 size={15} className="text-red-400" />
-                                )}
-                              </button>
+                              <Button variant="ghost" size="sm" onClick={() => setDetail({ type: "contact", data: contact })}>
+                                <Eye size={15} className="text-gray-500" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => markContactResponded(contact.id)} disabled={actionId === `contact-${contact.id}-responded`}>
+                                {actionId === `contact-${contact.id}-responded` ? <Loader2 size={15} className="animate-spin" /> : <Edit size={15} className="text-blue-500" />}
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => deleteContact(contact.id)} disabled={actionId === `contact-${contact.id}`}>
+                                {actionId === `contact-${contact.id}` ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} className="text-red-500" />}
+                              </Button>
                             </div>
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
-            </div>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
 
       {/* Detail dialog */}
       <Dialog open={!!detail} onOpenChange={(open) => !open && setDetail(null)}>
-        <DialogContent className="border-white/10 bg-[#15151B] text-white">
+        <DialogContent>
           {detail?.type === "vehicle" && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-white">
-                  {detail.data.name || `${detail.data.brand || ""} ${detail.data.model || ""}`.trim() || "Vehicle"}
-                </DialogTitle>
-                <DialogDescription className="text-white/50">Vehicle details</DialogDescription>
+                <DialogTitle>{detail.data.name || `${detail.data.brand || ""} ${detail.data.model || ""}`.trim() || "Vehicle"}</DialogTitle>
+                <DialogDescription>Vehicle details</DialogDescription>
               </DialogHeader>
               <dl className="space-y-2.5 text-sm">
                 <DetailRow label="Brand / Model" value={`${detail.data.brand || detail.data.make || "—"} ${detail.data.model || ""}`} />
@@ -857,7 +768,7 @@ export function AdminDashboard() {
                 <DetailRow label="Price" value={formatCurrency(detail.data.price)} />
                 <DetailRow label="Status" value={labelStatus(detail.data.status)} />
               </dl>
-              <Button className="mt-2 w-full bg-brand hover:bg-brand-strong" onClick={() => navigate("/admin/vehicles")}>
+              <Button className="mt-2 w-full bg-brand hover:bg-brand-strong text-white" onClick={() => navigate("/admin/vehicles")}>
                 Manage in Inventory
               </Button>
             </>
@@ -865,10 +776,8 @@ export function AdminDashboard() {
           {detail?.type === "application" && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-white">
-                  {`${detail.data.firstName || ""} ${detail.data.lastName || ""}`.trim() || "Applicant"}
-                </DialogTitle>
-                <DialogDescription className="text-white/50">Finance application</DialogDescription>
+                <DialogTitle>{`${detail.data.firstName || ""} ${detail.data.lastName || ""}`.trim() || "Applicant"}</DialogTitle>
+                <DialogDescription>Finance application</DialogDescription>
               </DialogHeader>
               <dl className="space-y-2.5 text-sm">
                 <DetailRow label="Email" value={detail.data.email} />
@@ -884,8 +793,8 @@ export function AdminDashboard() {
           {detail?.type === "contact" && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-white">{detail.data.name || "Contact"}</DialogTitle>
-                <DialogDescription className="text-white/50">{detail.data.subject || "Message"}</DialogDescription>
+                <DialogTitle>{detail.data.name || "Contact"}</DialogTitle>
+                <DialogDescription>{detail.data.subject || "Message"}</DialogDescription>
               </DialogHeader>
               <dl className="space-y-2.5 text-sm">
                 <DetailRow label="Email" value={detail.data.email} />
@@ -893,7 +802,7 @@ export function AdminDashboard() {
                 <DetailRow label="Submitted" value={formatDate(detail.data.createdAt)} />
                 <DetailRow label="Status" value={labelStatus(detail.data.status)} />
               </dl>
-              <div className="mt-1 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-white/70">
+              <div className="mt-1 rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
                 {detail.data.message || "No message."}
               </div>
             </>
@@ -906,9 +815,9 @@ export function AdminDashboard() {
 
 function DetailRow({ label, value }: { label: string; value?: string | number | null }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-white/[0.06] pb-2.5 last:border-0">
-      <dt className="text-white/40">{label}</dt>
-      <dd className="text-right font-medium text-white/80">{value || "—"}</dd>
+    <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-2.5 last:border-0">
+      <dt className="text-gray-500">{label}</dt>
+      <dd className="text-right font-medium text-gray-900">{value || "—"}</dd>
     </div>
   );
 }

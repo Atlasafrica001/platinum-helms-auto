@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import api from "@/lib/api";
-import { formatCurrency, normalizeCar } from "@/lib/adminUtils";
+import { CarRecord, formatCurrency, normalizeCar } from "@/lib/adminUtils";
 import { useAsync } from "@/hooks/useAsync";
 import { ImageWithFallback } from "../components/ImageWithFallback";
 import { Reveal } from "../components/motion/Reveal";
@@ -87,7 +87,9 @@ export function CarPurchasePage({ onNavigate }: CarPurchasePageProps) {
 
   const { data, isLoading, error, refetch } = useAsync<Vehicle[]>(async () => {
     const response = await api.cars.getAll({ limit: 100 });
-    const cars = (response.data || []).map(normalizeCar) as unknown as Vehicle[];
+    const cars = (response.data || [])
+      .map(normalizeCar)
+      .filter((c: CarRecord) => c.listingType !== "importation") as unknown as Vehicle[];
     return cars.length > 0 ? cars : fallbackVehicles;
   }, []);
 

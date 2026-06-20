@@ -23,8 +23,6 @@ import {
   CheckCircle2,
   Download,
   ImagePlus,
-  LayoutGrid,
-  List,
   Loader2,
   Pencil,
   Star,
@@ -49,6 +47,7 @@ const initialCarForm = {
   model: "",
   year: String(new Date().getFullYear()),
   vin: "",
+  listingType: "purchase",
   category: "sedan",
   bodyType: "Sedan",
   condition: "Foreign Used",
@@ -95,7 +94,6 @@ export default function VehicleInventoryPage() {
   const [featureOptions, setFeatureOptions] = useState<string[]>([]);
   const [tagOptions, setTagOptions] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
   // Merge curated presets with values already used across inventory.
   const mergeUnique = (presets: string[], used: string[]) => {
@@ -175,6 +173,7 @@ export default function VehicleInventoryPage() {
       model: car.model,
       year: String(car.year),
       vin: car.vin || "",
+      listingType: car.listingType || "purchase",
       category: car.category,
       bodyType: car.bodyType,
       condition: car.condition,
@@ -390,6 +389,28 @@ export default function VehicleInventoryPage() {
         </div>
         <form onSubmit={submitCar} className="space-y-6">
           <div>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">Listing Type</p>
+            <div className="grid grid-cols-2 gap-3 sm:max-w-md">
+              <button
+                type="button"
+                onClick={() => setField("listingType", "purchase")}
+                className={`rounded-xl border px-4 py-3 text-left transition ${form.listingType === "purchase" ? "border-brand bg-brand/10" : "border-white/[0.12] bg-white/[0.03] hover:border-white/25"}`}
+              >
+                <span className="block text-sm font-semibold text-white">Purchase</span>
+                <span className="block text-xs text-white/40">In-country, ready to buy</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setField("listingType", "importation")}
+                className={`rounded-xl border px-4 py-3 text-left transition ${form.listingType === "importation" ? "border-brand bg-brand/10" : "border-white/[0.12] bg-white/[0.03] hover:border-white/25"}`}
+              >
+                <span className="block text-sm font-semibold text-white">Importation</span>
+                <span className="block text-xs text-white/40">To be imported on request</span>
+              </button>
+            </div>
+          </div>
+          <div className="border-t border-white/[0.06]" />
+          <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">Identity</p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div className="space-y-1.5">
@@ -575,35 +596,14 @@ export default function VehicleInventoryPage() {
             <h2 className="font-display text-base font-semibold text-white">All Vehicles</h2>
             <p className="mt-0.5 text-xs text-white/40">{cars.length} vehicle{cars.length !== 1 ? "s" : ""} in inventory</p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex shrink-0 rounded-lg border border-white/[0.12] bg-white/[0.04] p-0.5">
-              <button
-                type="button"
-                onClick={() => setViewMode("table")}
-                title="Table view"
-                className={`flex size-7 items-center justify-center rounded-md transition ${viewMode === "table" ? "bg-brand text-white" : "text-white/40 hover:text-white/70"}`}
-              >
-                <List size={14} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("grid")}
-                title="Grid view"
-                className={`flex size-7 items-center justify-center rounded-md transition ${viewMode === "grid" ? "bg-brand text-white" : "text-white/40 hover:text-white/70"}`}
-              >
-                <LayoutGrid size={14} />
-              </button>
-            </div>
-            <Input
-              className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/30 md:w-72"
-              placeholder="Search vehicles…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+          <Input
+            className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/30 md:max-w-sm"
+            placeholder="Search vehicles…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
 
-        {viewMode === "table" && (
         <div className="overflow-x-auto px-4 pb-4 pt-2 sm:px-5">
           <table className="w-full border-separate" style={{ borderSpacing: "0 6px", minWidth: 860 }}>
             <thead>
@@ -774,87 +774,6 @@ export default function VehicleInventoryPage() {
             </tbody>
           </table>
         </div>
-        )}
-
-        {viewMode === "grid" && (
-          <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 xl:grid-cols-3">
-            {isLoading &&
-              Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-72 animate-pulse rounded-xl bg-white/[0.04]" />
-              ))}
-            {!isLoading && cars.length === 0 && (
-              <p className="col-span-full py-16 text-center text-sm text-white/30">
-                No vehicles in inventory. Upload one above to get started.
-              </p>
-            )}
-            {!isLoading &&
-              cars.map((car) => (
-                <div
-                  key={car.id}
-                  className="group overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02] transition hover:border-white/[0.15]"
-                >
-                  <div className="relative h-40 overflow-hidden bg-white/[0.04]">
-                    <img src={car.image} alt={car.name} className="h-full w-full object-cover" />
-                    <div className="absolute left-3 top-3">
-                      <StatusBadge status={car.status} />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => toggleFeatured(car)}
-                      title="Toggle featured"
-                      className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-lg bg-black/50 backdrop-blur transition hover:bg-black/70"
-                    >
-                      <Star size={13} className={car.tags.includes("popular") ? "fill-brand text-brand" : "text-white/60"} />
-                    </button>
-                    {!car.visibility && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-obsidian/60 text-[10px] font-semibold uppercase tracking-widest text-white/60">
-                        Hidden
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <div className="text-sm font-semibold text-white">{car.name}</div>
-                    <div className="text-xs text-white/40">{car.brand} {car.model} · {car.year}</div>
-                    <div className="mt-1.5 text-sm font-bold text-brand">{formatCurrency(car.price)}</div>
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {car.features.slice(0, 3).map((f) => (
-                        <span key={f} className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-white/50">{f}</span>
-                      ))}
-                      {car.features.length > 3 && (
-                        <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-white/50">+{car.features.length - 3}</span>
-                      )}
-                    </div>
-                    <div className="mt-3 flex items-center justify-between border-t border-white/[0.06] pt-3">
-                      <span className="text-[11px] text-white/30">{car.images.length} image{car.images.length !== 1 ? "s" : ""}</span>
-                      <div className="flex gap-1">
-                        <button
-                          type="button"
-                          onClick={() => startEdit(car)}
-                          title="Edit vehicle"
-                          className="flex size-8 items-center justify-center rounded-lg transition hover:bg-white/[0.08]"
-                        >
-                          <Pencil size={13} className="text-white/50" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteCar(car.id)}
-                          disabled={actionId === `delete-${car.id}`}
-                          title="Delete vehicle"
-                          className="flex size-8 items-center justify-center rounded-lg transition hover:bg-red-500/10 disabled:opacity-50"
-                        >
-                          {actionId === `delete-${car.id}` ? (
-                            <Loader2 size={13} className="animate-spin text-white/30" />
-                          ) : (
-                            <Trash2 size={13} className="text-red-400" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-          </div>
-        )}
       </div>
     </div>
   );
