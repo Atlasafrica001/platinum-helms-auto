@@ -16,17 +16,32 @@ import { Label } from "@/components/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/select";
 import { Textarea } from "@/components/textarea";
 import { Switch } from "@/components/switch";
+import { MultiTagInput } from "@/components/MultiTagInput";
 import {
   AlertTriangle,
   CheckCircle,
   CheckCircle2,
   Download,
   ImagePlus,
+  LayoutGrid,
+  List,
   Loader2,
+  Pencil,
   Star,
   Trash2,
   Upload,
 } from "lucide-react";
+
+// Curated starting points; merged with values already used in inventory.
+const FEATURE_PRESETS = [
+  "Leather Seats", "Sunroof", "Panoramic Roof", "Navigation System", "Bluetooth",
+  "Backup Camera", "360 Camera", "Parking Sensors", "Heated Seats", "Ventilated Seats",
+  "Keyless Entry", "Push Start", "Cruise Control", "Adaptive Cruise Control",
+  "Lane Assist", "Blind Spot Monitor", "Apple CarPlay", "Android Auto",
+  "Premium Sound System", "Alloy Wheels", "LED Headlights", "Third Row Seats",
+  "Power Tailgate", "Wireless Charging", "Ambient Lighting",
+];
+const TAG_PRESETS = ["popular", "hotDeal", "promo", "searched"];
 
 const initialCarForm = {
   name: "",
@@ -43,8 +58,8 @@ const initialCarForm = {
   mileage: "0",
   country: "",
   description: "",
-  features: "",
-  tags: "",
+  features: [] as string[],
+  tags: [] as string[],
   status: "available",
   visibility: true,
 };
@@ -77,6 +92,37 @@ export default function VehicleInventoryPage() {
   const [actionId, setActionId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [featureOptions, setFeatureOptions] = useState<string[]>([]);
+  const [tagOptions, setTagOptions] = useState<string[]>([]);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+
+  // Merge curated presets with values already used across inventory.
+  const mergeUnique = (presets: string[], used: string[]) => {
+    const seen = new Set<string>();
+    return [...presets, ...used].filter((v) => {
+      const key = v.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+  const featureSuggestions = mergeUnique(FEATURE_PRESETS, featureOptions);
+  const tagSuggestions = mergeUnique(TAG_PRESETS, tagOptions);
+
+  const loadMeta = async () => {
+    try {
+      const response = await api.cars.getMeta();
+      setFeatureOptions(response.data?.features || []);
+      setTagOptions(response.data?.tags || []);
+    } catch {
+      // Suggestions are a nicety — fall back to presets only.
+    }
+  };
+
+  useEffect(() => {
+    loadMeta();
+  }, []);
 
   const loadCars = async () => {
     setIsLoading(true);
@@ -110,27 +156,67 @@ export default function VehicleInventoryPage() {
     mileage: Number(form.mileage || 0),
     vin: form.vin || undefined,
     country: form.country || undefined,
-    features: form.features.split(",").map((f) => f.trim()).filter(Boolean),
-    tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+    features: form.features,
+    tags: form.tags,
   });
 
-  const createCar = async (event: React.FormEvent) => {
+  const resetForm = () => {
+    setForm(initialCarForm);
+    setFiles(null);
+    setNewImagePreviews([]);
+    setEditingId(null);
+  };
+
+  const startEdit = (car: CarRecord) => {
+    setEditingId(car.id);
+    setForm({
+      name: car.name,
+      brand: car.brand,
+      model: car.model,
+      year: String(car.year),
+      vin: car.vin || "",
+      category: car.category,
+      bodyType: car.bodyType,
+      condition: car.condition,
+      price: String(car.price),
+      transmission: car.transmission,
+      fuelType: car.fuelType,
+      mileage: String(car.mileage),
+      country: car.country || "",
+      description: car.description || "",
+      features: car.features,
+      tags: car.tags,
+      status: car.status || "available",
+      visibility: car.visibility ?? true,
+    });
+    setFiles(null);
+    setNewImagePreviews([]);
+    setError("");
+    setMessage("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const submitCar = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSaving(true);
     setError("");
     try {
-      const response = await api.cars.create(carPayload());
-      const carId = response.data?.id;
+      let carId = editingId;
+      if (editingId) {
+        await api.cars.update(editingId, carPayload());
+      } else {
+        const response = await api.cars.create(carPayload());
+        carId = response.data?.id ?? null;
+      }
       if (carId && files && files.length > 0) {
         await api.cars.uploadImages(carId, files);
       }
-      setForm(initialCarForm);
-      setFiles(null);
-      setNewImagePreviews([]);
-      setMessage("Vehicle uploaded successfully.");
+      setMessage(editingId ? "Vehicle updated successfully." : "Vehicle uploaded successfully.");
+      resetForm();
       await loadCars();
+      loadMeta();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to create vehicle");
+      setError(err instanceof Error ? err.message : "Unable to save vehicle");
     } finally {
       setIsSaving(false);
     }
@@ -284,10 +370,25 @@ export default function VehicleInventoryPage() {
       )}
 
       {/* Upload form */}
-      <Card className="rounded-2xl border border-white/[0.08] bg-obsidian-soft p-6 shadow-none">
-        <h2 className="mb-1 font-display text-base font-semibold text-white">Upload New Vehicle</h2>
-        <p className="mb-6 text-xs text-white/40">Fill out the details below to list a new vehicle in inventory.</p>
-        <form onSubmit={createCar} className="space-y-6">
+      <Card className={`rounded-2xl border bg-obsidian-soft p-6 shadow-none ${editingId ? "border-brand/40" : "border-white/[0.08]"}`}>
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h2 className="mb-1 font-display text-base font-semibold text-white">
+              {editingId ? "Edit Vehicle" : "Upload New Vehicle"}
+            </h2>
+            <p className="text-xs text-white/40">
+              {editingId
+                ? "Update the details below and save your changes."
+                : "Fill out the details below to list a new vehicle in inventory."}
+            </p>
+          </div>
+          {editingId && (
+            <Button type="button" variant="ghost" onClick={resetForm} className="text-white/50 hover:bg-white/[0.06] hover:text-white">
+              Cancel edit
+            </Button>
+          )}
+        </div>
+        <form onSubmit={submitCar} className="space-y-6">
           <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">Identity</p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -409,12 +510,22 @@ export default function VehicleInventoryPage() {
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">Details</p>
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-white/70">Features <span className="text-white/30">(comma-separated)</span></Label>
-                <Input placeholder="e.g. Leather seats, Sunroof, Navigation" value={form.features} onChange={(e) => setField("features", e.target.value)} className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/25 focus:border-brand/50" />
+                <Label className="text-white/70">Features <span className="text-white/30">(select or type, press Enter)</span></Label>
+                <MultiTagInput
+                  value={form.features}
+                  onChange={(next) => setForm((current) => ({ ...current, features: next }))}
+                  suggestions={featureSuggestions}
+                  placeholder="e.g. Leather Seats, Sunroof, Navigation…"
+                />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-white/70">Tags <span className="text-white/30">(comma-separated)</span></Label>
-                <Input placeholder="popular, hotDeal, promo, searched" value={form.tags} onChange={(e) => setField("tags", e.target.value)} className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/25 focus:border-brand/50" />
+                <Label className="text-white/70">Tags <span className="text-white/30">(select or type, press Enter)</span></Label>
+                <MultiTagInput
+                  value={form.tags}
+                  onChange={(next) => setForm((current) => ({ ...current, tags: next }))}
+                  suggestions={tagSuggestions}
+                  placeholder="e.g. popular, hotDeal, promo…"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-white/70">Description</Label>
@@ -423,7 +534,11 @@ export default function VehicleInventoryPage() {
             </div>
           </div>
           <Button type="submit" disabled={isSaving} className="bg-brand hover:bg-brand-strong w-full gap-2 text-white sm:w-auto">
-            {isSaving ? <><Loader2 size={15} className="animate-spin" /> Uploading Vehicle…</> : <><Upload size={15} /> Upload Vehicle</>}
+            {isSaving ? (
+              <><Loader2 size={15} className="animate-spin" /> {editingId ? "Saving Changes…" : "Uploading Vehicle…"}</>
+            ) : (
+              <><Upload size={15} /> {editingId ? "Save Changes" : "Upload Vehicle"}</>
+            )}
           </Button>
         </form>
       </Card>
@@ -460,14 +575,35 @@ export default function VehicleInventoryPage() {
             <h2 className="font-display text-base font-semibold text-white">All Vehicles</h2>
             <p className="mt-0.5 text-xs text-white/40">{cars.length} vehicle{cars.length !== 1 ? "s" : ""} in inventory</p>
           </div>
-          <Input
-            className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/30 md:max-w-sm"
-            placeholder="Search vehicles…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <div className="flex items-center gap-2">
+            <div className="flex shrink-0 rounded-lg border border-white/[0.12] bg-white/[0.04] p-0.5">
+              <button
+                type="button"
+                onClick={() => setViewMode("table")}
+                title="Table view"
+                className={`flex size-7 items-center justify-center rounded-md transition ${viewMode === "table" ? "bg-brand text-white" : "text-white/40 hover:text-white/70"}`}
+              >
+                <List size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                title="Grid view"
+                className={`flex size-7 items-center justify-center rounded-md transition ${viewMode === "grid" ? "bg-brand text-white" : "text-white/40 hover:text-white/70"}`}
+              >
+                <LayoutGrid size={14} />
+              </button>
+            </div>
+            <Input
+              className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/30 md:w-72"
+              placeholder="Search vehicles…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
 
+        {viewMode === "table" && (
         <div className="overflow-x-auto px-4 pb-4 pt-2 sm:px-5">
           <table className="w-full border-separate" style={{ borderSpacing: "0 6px", minWidth: 860 }}>
             <thead>
@@ -609,24 +745,116 @@ export default function VehicleInventoryPage() {
                       <span className="text-xs text-white/35">{formatDate(car.createdAt)}</span>
                     </td>
                     <td className={cell}>
-                      <button
-                        type="button"
-                        onClick={() => deleteCar(car.id)}
-                        disabled={actionId === `delete-${car.id}`}
-                        className="ml-auto flex size-8 items-center justify-center rounded-lg transition hover:bg-red-500/10 disabled:opacity-50"
-                      >
-                        {actionId === `delete-${car.id}` ? (
-                          <Loader2 size={13} className="animate-spin text-white/30" />
-                        ) : (
-                          <Trash2 size={13} className="text-red-400" />
-                        )}
-                      </button>
+                      <div className="flex justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => startEdit(car)}
+                          title="Edit vehicle"
+                          className="flex size-8 items-center justify-center rounded-lg transition hover:bg-white/[0.08]"
+                        >
+                          <Pencil size={13} className="text-white/50" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteCar(car.id)}
+                          disabled={actionId === `delete-${car.id}`}
+                          title="Delete vehicle"
+                          className="flex size-8 items-center justify-center rounded-lg transition hover:bg-red-500/10 disabled:opacity-50"
+                        >
+                          {actionId === `delete-${car.id}` ? (
+                            <Loader2 size={13} className="animate-spin text-white/30" />
+                          ) : (
+                            <Trash2 size={13} className="text-red-400" />
+                          )}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
             </tbody>
           </table>
         </div>
+        )}
+
+        {viewMode === "grid" && (
+          <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 xl:grid-cols-3">
+            {isLoading &&
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-72 animate-pulse rounded-xl bg-white/[0.04]" />
+              ))}
+            {!isLoading && cars.length === 0 && (
+              <p className="col-span-full py-16 text-center text-sm text-white/30">
+                No vehicles in inventory. Upload one above to get started.
+              </p>
+            )}
+            {!isLoading &&
+              cars.map((car) => (
+                <div
+                  key={car.id}
+                  className="group overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02] transition hover:border-white/[0.15]"
+                >
+                  <div className="relative h-40 overflow-hidden bg-white/[0.04]">
+                    <img src={car.image} alt={car.name} className="h-full w-full object-cover" />
+                    <div className="absolute left-3 top-3">
+                      <StatusBadge status={car.status} />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleFeatured(car)}
+                      title="Toggle featured"
+                      className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-lg bg-black/50 backdrop-blur transition hover:bg-black/70"
+                    >
+                      <Star size={13} className={car.tags.includes("popular") ? "fill-brand text-brand" : "text-white/60"} />
+                    </button>
+                    {!car.visibility && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-obsidian/60 text-[10px] font-semibold uppercase tracking-widest text-white/60">
+                        Hidden
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <div className="text-sm font-semibold text-white">{car.name}</div>
+                    <div className="text-xs text-white/40">{car.brand} {car.model} · {car.year}</div>
+                    <div className="mt-1.5 text-sm font-bold text-brand">{formatCurrency(car.price)}</div>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {car.features.slice(0, 3).map((f) => (
+                        <span key={f} className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-white/50">{f}</span>
+                      ))}
+                      {car.features.length > 3 && (
+                        <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-white/50">+{car.features.length - 3}</span>
+                      )}
+                    </div>
+                    <div className="mt-3 flex items-center justify-between border-t border-white/[0.06] pt-3">
+                      <span className="text-[11px] text-white/30">{car.images.length} image{car.images.length !== 1 ? "s" : ""}</span>
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => startEdit(car)}
+                          title="Edit vehicle"
+                          className="flex size-8 items-center justify-center rounded-lg transition hover:bg-white/[0.08]"
+                        >
+                          <Pencil size={13} className="text-white/50" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteCar(car.id)}
+                          disabled={actionId === `delete-${car.id}`}
+                          title="Delete vehicle"
+                          className="flex size-8 items-center justify-center rounded-lg transition hover:bg-red-500/10 disabled:opacity-50"
+                        >
+                          {actionId === `delete-${car.id}` ? (
+                            <Loader2 size={13} className="animate-spin text-white/30" />
+                          ) : (
+                            <Trash2 size={13} className="text-red-400" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
       </div>
     </div>
   );

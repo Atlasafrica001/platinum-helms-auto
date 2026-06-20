@@ -66,7 +66,7 @@ const AdminDashboardWrapper = ({ children }: AdminDashboardWrapperProps) => {
   const page = pageTitles[pathname] ?? { title: "Admin", desc: "" };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-obsidian">
 
       {/* ── Mobile overlay ── */}
       {sidebarOpen && (
@@ -195,10 +195,10 @@ const AdminDashboardWrapper = ({ children }: AdminDashboardWrapperProps) => {
       <div className="flex min-h-screen flex-1 flex-col lg:pl-64">
 
         {/* Top bar */}
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b border-gray-200 bg-white px-4 sm:px-6">
+        <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b border-white/[0.06] bg-obsidian/80 px-4 backdrop-blur sm:px-6">
           {/* Mobile menu button */}
           <button
-            className="flex size-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 lg:hidden"
+            className="flex size-8 items-center justify-center rounded-lg border border-white/[0.1] text-white/50 hover:bg-white/[0.06] lg:hidden"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu size={16} />
@@ -206,18 +206,18 @@ const AdminDashboardWrapper = ({ children }: AdminDashboardWrapperProps) => {
 
           {/* Page title */}
           <div className="flex-1 min-w-0">
-            <h1 className="font-display text-base font-bold text-gray-900 leading-tight truncate">
+            <h1 className="font-display text-base font-bold text-white leading-tight truncate">
               {page.title}
             </h1>
             {page.desc && (
-              <p className="hidden text-xs text-gray-400 sm:block">{page.desc}</p>
+              <p className="hidden text-xs text-white/40 sm:block">{page.desc}</p>
             )}
           </div>
 
           {/* Right: user chip */}
           <button
             onClick={() => navigate("/admin/settings")}
-            className="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+            className="flex items-center gap-2 rounded-lg border border-white/[0.1] px-2.5 py-1.5 text-sm text-white/60 hover:bg-white/[0.06]"
           >
             <Avatar className="size-6">
               <AvatarFallback className="bg-brand text-[10px] font-bold text-white">
