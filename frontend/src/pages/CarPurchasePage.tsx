@@ -19,7 +19,7 @@ import {
 } from "../components/select";
 import { Badge } from "../components/badge";
 import { Slider } from "../components/slider";
-import { ArrowRight, Filter, TrendingUp, Search, Zap, Tag, ArrowUpDown, Hammer, Sparkles, Car } from "lucide-react";
+import { ArrowRight, Filter, TrendingUp, Search, Zap, Tag, ArrowUpDown, Hammer, Sparkles, Car, Clock } from "lucide-react";
 import { VehicleDetailsDialog } from "../components/VehicleDetailsDialog";
 import phblack from "../assets/phblack.png";
 import phred from "../assets/phred.png";
