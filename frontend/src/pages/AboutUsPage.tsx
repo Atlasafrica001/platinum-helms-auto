@@ -28,14 +28,14 @@ const stats = [
 ];
 
 const team = [
-  { name: "The Founder", role: "Chief Executive Officer", image: null },
-  { name: "Mrs Afolabi Gladys .U.", role: "Director, Head of Operation", image: afolabigladys },
+  { name: "Ugochukwu Ifeanacho", role: "CEO", image: null },
+  { name: "Mrs Afolabi Gladys .U.", role: "Director, Partnerships", image: afolabigladys },
 ];
 
 const testimonials = [
-  { quote: "The entire experience was exceptional. From selection to delivery, the team made the process seamless and enjoyable.", name: "James Morrison", detail: "Purchased S-Class" },
-  { quote: "Their import service exceeded my expectations. They handled everything professionally and kept me informed throughout.", name: "Emily Richardson", detail: "Imported from Europe" },
-  { quote: "Best financing experience I've had. Transparent, fair, and incredibly helpful in finding the perfect terms.", name: "Robert Chen", detail: "Financed AMG GT" },
+  { quote: "I got my Honda Accord 2013 through Platinum Helms and the whole process was smooth from start to finish. No stress, no wahala — just my car delivered to my door.", name: "Chukwuemeka Obi", detail: "Purchased Honda Accord 2013" },
+  { quote: "They imported my Lexus RX350 from Canada and handled everything — customs, documentation, shipping. I just paid and waited. Best decision I made.", name: "Funmilayo Adeyemi", detail: "Imported Lexus RX350 from Canada" },
+  { quote: "Got a brand new Mercedes GLE350 on their financing plan. The terms were fair and they were very transparent. I've already referred three people.", name: "Tunde Bakare", detail: "Financed Mercedes-Benz GLE350" },
 ];
 
 export function AboutUsPage({ onNavigate }: AboutUsPageProps) {
@@ -160,7 +160,7 @@ export function AboutUsPage({ onNavigate }: AboutUsPageProps) {
                       <ImageWithFallback
                         src={member.image}
                         alt={member.name}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                       />
                     ) : (
                       <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-b from-obsidian-soft to-obsidian">

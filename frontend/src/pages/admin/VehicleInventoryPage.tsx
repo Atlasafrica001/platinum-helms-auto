@@ -18,6 +18,12 @@ import { Textarea } from "@/components/textarea";
 import { Switch } from "@/components/switch";
 import { MultiTagInput } from "@/components/MultiTagInput";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/dialog";
+import {
   AlertTriangle,
   CheckCircle,
   CheckCircle2,
@@ -86,6 +92,7 @@ export default function VehicleInventoryPage() {
   const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
   const [existingImagePreviews, setExistingImagePreviews] = useState<Record<number, string[]>>({});
   const [search, setSearch] = useState("");
+  const [tableTab, setTableTab] = useState<"all" | "purchase" | "importation">("all");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [actionId, setActionId] = useState<string | null>(null);
@@ -94,6 +101,7 @@ export default function VehicleInventoryPage() {
   const [featureOptions, setFeatureOptions] = useState<string[]>([]);
   const [tagOptions, setTagOptions] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   // Merge curated presets with values already used across inventory.
   const mergeUnique = (presets: string[], used: string[]) => {
@@ -163,6 +171,8 @@ export default function VehicleInventoryPage() {
     setFiles(null);
     setNewImagePreviews([]);
     setEditingId(null);
+    setEditDialogOpen(false);
+    setError("");
   };
 
   const startEdit = (car: CarRecord) => {
@@ -191,8 +201,7 @@ export default function VehicleInventoryPage() {
     setFiles(null);
     setNewImagePreviews([]);
     setError("");
-    setMessage("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setEditDialogOpen(true);
   };
 
   const submitCar = async (event: React.FormEvent) => {
@@ -368,24 +377,11 @@ export default function VehicleInventoryPage() {
         </div>
       )}
 
-      {/* Upload form */}
-      <Card className={`rounded-2xl border bg-obsidian-soft p-6 shadow-none ${editingId ? "border-brand/40" : "border-white/[0.08]"}`}>
-        <div className="mb-6 flex items-start justify-between gap-4">
-          <div>
-            <h2 className="mb-1 font-display text-base font-semibold text-white">
-              {editingId ? "Edit Vehicle" : "Upload New Vehicle"}
-            </h2>
-            <p className="text-xs text-white/40">
-              {editingId
-                ? "Update the details below and save your changes."
-                : "Fill out the details below to list a new vehicle in inventory."}
-            </p>
-          </div>
-          {editingId && (
-            <Button type="button" variant="ghost" onClick={resetForm} className="text-white/50 hover:bg-white/[0.06] hover:text-white">
-              Cancel edit
-            </Button>
-          )}
+      {/* Upload form — new vehicles only */}
+      <Card className="rounded-2xl border border-white/[0.08] bg-obsidian-soft p-6 shadow-none">
+        <div className="mb-6">
+          <h2 className="mb-1 font-display text-base font-semibold text-white">Upload New Vehicle</h2>
+          <p className="text-xs text-white/40">Fill out the details below to list a new vehicle in inventory.</p>
         </div>
         <form onSubmit={submitCar} className="space-y-6">
           <div>
@@ -556,45 +552,76 @@ export default function VehicleInventoryPage() {
           </div>
           <Button type="submit" disabled={isSaving} className="bg-brand hover:bg-brand-strong w-full gap-2 text-white sm:w-auto">
             {isSaving ? (
-              <><Loader2 size={15} className="animate-spin" /> {editingId ? "Saving Changes…" : "Uploading Vehicle…"}</>
+              <><Loader2 size={15} className="animate-spin" /> Uploading Vehicle…</>
             ) : (
-              <><Upload size={15} /> {editingId ? "Save Changes" : "Upload Vehicle"}</>
+              <><Upload size={15} /> Upload Vehicle</>
             )}
           </Button>
         </form>
       </Card>
 
-      {/* Featured cars */}
+      {/* Tag collection overview */}
       <Card className="rounded-2xl border border-white/[0.08] bg-obsidian-soft p-6 shadow-none">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h2 className="font-display text-base font-semibold text-white">Featured Collection</h2>
-            <p className="mt-0.5 text-xs text-white/40">Cars marked featured appear on the homepage.</p>
-          </div>
-          <span className="inline-flex items-center rounded-full bg-brand/15 px-2.5 py-0.5 text-xs font-semibold text-brand">
-            {featuredCars.length} featured
-          </span>
+        <div className="mb-4">
+          <h2 className="font-display text-base font-semibold text-white">Collection Overview</h2>
+          <p className="mt-0.5 text-xs text-white/40">Tag your vehicles to highlight them on the site.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {featuredCars.length === 0 ? (
-            <p className="text-sm text-white/30">No cars are currently featured.</p>
-          ) : (
-            featuredCars.map((car) => (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { tag: "popular", label: "Popular", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
+            { tag: "hotDeal", label: "Hot Deal", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" },
+            { tag: "promo", label: "Promo", color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20" },
+            { tag: "searched", label: "Most Searched", color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20" },
+          ].map(({ tag, label, color, bg }) => {
+            const count = cars.filter((c) => c.tags.includes(tag)).length;
+            return (
+              <div key={tag} className={`rounded-xl border px-4 py-3 ${bg}`}>
+                <p className={`text-xs font-semibold uppercase tracking-wide ${color}`}>{label}</p>
+                <p className="mt-1 text-2xl font-bold text-white">{count}</p>
+                <p className="text-[10px] text-white/30">vehicle{count !== 1 ? "s" : ""}</p>
+              </div>
+            );
+          })}
+        </div>
+        {featuredCars.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2 border-t border-white/[0.06] pt-4">
+            {featuredCars.map((car) => (
               <span key={car.id} className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.1] bg-white/[0.05] px-3 py-1 text-sm text-white/70">
                 <Star size={11} className="text-brand" />
                 {car.brand} {car.model}
               </span>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </Card>
 
       {/* Vehicles table */}
       <div className="rounded-2xl border border-white/[0.08] bg-obsidian-soft">
         <div className="flex flex-col gap-4 border-b border-white/[0.06] p-5 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="font-display text-base font-semibold text-white">All Vehicles</h2>
-            <p className="mt-0.5 text-xs text-white/40">{cars.length} vehicle{cars.length !== 1 ? "s" : ""} in inventory</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <div>
+              <h2 className="font-display text-base font-semibold text-white">Vehicle Inventory</h2>
+              <p className="mt-0.5 text-xs text-white/40">{cars.length} vehicle{cars.length !== 1 ? "s" : ""} total</p>
+            </div>
+            <div className="flex gap-1.5 rounded-xl border border-white/[0.1] bg-white/[0.04] p-1">
+              {(["all", "purchase", "importation"] as const).map((tab) => {
+                const count = tab === "all" ? cars.length : cars.filter((c) => c.listingType === tab).length;
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setTableTab(tab)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium capitalize transition ${
+                      tableTab === tab
+                        ? "bg-brand text-white shadow"
+                        : "text-white/50 hover:text-white/80"
+                    }`}
+                  >
+                    {tab === "all" ? "All" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    <span className={`ml-1.5 ${tableTab === tab ? "text-white/70" : "text-white/25"}`}>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <Input
             className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/30 md:max-w-sm"
@@ -667,7 +694,9 @@ export default function VehicleInventoryPage() {
               )}
 
               {!isLoading &&
-                cars.map((car) => (
+                cars
+                .filter((car) => tableTab === "all" || car.listingType === tableTab)
+                .map((car) => (
                   <tr key={car.id} className="group">
                     <td className={cell}>
                       <div className="flex min-w-[200px] items-center gap-3">
@@ -775,6 +804,202 @@ export default function VehicleInventoryPage() {
           </table>
         </div>
       </div>
+
+      {/* ── Edit Dialog ── */}
+      <Dialog open={editDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); }}>
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto bg-obsidian-soft text-white">
+          <DialogHeader>
+            <DialogTitle className="font-display text-lg text-white">
+              Edit Vehicle
+            </DialogTitle>
+            <p className="text-xs text-white/40">
+              {form.name || "—"} · Update the details and save your changes.
+            </p>
+          </DialogHeader>
+
+          {error && (
+            <div className="flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+              <AlertTriangle size={15} className="mt-0.5 shrink-0" /> {error}
+            </div>
+          )}
+
+          <form onSubmit={submitCar} className="space-y-6 pt-2">
+            {/* Listing type */}
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">Listing Type</p>
+              <div className="grid grid-cols-2 gap-3 sm:max-w-sm">
+                <button type="button" onClick={() => setField("listingType", "purchase")}
+                  className={`rounded-xl border px-4 py-3 text-left transition ${form.listingType === "purchase" ? "border-brand bg-brand/10" : "border-white/[0.12] bg-white/[0.03] hover:border-white/25"}`}>
+                  <span className="block text-sm font-semibold text-white">Purchase</span>
+                  <span className="block text-xs text-white/40">In-country, ready to buy</span>
+                </button>
+                <button type="button" onClick={() => setField("listingType", "importation")}
+                  className={`rounded-xl border px-4 py-3 text-left transition ${form.listingType === "importation" ? "border-brand bg-brand/10" : "border-white/[0.12] bg-white/[0.03] hover:border-white/25"}`}>
+                  <span className="block text-sm font-semibold text-white">Importation</span>
+                  <span className="block text-xs text-white/40">To be imported on request</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="border-t border-white/[0.06]" />
+
+            {/* Identity */}
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">Identity</p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Name *</Label>
+                  <Input required value={form.name} onChange={(e) => setField("name", e.target.value)} placeholder="e.g. Mercedes-Benz GLE 450" className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/25 focus:border-brand/50" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Brand *</Label>
+                  <Input required value={form.brand} onChange={(e) => setField("brand", e.target.value)} placeholder="e.g. Mercedes-Benz" className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/25 focus:border-brand/50" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Model *</Label>
+                  <Input required value={form.model} onChange={(e) => setField("model", e.target.value)} placeholder="e.g. GLE 450" className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/25 focus:border-brand/50" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Year *</Label>
+                  <Input required type="number" value={form.year} onChange={(e) => setField("year", e.target.value)} className="border-white/[0.12] bg-white/[0.05] text-white focus:border-brand/50" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">VIN</Label>
+                  <Input value={form.vin} onChange={(e) => setField("vin", e.target.value)} placeholder="Vehicle Identification Number" className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/25 focus:border-brand/50" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Country of Origin</Label>
+                  <Input value={form.country} onChange={(e) => setField("country", e.target.value)} placeholder="e.g. Canada, USA" className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/25 focus:border-brand/50" />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/[0.06]" />
+
+            {/* Specifications */}
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">Specifications</p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Category</Label>
+                  <Select value={form.category} onValueChange={(v) => setField("category", v)}>
+                    <SelectTrigger className="border-white/[0.12] bg-white/[0.05] text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent>{["luxury","sedan","suv","sports","coupe","hatchback","truck","van"].map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Body Type</Label>
+                  <Select value={form.bodyType} onValueChange={(v) => setField("bodyType", v)}>
+                    <SelectTrigger className="border-white/[0.12] bg-white/[0.05] text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent>{["Sedan","SUV","Coupe","Hatchback","Truck","Van","Wagon","Convertible"].map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Condition</Label>
+                  <Select value={form.condition} onValueChange={(v) => setField("condition", v)}>
+                    <SelectTrigger className="border-white/[0.12] bg-white/[0.05] text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent>{["New","Foreign Used","Nigerian Used"].map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Transmission</Label>
+                  <Select value={form.transmission} onValueChange={(v) => setField("transmission", v)}>
+                    <SelectTrigger className="border-white/[0.12] bg-white/[0.05] text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent><SelectItem value="Automatic">Automatic</SelectItem><SelectItem value="Manual">Manual</SelectItem></SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Fuel Type</Label>
+                  <Select value={form.fuelType} onValueChange={(v) => setField("fuelType", v)}>
+                    <SelectTrigger className="border-white/[0.12] bg-white/[0.05] text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent>{["Petrol","Diesel","Hybrid","Electric"].map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Mileage (km)</Label>
+                  <Input type="number" value={form.mileage} onChange={(e) => setField("mileage", e.target.value)} className="border-white/[0.12] bg-white/[0.05] text-white focus:border-brand/50" />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/[0.06]" />
+
+            {/* Pricing & Status */}
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">Pricing & Status</p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Price (₦) *</Label>
+                  <Input required type="number" value={form.price} onChange={(e) => setField("price", e.target.value)} placeholder="0" className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/25 focus:border-brand/50" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Status</Label>
+                  <Select value={form.status} onValueChange={(v) => setField("status", v)}>
+                    <SelectTrigger className="border-white/[0.12] bg-white/[0.05] text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent>{["available","reserved","sold","hidden"].map((v) => <SelectItem key={v} value={v}>{labelStatus(v)}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-3 pt-6">
+                  <Switch checked={form.visibility} onCheckedChange={(checked) => setField("visibility", checked)} />
+                  <Label className="text-white/70">Visible on public site</Label>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/[0.06]" />
+
+            {/* Details */}
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">Details</p>
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Features <span className="text-white/30">(select or type, press Enter)</span></Label>
+                  <MultiTagInput value={form.features} onChange={(next) => setForm((c) => ({ ...c, features: next }))} suggestions={featureSuggestions} placeholder="e.g. Leather Seats, Sunroof…" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Tags <span className="text-white/30">(select or type, press Enter)</span></Label>
+                  <MultiTagInput value={form.tags} onChange={(next) => setForm((c) => ({ ...c, tags: next }))} suggestions={tagSuggestions} placeholder="e.g. popular, hotDeal…" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-white/70">Description</Label>
+                  <Textarea value={form.description} onChange={(e) => setField("description", e.target.value)} rows={3} className="border-white/[0.12] bg-white/[0.05] text-white placeholder:text-white/25 focus:border-brand/50" />
+                </div>
+              </div>
+            </div>
+
+            {/* Media */}
+            <div className="border-t border-white/[0.06]" />
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">Add / Replace Images</p>
+              <label className="flex cursor-pointer flex-col items-center gap-3 rounded-xl border border-dashed border-white/[0.15] bg-white/[0.02] px-6 py-6 text-center transition hover:border-brand/40 hover:bg-brand/[0.03]">
+                <ImagePlus size={20} className="text-white/40" />
+                <div>
+                  <p className="text-sm font-medium text-white/70">Click to add new images</p>
+                  <p className="mt-0.5 text-xs text-white/30">PNG, JPG, WebP — multiple files supported</p>
+                </div>
+                <Input type="file" multiple accept="image/*" className="hidden" onChange={(e) => updateNewFiles(e.target.files)} />
+              </label>
+              {newImagePreviews.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {newImagePreviews.map((preview, index) => (
+                    <img key={preview} src={preview} alt={`Preview ${index + 1}`} className="h-16 w-24 rounded-lg border border-white/10 object-cover" />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 border-t border-white/[0.06] pt-4">
+              <Button type="submit" disabled={isSaving} className="bg-brand hover:bg-brand-strong flex-1 gap-2 text-white sm:flex-none sm:px-8">
+                {isSaving ? <><Loader2 size={15} className="animate-spin" /> Saving…</> : <><CheckCircle2 size={15} /> Save Changes</>}
+              </Button>
+              <Button type="button" variant="ghost" onClick={resetForm} className="text-white/50 hover:bg-white/[0.06] hover:text-white">
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
